@@ -10,7 +10,7 @@ namespace TaskManager.Node.Corn
 {
     public class CornFactory
     {
-        public static Trigger CreateTigger(NodeTaskRuntimeInfo taskruntimeinfo)
+        public static ITrigger CreateTigger(NodeTaskRuntimeInfo taskruntimeinfo)
         {
             if (taskruntimeinfo.TaskModel.taskcron.Contains("["))
             {
@@ -19,31 +19,36 @@ namespace TaskManager.Node.Corn
                 if (customcorn is SimpleCorn || customcorn is RunOnceCorn)
                 {
                     var simplecorn = customcorn as SimpleCorn;
-                    // 定义调度触发规则，比如每1秒运行一次，共运行8次
-                    SimpleTrigger simpleTrigger = new SimpleTrigger(taskruntimeinfo.TaskModel.id.ToString(), taskruntimeinfo.TaskModel.categoryid.ToString());
+                    DateTime date = simplecorn.ConInfo.StartTime.Value;
+                    TriggerBuilder builder = TriggerBuilder.Create()
+                        .WithIdentity(taskruntimeinfo.TaskModel.id.ToString(), taskruntimeinfo.TaskModel.categoryid.ToString());
                     if (simplecorn.ConInfo.StartTime != null)
-                        simpleTrigger.StartTimeUtc = simplecorn.ConInfo.StartTime.Value.ToUniversalTime();
-                    //else
-                    //    simpleTrigger.StartTimeUtc = DateTime.Now.ToUniversalTime();
+                        builder.StartAt(DateBuilder.DateOf(date.Hour, date.Minute, date.Second, date.Day, date.Month, date.Year));
                     if (simplecorn.ConInfo.EndTime != null)
-                        simpleTrigger.EndTimeUtc = simplecorn.ConInfo.EndTime.Value.ToUniversalTime();
-                    if (simplecorn.ConInfo.RepeatInterval != null)
-                        simpleTrigger.RepeatInterval = TimeSpan.FromSeconds(simplecorn.ConInfo.RepeatInterval.Value);
-                    else
-                        simpleTrigger.RepeatInterval = TimeSpan.FromSeconds(1);
-                    if (simplecorn.ConInfo.RepeatCount != null)
-                        simpleTrigger.RepeatCount = simplecorn.ConInfo.RepeatCount.Value - 1;//因为任务默认执行一次，所以减一次
-                    else
-                        simpleTrigger.RepeatCount = int.MaxValue;//不填，则默认最大执行次数
-                    return simpleTrigger;
+                        builder.EndAt(DateBuilder.DateOf(date.Hour, date.Minute, date.Second, date.Day, date.Month, date.Year));
+                    //TBD
+                    //if (simplecorn.ConInfo.RepeatInterval != null)
+                    //    builder.
+                    //else
+                    //    simpleTrigger.RepeatInterval = TimeSpan.FromSeconds(1);
+                    //if (simplecorn.ConInfo.RepeatCount != null)
+                    //    simpleTrigger.RepeatCount = simplecorn.ConInfo.RepeatCount.Value - 1;//因为任务默认执行一次，所以减一次
+                    //else
+                    //    simpleTrigger.RepeatCount = int.MaxValue;//不填，则默认最大执行次数                        
+
+                    //.WithSimpleSchedule(x => x.RepeatHourlyForever())
+                    //.ModifiedByCalendar("holidays")
+                    //.Build();
+                    return builder.Build();
                 }
                 return null;
             }
             else
             {
-                CronTrigger trigger = new CronTrigger(taskruntimeinfo.TaskModel.id.ToString(), taskruntimeinfo.TaskModel.categoryid.ToString());// 触发器名,触发器组  
-                trigger.CronExpressionString = taskruntimeinfo.TaskModel.taskcron;// 触发器时间设定  
-                return trigger;
+                return TriggerBuilder.Create()
+                        .WithIdentity(taskruntimeinfo.TaskModel.id.ToString(), taskruntimeinfo.TaskModel.categoryid.ToString())
+                        .WithCronSchedule(taskruntimeinfo.TaskModel.taskcron)
+                        .Build();
             }
         }
     }

@@ -14,34 +14,38 @@ namespace TaskManager.Node.SystemRuntime
     /// </summary>
     public class TaskJob:IJob
     {
-   
-        public void Execute(JobExecutionContext context)
+        public Task Execute(IJobExecutionContext context)
         {
             try
             {
-                int taskid = Convert.ToInt32(context.JobDetail.Name);
+                //TBD JobDetail.Name  -> JobDetail.Key  is right
+                int taskid = Convert.ToInt32(context.JobDetail.Key);
                 var taskruntimeinfo = TaskPoolManager.CreateInstance().Get(taskid.ToString());
                 if (taskruntimeinfo == null || taskruntimeinfo.DllTask == null)
                 {
                     LogHelper.AddTaskError("当前任务信息为空引用", taskid, new Exception());
-                    return;
                 }
-                taskruntimeinfo.TaskLock.Invoke(() => {
-                    try
+                else
+                {
+                    taskruntimeinfo.TaskLock.Invoke(() =>
                     {
-                        taskruntimeinfo.DllTask.TryRun();
-                    }
-                    catch (Exception exp)
-                    {
-                        LogHelper.AddTaskError("任务" + taskid + "TaskJob回调时执行失败", taskid, exp);
-                    }
-                });
-               
+                        try
+                        {
+                            taskruntimeinfo.DllTask.TryRun();
+                        }
+                        catch (Exception exp)
+                        {
+                            LogHelper.AddTaskError("任务" + taskid + "TaskJob回调时执行失败", taskid, exp);
+                        }
+                    });
+                }
             }
             catch (Exception exp)
             {
                 LogHelper.AddNodeError("任务回调时严重系统级错误", exp);
             }
+            //TBD
+            return Task.CompletedTask;
         }
     }
 }

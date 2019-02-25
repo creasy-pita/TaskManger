@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BSF.Extensions;
 using BSF.BaseService.Monitor;
+using Microsoft.AspNetCore.Http.Extensions;
 
 namespace BSF.Db
 {
@@ -35,7 +36,7 @@ namespace BSF.Db
                     if (procedurePar != null)
                     {
 
-                        string url = (System.Web.HttpContext.Current != null ? (System.Web.HttpContext.Current.Request.RawUrl.ToString().SubString2(90)) : "");
+                        string url = (System.Web.HttpContext.Current != null ? (System.Web.HttpContext.Current.Request.GetDisplayUrl().SubString2(90)) : "");
                         info.sqlip = datasource.NullToEmpty();
                         info.msg = sql.NullToEmpty();
                         info.url = url;

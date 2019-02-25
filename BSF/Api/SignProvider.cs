@@ -1,4 +1,5 @@
 ﻿using BSF.Tool;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,7 +46,17 @@ namespace BSF.Api
         public bool ValidateSign(HttpRequest request, string appSecret, out string err)
         {
             err = "";
-            string sign = request.Params[signKey];
+            //HttpRequest.Params[signKey]  分解为Query, Form,Cookies
+            string sign = request.Query[signKey];
+            if (string.IsNullOrWhiteSpace(sign))
+            {
+                sign = request.Form[signKey];
+            }
+            if (string.IsNullOrWhiteSpace(sign))
+            {
+                sign = request.Cookies[signKey];
+            }
+
             if (string.IsNullOrWhiteSpace(sign))
             {
                 err += "缺少签名" + signKey;
@@ -61,7 +72,7 @@ namespace BSF.Api
 
             Dictionary<string, string> signDic = new Dictionary<string, string>();
 
-            string[] keys = request.Form.AllKeys;
+            ICollection<string> keys = request.Form.Keys;
             foreach (var m in keys)
             {
                signDic.Add(m, request.Form[m]);

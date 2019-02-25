@@ -40,7 +40,7 @@ namespace TaskManager.Node.SystemRuntime
         {
             _taskpoolmanager = new TaskPoolManager();
             ISchedulerFactory sf = new StdSchedulerFactory();
-            _sched = sf.GetScheduler();
+            _sched = sf.GetScheduler().Result;
             _sched.Start();
         }
         /// <summary>
@@ -71,7 +71,9 @@ namespace TaskManager.Node.SystemRuntime
             {
                 if (!TaskRuntimePool.ContainsKey(taskid))
                 {
-                    JobDetail jobDetail = new JobDetail(taskruntimeinfo.TaskModel.id.ToString(), taskruntimeinfo.TaskModel.categoryid.ToString(), typeof(TaskJob));// 任务名，任务组，任务执行类  
+                    IJobDetail jobDetail = JobBuilder.Create<TaskJob>()
+                        .WithIdentity(taskruntimeinfo.TaskModel.id.ToString(), taskruntimeinfo.TaskModel.categoryid.ToString())
+                        .Build();
                     var trigger = CornFactory.CreateTigger(taskruntimeinfo);
                     _sched.ScheduleJob(jobDetail, trigger);  
 
@@ -86,16 +88,17 @@ namespace TaskManager.Node.SystemRuntime
         /// </summary>
         /// <param name="taskid"></param>
         /// <returns></returns>
-        public bool Remove(string taskid)
+        public async Task<bool> Remove(string taskid)
         {
             lock (_locktag)
             {
                 if (TaskRuntimePool.ContainsKey(taskid))
                 {
                     var taskruntimeinfo = TaskRuntimePool[taskid];
-                    _sched.PauseTrigger(taskruntimeinfo.TaskModel.id.ToString(), taskruntimeinfo.TaskModel.categoryid.ToString());// 停止触发器  
-                    _sched.UnscheduleJob(taskruntimeinfo.TaskModel.id.ToString(), taskruntimeinfo.TaskModel.categoryid.ToString());// 移除触发器  
-                    _sched.DeleteJob(taskruntimeinfo.TaskModel.id.ToString(), taskruntimeinfo.TaskModel.categoryid.ToString());// 删除任务
+                    //TBD
+                    //_sched.PauseTrigger(taskruntimeinfo.TaskModel.id.ToString(), taskruntimeinfo.TaskModel.categoryid.ToString());// 停止触发器  
+                    //_sched.UnscheduleJob(taskruntimeinfo.TaskModel.id.ToString(), taskruntimeinfo.TaskModel.categoryid.ToString());// 移除触发器  
+                    //_sched.DeleteJob(taskruntimeinfo.TaskModel.id.ToString(), taskruntimeinfo.TaskModel.categoryid.ToString());// 删除任务
 
                     TaskRuntimePool.Remove(taskid);
                     return true;

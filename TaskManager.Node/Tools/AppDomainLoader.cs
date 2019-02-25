@@ -21,16 +21,18 @@ namespace TaskManager.Node.Tools
         /// <returns></returns>
         public T Load(string dllpath, string classpath, out AppDomain domain)
         {
-            AppDomainSetup setup = new AppDomainSetup();
-            if (System.IO.File.Exists(dllpath+".config"))
-                setup.ConfigurationFile = dllpath + ".config";
-            setup.ShadowCopyFiles = "true";
-            setup.ApplicationBase = System.IO.Path.GetDirectoryName(dllpath);
-            domain = AppDomain.CreateDomain(System.IO.Path.GetFileName(dllpath), null, setup);
-            AppDomain.MonitoringIsEnabled = true;
-            object o = domain.CreateInstanceFromAndUnwrap(dllpath, classpath);
-            T obj = (T)o;
-            return obj;
+            //AppDomainSetup setup = new AppDomainSetup();
+            //if (System.IO.File.Exists(dllpath+".config"))
+            //    setup.ConfigurationFile = dllpath + ".config";
+            //setup.ShadowCopyFiles = "true";
+            //setup.ApplicationBase = System.IO.Path.GetDirectoryName(dllpath);
+            domain = AppDomain.CreateDomain(System.IO.Path.GetFileName(dllpath));
+            //AppDomain.MonitoringIsEnabled = true;
+            //object o = domain.CreateInstanceFromAndUnwrap(dllpath, classpath);
+            //T obj = (T)o;
+            //return obj;
+
+            return  (T)(new Object());
         }
         /// <summary>
         /// 卸载应用程序域

@@ -59,8 +59,10 @@ namespace TaskManager.Node.SystemRuntime
             BSF.Tool.IOHelper.CopyDirectory(taskshareddlldir, fileinstallpath);
             try
             {
-                new TaskAssemblyRedirect().TryRebulidDll(fileinstallmainclassdllpath, taskruntimeinfo.TaskModel.taskmainclassnamespace);
+                //TBD
+                //new TaskAssemblyRedirect().TryRebulidDll(fileinstallmainclassdllpath, taskruntimeinfo.TaskModel.taskmainclassnamespace);
                 var dlltask = new AppDomainLoader<BaseDllTask>().Load(fileinstallmainclassdllpath, taskruntimeinfo.TaskModel.taskmainclassnamespace, out taskruntimeinfo.Domain);
+                
                 var sdktaskmodel = new BSF.BaseService.TaskManager.Model.tb_task_model();
                 PropertyHelper.Copy(taskruntimeinfo.TaskModel, sdktaskmodel);
                 dlltask.SystemRuntimeInfo = new TaskSystemRuntimeInfo()

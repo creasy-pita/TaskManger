@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using System.Web;
 using BSF.Extensions;
 using System.Collections;
+using System.Web;
+using Microsoft.AspNetCore.Http.Extensions;
 
 namespace BSF.Api
 {
@@ -101,7 +103,7 @@ namespace BSF.Api
                 //TimeWatchLog watch = new TimeWatchLog();//网络耗时打印
                 string msg = "";
                 if (HttpContext.Current != null && HttpContext.Current.Request != null)
-                    msg = HttpContext.Current.Request.RawUrl.ToString();
+                    msg = HttpContext.Current.Request.GetDisplayUrl();
 
                 string clientResultText = new HttpProvider().PostWithJson(url, param);
                 T r = action.Invoke(clientResultText);

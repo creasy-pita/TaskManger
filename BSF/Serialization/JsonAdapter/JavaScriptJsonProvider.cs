@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Web.Script.Serialization;
+//using System.Web.Script.Serialization;
 
 namespace BSF.Serialization.JsonAdapter
 {
@@ -19,9 +20,7 @@ namespace BSF.Serialization.JsonAdapter
         /// <returns></returns>
         public override string Serializer(object o)
         {
-            JavaScriptSerializer js = new JavaScriptSerializer();
-            return js.Serialize(o);
-
+            return JsonConvert.SerializeObject(o);
         }
 
 
@@ -33,9 +32,7 @@ namespace BSF.Serialization.JsonAdapter
         /// <returns></returns>
         public override object Deserialize(string s, Type type)
         {
-            JavaScriptSerializer js = new JavaScriptSerializer();
-            return js.Deserialize(s, type);
-
+            return JsonConvert.DeserializeObject(s, type);
         }
     }
 }

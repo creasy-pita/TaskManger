@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,24 +17,24 @@ namespace BSF.Extensions
         /// </summary>
         /// <param name="Request"></param>
         /// <returns></returns>
-        public static List<string> RequestParams(this System.Web.HttpRequestBase Request)
-        {
-            var rs = new List<string>();
-            rs.AddRange(Request.Form.AllKeys);
-            rs.AddRange(Request.QueryString.AllKeys);
-            return rs.Distinct().ToList();
-        }
+        //public static List<string> RequestParams(this System.Web.HttpRequestBase Request)
+        //{
+        //    var rs = new List<string>();
+        //    rs.AddRange(Request.Form.Keys);
+        //    rs.AddRange(Request.Query.Keys);
+        //    return rs.Distinct().ToList();
+        //}
 
         /// <summary>
         /// 请求参数Get,Post
         /// </summary>
         /// <param name="Request"></param>
         /// <returns></returns>
-        public static List<string> RequestParams(this System.Web.HttpRequest Request)
+        public static List<string> RequestParams(this HttpRequest Request)
         {
             var rs = new List<string>();
-            rs.AddRange(Request.Form.AllKeys);
-            rs.AddRange(Request.QueryString.AllKeys);
+            rs.AddRange(Request.Form.Keys);
+            rs.AddRange(Request.Query.Keys);
             return rs.Distinct().ToList();
         }
         /// <summary>
@@ -42,14 +43,14 @@ namespace BSF.Extensions
         /// <param name="Request"></param>
         /// <param name="key"></param>
         /// <returns></returns>
-        public static object RequestParamValue(this System.Web.HttpRequestBase Request,string key)
-        {
-            if (Request.Form.AllKeys.Contains(key))
-                return Request.Form[key];
-            if(Request.QueryString.AllKeys.Contains(key))
-                return Request.QueryString[key];
-            return null;
-        }
+        //public static object RequestParamValue(this System.Web.HttpRequestBase Request,string key)
+        //{
+        //    if (Request.Form.Keys.Contains(key))
+        //        return Request.Form[key];
+        //    if(Request.Query.Keys.Contains(key))
+        //        return Request.QueryString[key];
+        //    return null;
+        //}
 
         /// <summary>
         /// 获取请求参数值
@@ -57,12 +58,12 @@ namespace BSF.Extensions
         /// <param name="Request"></param>
         /// <param name="key"></param>
         /// <returns></returns>
-        public static object RequestParamValue(this System.Web.HttpRequest Request, string key)
+        public static object RequestParamValue(this HttpRequest Request, string key)
         {
-            if (Request.Form.AllKeys.Contains(key))
+            if (Request.Form.Keys.Contains(key))
                 return Request.Form[key];
-            if (Request.QueryString.AllKeys.Contains(key))
-                return Request.QueryString[key];
+            if (Request.Query.Keys.Contains(key))
+                return Request.Query[key];
             return null;
         }
     }

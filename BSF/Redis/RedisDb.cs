@@ -237,7 +237,8 @@ namespace BSF.Redis
             {
                 try
                 {
-                    redisCli.SetEntry(key, value as string, timespan);
+                    redisCli.SetValue(key, value as string, timespan);
+                    //https://docs.servicestack.net/releases/v4.0.50
                     return true;
                 }
                 catch
