@@ -50,7 +50,8 @@ namespace BSF.Api
             string sign = request.Query[signKey];
             if (string.IsNullOrWhiteSpace(sign))
             {
-                sign = request.Form[signKey];
+                if (request.HasFormContentType)
+                    sign = request.Form[signKey];
             }
             if (string.IsNullOrWhiteSpace(sign))
             {
@@ -71,11 +72,13 @@ namespace BSF.Api
             //}
 
             Dictionary<string, string> signDic = new Dictionary<string, string>();
-
-            ICollection<string> keys = request.Form.Keys;
-            foreach (var m in keys)
+            if (request.HasFormContentType)
             {
-               signDic.Add(m, request.Form[m]);
+                ICollection<string> keys = request.Form.Keys;
+                foreach (var m in keys)
+                {
+                   signDic.Add(m, request.Form[m]);
+                }
             }
 
             string signnew = CreateSign(signDic, appSecret);

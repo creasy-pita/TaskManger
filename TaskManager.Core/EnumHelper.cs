@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-//using System.Web.Mvc;
 
 namespace TaskManager.Core
 {
@@ -17,41 +17,41 @@ namespace TaskManager.Core
         /// 将指定枚举转为列表控件的数据源
         /// </summary>
         /// <returns>Text:枚举的描述，value：枚举的值</returns>
-        //public static IEnumerable<SelectListItem> GetAllEnumsOfList()
-        //{
-        //    Type t = typeof(T);
-        //    FieldInfo[] fieldInfoList = t.GetFields();
-        //    IList<SelectListItem> dt = new List<SelectListItem>();
+        public static IEnumerable<SelectListItem> GetAllEnumsOfList()
+        {
+            Type t = typeof(T);
+            FieldInfo[] fieldInfoList = t.GetFields();
+            IList<SelectListItem> dt = new List<SelectListItem>();
 
-        //    var query = from q in fieldInfoList
-        //                where q.GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false).Length > 0
-        //                select new SelectListItem()
-        //                {
-        //                    Value = q.Name,
-        //                    Text = (q.GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false)[0] as System.ComponentModel.DescriptionAttribute).Description ?? q.Name
-        //                };
-        //    return query;
-        //}
+            var query = from q in fieldInfoList
+                        where q.GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false).Length > 0
+                        select new SelectListItem()
+                        {
+                            Value = q.Name,
+                            Text = (q.GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false)[0] as System.ComponentModel.DescriptionAttribute).Description ?? q.Name
+                        };
+            return query;
+        }
 
         /// <summary>
         /// 将指定枚举转为列表控件的数据源
         /// </summary>
         /// <returns>Text:枚举的描述，value：枚举的值</returns>
-        //public static IEnumerable<SelectListItem> GetAllEnumsOfList2()
-        //{
-        //    Type t = typeof(T);
-        //    FieldInfo[] fieldInfoList = t.GetFields();
-        //    IList<SelectListItem> dt = new List<SelectListItem>();
+        public static IEnumerable<SelectListItem> GetAllEnumsOfList2()
+        {
+            Type t = typeof(T);
+            FieldInfo[] fieldInfoList = t.GetFields();
+            IList<SelectListItem> dt = new List<SelectListItem>();
 
-        //    var query = from q in fieldInfoList
-        //                where q.GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false).Length > 0
-        //                select new SelectListItem()
-        //                {
-        //                    Value = ((int)q.GetValue(null)).ToString(),
-        //                    Text = (q.GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false)[0] as System.ComponentModel.DescriptionAttribute).Description ?? q.Name
-        //                };
-        //    return query;
-        //}
+            var query = from q in fieldInfoList
+                        where q.GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false).Length > 0
+                        select new SelectListItem()
+                        {
+                            Value = ((int)q.GetValue(null)).ToString(),
+                            Text = (q.GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false)[0] as System.ComponentModel.DescriptionAttribute).Description ?? q.Name
+                        };
+            return query;
+        }
 
         /// <summary>
         /// 获得指定枚举的描述信息

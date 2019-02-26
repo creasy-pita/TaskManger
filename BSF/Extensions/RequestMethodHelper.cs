@@ -33,7 +33,8 @@ namespace BSF.Extensions
         public static List<string> RequestParams(this HttpRequest Request)
         {
             var rs = new List<string>();
-            rs.AddRange(Request.Form.Keys);
+            if(Request.HasFormContentType)
+                rs.AddRange(Request.Form.Keys);
             rs.AddRange(Request.Query.Keys);
             return rs.Distinct().ToList();
         }
@@ -60,7 +61,7 @@ namespace BSF.Extensions
         /// <returns></returns>
         public static object RequestParamValue(this HttpRequest Request, string key)
         {
-            if (Request.Form.Keys.Contains(key))
+            if (Request.Form !=null && Request.Form.Keys.Contains(key))
                 return Request.Form[key];
             if (Request.Query.Keys.Contains(key))
                 return Request.Query[key];

@@ -1,0 +1,32 @@
+﻿@model TaskManager.Domain.Model.tb_config_model
+@{
+    ViewBag.Title = "Add";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="head">
+    <div class="title">
+        @(Model == null ? "添加" : "编辑")配置 @Html.Raw(TaskManager.Web.Models.Common.HelpHtml(""))
+    </div>
+</div>
+<div>
+
+    @using (Html.BeginForm("Add", "Config", FormMethod.Post))
+    {
+        <input type="hidden" value="@(Model==null?"0":Model.id+"")" name="id" id="id" />
+        <ul class="mydetail">
+            <li>
+                <label>配置Key</label><input type="text" name="configkey" value="@(Model==null?"":Model.configkey)" />
+            </li>
+            <li>
+                <label>配置value</label><textarea name="configvalue" >@(Model == null ? "" : Model.configvalue)</textarea>
+            </li>
+            <li>
+    <label>配置remark</label><textarea name="remark">@(Model == null ? "" : Model.remark)</textarea>
+</li>
+            <li>
+                <input type="submit" class="btn1" value="提交" />
+            </li>
+        </ul>
+    }
+</div>

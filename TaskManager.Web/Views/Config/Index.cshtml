@@ -1,0 +1,69 @@
+﻿@using AspNetCorePage;
+@model List<TaskManager.Domain.Model.tb_config_model>
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script>
+    function Delete(id) {
+        $.ajax({
+            url: '@Url.Action("Delete", "Config")',
+            type: "post",
+            data: {
+                id: id
+            },
+            success: function (data) {
+                if (data.code == 1) {
+                    if (data.state == true) {
+                        alert("删除成功！");
+                        window.location.reload();
+                    }
+                    else {
+                        alert("删除失败！");
+                    }
+                }
+                else {
+                    alert(data.msg);
+                }
+            }
+        })
+    }
+</script>
+<div class="head">
+    <div class="title">
+        配置 @Html.Raw(TaskManager.Web.Models.Common.HelpHtml("用于任务调度平台自身的配置+任务AppConfig里面公共的初始化的配置信息。（运行中的任务重启后方可生效修改的配置,若需要变动的业务配置请使用“统一配置中心”,若当前配置与单独任务配置json中的key重复,优先使用单独任务的配置value）"))
+    </div>
+</div>
+<div class="orderlist m10 myorder">
+    <a href="@Url.Action("add", "Config")" class="btn1">新增</a>
+    <div class="tab_cont">
+        <div class="list">
+            <table>
+                <tr>
+                    <th>id</th>
+                    <th>配置</th>
+                    <th>值</th>
+                    <th>备注</th>
+                    <th>最后更新时间</th>
+                    <th>操作</th>
+                </tr>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.id</td>
+                        <td>@item.configkey</td>
+                        <td>@item.configvalue</td>
+                        <td>@item.remark</td>
+                        <td>@item.lastupdatetime</td>
+                        <td>
+                            <a href="@Url.Action("Add", "Config", new { id = @item.id })">修改</a>
+                            <input type="button" value="删除" onclick="Delete('@item.id    ')" />
+                        </td>
+                    </tr>
+                }
+            </table>
+            <div class="total pt10">
+            </div>
+        </div>
+    </div>
+</div>

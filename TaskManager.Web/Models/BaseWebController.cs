@@ -29,6 +29,7 @@ namespace TaskManager.Web.Models
         /// <returns></returns>
         public T Visit<T>(EnumUserRole userrole, Func<T> action)
         {
+                    return action.Invoke();
             try
             {
                 int currentuserrole = -2;

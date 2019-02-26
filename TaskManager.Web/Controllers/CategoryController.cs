@@ -8,11 +8,11 @@ using BSF.Db;
 using TaskManager.Web.Models;
 using TaskManager.Core;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TaskManager.Web.Controllers
 {
-    //TBD
-    //[AuthorityCheck]
+    [Authorize]
     public class CategoryController : BaseWebController
     {
         //
@@ -20,8 +20,8 @@ namespace TaskManager.Web.Controllers
 
         public ActionResult Index(string keyword)
         {
-            //return this.Visit(EnumUserRole.Admin, () =>
-            //{
+            return this.Visit(EnumUserRole.Admin, () =>
+            {
                 using (DbConn PubConn = DbConn.CreateConn(Config.TaskConnectString))
                 {
                     PubConn.Open();
@@ -29,7 +29,7 @@ namespace TaskManager.Web.Controllers
                     List<tb_category_model> model = dal.GetList(PubConn, keyword);
                     return View(model);
                 }
-            //});
+            });
         }
 
         public ActionResult Add()
