@@ -21,7 +21,7 @@ namespace TaskManager.Domain.Dal
 					//
 					new ProcedureParameter("@taskid",    model.taskid),
 					//
-					new ProcedureParameter("@tempdatajson",    model.tempdatajson),
+					new ProcedureParameter("@tempdatajson",    model.tempdatajson.NullToEmpty()),
 					//
 					new ProcedureParameter("@tempdatalastupdatetime",    model.tempdatalastupdatetime)   
                 };

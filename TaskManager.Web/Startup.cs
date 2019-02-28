@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using TaskManager.Web.Extensions;
 
 namespace TaskManager.Web
 {
@@ -69,6 +70,7 @@ namespace TaskManager.Web
             app.UseStaticFiles();
             app.UseCookiePolicy();
             app.UseSession();
+            app.UseHttpContextSetMiddleware();
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

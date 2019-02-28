@@ -7,25 +7,15 @@ namespace System.Web
 
     public static class HttpContext
     {
-        private static Microsoft.AspNetCore.Http.IHttpContextAccessor m_httpContextAccessor;
-
-
-        public static void Configure(Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor)
+        public static void Configure(Microsoft.AspNetCore.Http.HttpContext httpContext)
         {
-            m_httpContextAccessor = httpContextAccessor;
+            Current = httpContext;
         }
-
 
         public static Microsoft.AspNetCore.Http.HttpContext Current
         {
-            get
-            {
-                return m_httpContextAccessor.HttpContext;
-            }
+            get;
+            set;
         }
-
-
     }
-
-
 }
