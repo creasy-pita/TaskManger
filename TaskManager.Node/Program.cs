@@ -6,7 +6,9 @@ namespace TaskManager.Node
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            CommandQueueProcessor.ServiceRunning();
+            //Console.WriteLine("Hello World!");
+            Console.ReadKey();
         }
     }
 }

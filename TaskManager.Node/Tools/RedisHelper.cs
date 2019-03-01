@@ -1,8 +1,5 @@
 ﻿using BSF.Db;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using TaskManager.Core.Redis;
 using TaskManager.Domain.Dal;
@@ -16,37 +13,41 @@ namespace TaskManager.Node.Tools
             try
             {
                 if (string.IsNullOrWhiteSpace(RedisConfig.RedisServer))
+                {
                     RefreashRedisServerIP();
+                }
                 if (string.IsNullOrWhiteSpace(RedisConfig.RedisServer))
-                    throw new Exception("请在系统中“配置管理”中配置redis服务器的地址,配置key为:" + RedisConfig.RedisServerKey);
+                {
+                    throw new Exception("Redis为配置服务器地址");
+                }
                 var cancelSource = new CancellationTokenSource();
-                //LogHelper.AddNodeError($"{RedisConfig.RedisServer}", new Exception());
-
-                new RedisNetCommandListener(RedisConfig.RedisServer).Register(action,errorAction,
+                new RedisNetCommandListener(RedisConfig.RedisServer).Register(action, errorAction,
                     cancelSource, RedisConfig.Redis_Channel);
             }
             catch (Exception exp)
             {
                 LogHelper.AddNodeError("订阅redis出错", exp);
             }
-            
+
         }
         public static void RefreashRedisServerIP()
         {
             try
             {
-                using (DbConn PubConn = DbConn.CreateConn(GlobalConfig.TaskDataBaseConnectString))
+                using (DbConn PubConn = DbConn.CreateConn(GlobalConfig.ConnectionString))
                 {
                     PubConn.Open();
                     var dal = new tb_config_dal();
                     var config = dal.Get(PubConn, RedisConfig.RedisServerKey);
                     if (config != null)
+                    {
                         RedisConfig.RedisServer = config.configvalue;
+                    }
                 }
             }
             catch (Exception exp)
             {
-                LogHelper.AddNodeError(string.Format("从配置中获取{0}出错,", RedisConfig.RedisServerKey),exp);
+                LogHelper.AddNodeError(string.Format("从配置中获取{0}出错,", RedisConfig.RedisServerKey), exp);
             }
         }
     }

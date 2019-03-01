@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Root>
+  <!--windows系统下操作服务脚本-->
+  <ShellInfo SystemType="windows">
+    <Operation Type="install">
+      <Value>
+        <![CDATA[
+@echo off
+nssm install {0} %PROGRAMFILES%\dotnet\dotnet.exe
+nssm set {0} appDirectory {1}
+nssm set {0} application C:\Program Files\dotnet\dotnet.exe
+nssm set {0} AppParameters {2}
+exit
+        ]]>
+      </Value>
+    </Operation>
+    <Operation Type="uninstall">
+      <Value>
+        <![CDATA[nssm remove {0}]]>
+      </Value>
+    </Operation>
+    <Operation Type="start">
+      <Value>
+        <![CDATA[nssm start {0}]]>
+      </Value>
+    </Operation>
+    <Operation Type="stop">
+      <Value>
+        <![CDATA[nssm stop {0}]]>
+      </Value>
+    </Operation>
+  </ShellInfo>
+  <ShellInfo SystemType="linux">
+    <String type="install">
+      <Value>
+        <![CDATA[待添加！！！！]]>
+      </Value>
+    </String>
+  </ShellInfo>
+</Root>

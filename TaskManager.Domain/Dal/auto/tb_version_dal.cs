@@ -91,7 +91,22 @@ namespace TaskManager.Domain.Dal
             return null;
         }
 
-		public virtual tb_version_model CreateModel(DataRow dr)
+        public tb_version_model GetVersionByTaskID(DbConn pubConn, int taskid)
+        {
+            List<ProcedureParameter> Par = new List<ProcedureParameter>();
+            Par.Add(new ProcedureParameter("@taskid", taskid));
+            StringBuilder stringSql = new StringBuilder();
+            stringSql.Append(@"select s.* from tb_version s where s.taskid=@taskid");
+            DataSet ds = new DataSet();
+            pubConn.SqlToDataSet(ds, stringSql.ToString(), Par);
+            if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+            {
+                return CreateModel(ds.Tables[0].Rows[0]);
+            }
+            return null;
+        }
+
+        public virtual tb_version_model CreateModel(DataRow dr)
         {
             var o = new tb_version_model();
 			

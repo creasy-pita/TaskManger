@@ -38,10 +38,12 @@ namespace TaskManager.Core
     /// </summary>
     public enum EnumTaskState
     {
+        [Description("未安装")]
+        UnInstall=-1,
         [Description("停止")]
         Stop=0,
         [Description("运行中")]
-        Running=1,
+        Running=1,      
     }
     /// <summary>
     /// 系统用户角色
@@ -54,5 +56,15 @@ namespace TaskManager.Core
         Developer=1,
         [Description("无控制")]
         None = -1
+    }
+
+    public enum EnumSystemType
+    {
+        [Description("windows系统")]
+        windows = 0,
+        [Description("Linux系统")]
+        linux = 1,
+        [Description("未知系统")]
+        unknown = 2,
     }
 }
