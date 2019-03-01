@@ -33,7 +33,7 @@ namespace TaskManager.Domain.Dal
             DataSet dsList = SqlHelper.Visit<DataSet>(ps =>
             {
                 string sqlwhere = "";
-                string sql = "select ROW_NUMBER() over(order by E.id desc) as rownum,E.*,ISNULL(T.taskcreateuserid,0) taskcreateuserid, u.username as taskusername,T.taskname,n.nodename as tasknodename from tb_log E left join tb_task T on E.taskid=T.id left join tb_user u on t.taskcreateuserid=u.id left join tb_node n on n.id=E.nodeid where 1=1 ";
+                string sql = "select ROW_NUMBER() over(order by E.id desc) as rownum,E.*,ISNULL(T.taskcreateuserid,0) taskcreateuserid, u.username as taskusername,T.taskname,n.nodename as tasknodename from tb_log E left join tb_task T on E.taskid=T.id left join tb_user u on T.taskcreateuserid=u.id left join tb_node n on n.id=E.nodeid where 1=1 ";
                 if (!string.IsNullOrWhiteSpace(keyword))
                 {
                     ps.Add("keyword", keyword);

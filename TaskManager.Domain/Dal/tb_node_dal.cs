@@ -57,6 +57,7 @@ namespace TaskManager.Domain.Dal
             {
                 string sqlwhere = "";
                 string sql = "select ROW_NUMBER() over(order by id desc) as rownum,id,nodename,nodecreatetime,nodeip,nodelastupdatetime,ifcheckstate from tb_node where 1=1 ";
+                //string sql = "select * from tb_node where 1=1 ";
                 if (!string.IsNullOrWhiteSpace(keyword))
                 {
                     ps.Add("keyword", keyword);
@@ -76,6 +77,7 @@ namespace TaskManager.Domain.Dal
                 _count = Convert.ToInt32(PubConn.ExecuteScalar("select count(1) from tb_node where 1=1 " + sqlwhere, ps.ToParameters()));
                 DataSet ds = new DataSet();
                 string sqlSel = "select * from (" + sql + sqlwhere + ") A where rownum between " + ((pageindex - 1) * pagesize + 1) + " and " + pagesize * pageindex;
+                //string sqlSel = sql + sqlwhere + " order by id desc limit " + ((pageindex - 1) * pagesize ) + "," + pagesize;
                 PubConn.SqlToDataSet(ds, sqlSel, ps.ToParameters());
                 return ds;
             });

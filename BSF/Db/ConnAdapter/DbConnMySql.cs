@@ -2,23 +2,23 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
+using MySql.Data.MySqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace BSF.Db.ConnAdapter
 {
-    class DbConnSqlServer : DbConn
+    class DbConnMySql : DbConn
     {
-        private SqlConnection privateconn;
-        private SqlTransaction ts = null;
+        private MySqlConnection privateconn;
+        private MySqlTransaction ts = null;
 
-        public DbConnSqlServer()
+        public DbConnMySql()
         {
-            privateconn= new SqlConnection();
+            privateconn= new MySqlConnection();
             _conn = privateconn;
-            _dbtype = DbType.SQLSERVER;
+            _dbtype = DbType.MYSQL;
         }
 
         public override void BeginTransaction(IsolationLevel isolationLevel= IsolationLevel.ReadCommitted)
@@ -62,47 +62,46 @@ namespace BSF.Db.ConnAdapter
         /// <summary>参数类型转化</summary>
         /// <param name="Par"></param>
         /// <returns></returns>
-        private SqlParameter ParameterTransform(ProcedureParameter Par)
+        private MySqlParameter ParameterTransform(ProcedureParameter Par)
         {
-            /*车毅修改 支持无类型参数*/
             if (Par.ParType == ProcParType.Default)
-                return new SqlParameter(Par.Name, Par.Value == null ? DBNull.Value : Par.Value);
-            SqlParameter p = new SqlParameter();
+                return new MySqlParameter(Par.Name, Par.Value == null ? DBNull.Value : Par.Value);
+            MySqlParameter p = new MySqlParameter();
             p.ParameterName = Par.Name;
             switch (Par.ParType)
             {
                 case ProcParType.Int16:
-                    p.SqlDbType = SqlDbType.SmallInt;
+                    p.MySqlDbType = MySqlDbType.Int16;
                     break;
                 case ProcParType.Int32:
-                    p.SqlDbType = SqlDbType.Int;
+                    p.MySqlDbType = MySqlDbType.Int32;
                     break;
                 case ProcParType.Int64:
-                    p.SqlDbType = SqlDbType.BigInt;
+                    p.MySqlDbType = MySqlDbType.Int64;
                     break;
                 case ProcParType.Single:
-                    p.SqlDbType = SqlDbType.Real;
+                    p.MySqlDbType = MySqlDbType.Float;
                     break;
                 case ProcParType.Double:
-                    p.SqlDbType = SqlDbType.Float;
+                    p.MySqlDbType = MySqlDbType.Double;
                     break;
                 case ProcParType.Decimal:
-                    p.SqlDbType = SqlDbType.Decimal;
+                    p.MySqlDbType = MySqlDbType.Decimal;
                     break;
                 case ProcParType.Char:
-                    p.SqlDbType = SqlDbType.Char;
+                    p.MySqlDbType = MySqlDbType.String;
                     break;
                 case ProcParType.VarChar:
-                    p.SqlDbType = SqlDbType.VarChar;
+                    p.MySqlDbType = MySqlDbType.VarChar;
                     break;
                 case ProcParType.NVarchar:
-                    p.SqlDbType = SqlDbType.NVarChar;
+                    p.MySqlDbType = MySqlDbType.VarString;//TBD
                     break;
                 case ProcParType.Image:
-                    p.SqlDbType = SqlDbType.Binary;
+                    p.MySqlDbType = MySqlDbType.Binary;
                     break;
                 case ProcParType.DateTime:
-                    p.SqlDbType = SqlDbType.DateTime;
+                    p.MySqlDbType = MySqlDbType.DateTime;
                     break;
                 default:
                     throw new Exception("未知类型ProcParType：" + Par.ParType.ToString());
@@ -130,7 +129,7 @@ namespace BSF.Db.ConnAdapter
         {
             return DbCatch.Catch<int>(_isWatchTime, privateconn.DataSource, Sql, ProcedurePar, () =>
             {
-                SqlCommand cmd = new SqlCommand();
+                MySqlCommand cmd = new MySqlCommand();
                 cmd.Connection = privateconn;
                 cmd.Transaction = ts;
                 cmd.CommandTimeout = 0;
@@ -140,7 +139,7 @@ namespace BSF.Db.ConnAdapter
                 {
                     for (int i = 0; i < ProcedurePar.Count; i++)
                     {
-                        SqlParameter p = ParameterTransform(ProcedurePar[i]);
+                        MySqlParameter p = ParameterTransform(ProcedurePar[i]);
                         cmd.Parameters.Add(p);
                     }
                 }
@@ -152,7 +151,7 @@ namespace BSF.Db.ConnAdapter
         {
             return DbCatch.Catch<object>(_isWatchTime, privateconn.DataSource, Sql, ProcedurePar, () =>
            {
-               SqlCommand cmd = new SqlCommand();
+               MySqlCommand cmd = new MySqlCommand();
                cmd.Connection = privateconn;
                cmd.Transaction = ts;
                cmd.CommandTimeout = 0;
@@ -162,7 +161,7 @@ namespace BSF.Db.ConnAdapter
                {
                    for (int i = 0; i < ProcedurePar.Count; i++)
                    {
-                       SqlParameter p = ParameterTransform(ProcedurePar[i]);
+                       MySqlParameter p = ParameterTransform(ProcedurePar[i]);
                        cmd.Parameters.Add(p);
                    }
                }
@@ -172,7 +171,7 @@ namespace BSF.Db.ConnAdapter
 
         //publClass1.csic override int ExecuteSql(string Sql, List<ImageParameter> ImagePar)
         //{
-        //    SqlCommand cmd = new SqlCommand();
+        //    MySqlCommand cmd = new MySqlCommand();
         //    cmd.Connection = privateconn;
         //    cmd.Transaction = ts;
         //    cmd.CommandTimeout = 0;
@@ -180,7 +179,7 @@ namespace BSF.Db.ConnAdapter
         //    cmd.CommandText = Sql;
         //    for (int i = 0; i < ImagePar.Count; i++)
         //    {
-        //        SqlParameter p = new SqlParameter(ImagePar[i].Name, SqlDbType.VarBinary, ImagePar[i].Value.Length, ParameterDirection.Input, false, 0, 0, null, DataRowVersion.Current, ImagePar[i].Value);
+        //        MySqlParameter p = new MySqlParameter(ImagePar[i].Name, SqlDbType.VarBinary, ImagePar[i].Value.Length, ParameterDirection.Input, false, 0, 0, null, DataRowVersion.Current, ImagePar[i].Value);
         //        cmd.Parameters.Add(p);
         //    }
         //    return cmd.ExecuteNonQuery();
@@ -190,7 +189,7 @@ namespace BSF.Db.ConnAdapter
         {
             return DbCatch.Catch<int>(_isWatchTime, privateconn.DataSource, ProcedureName, ProcedurePar, () =>
            {
-               SqlCommand cmd = new SqlCommand();
+               MySqlCommand cmd = new MySqlCommand();
                cmd.Connection = privateconn;
                cmd.Transaction = ts;
                cmd.CommandTimeout = 0;
@@ -198,7 +197,7 @@ namespace BSF.Db.ConnAdapter
                cmd.CommandText = ProcedureName;
                for (int i = 0; i < ProcedurePar.Count; i++)
                {
-                   SqlParameter p = ParameterTransform(ProcedurePar[i]);
+                   MySqlParameter p = ParameterTransform(ProcedurePar[i]);
                    cmd.Parameters.Add(p);
                }
                int result = cmd.ExecuteNonQuery();
@@ -221,7 +220,7 @@ namespace BSF.Db.ConnAdapter
         {
             return DbCatch.Catch<DbDataReader>(_isWatchTime, privateconn.DataSource, Sql, ProcedurePar, () =>
           {
-              SqlCommand cmd = new SqlCommand();
+              MySqlCommand cmd = new MySqlCommand();
               cmd.Connection = privateconn;
               cmd.Transaction = ts;
               cmd.CommandTimeout = 0;
@@ -231,7 +230,7 @@ namespace BSF.Db.ConnAdapter
               {
                   for (int i = 0; i < ProcedurePar.Count; i++)
                   {
-                      SqlParameter p = ParameterTransform(ProcedurePar[i]);
+                      MySqlParameter p = ParameterTransform(ProcedurePar[i]);
                       cmd.Parameters.Add(p);
                   }
               }
@@ -255,7 +254,7 @@ namespace BSF.Db.ConnAdapter
 
         public override bool FieldIsExist(string aTableName, string aFieldName)
         {
-            string TempSql = "select top 0 * from " + aTableName;
+            string TempSql = "select * from " + aTableName + " limit 0";
             DataSet ds = new DataSet();
             SqlToDataSet(ds, TempSql, null);
             if (ds.Tables[0].Columns.IndexOf(aFieldName) < 0)
@@ -270,7 +269,7 @@ namespace BSF.Db.ConnAdapter
 
         public override bool FieldIsExist(string aDbName, string aTableName, string aFieldName)
         {
-            string TempSql = "select top 0 * from " + aDbName + ".." + aTableName;
+            string TempSql = "select * from " + aDbName + ".." + aTableName + " limit 0";
             DataSet ds = new DataSet();
             SqlToDataSet(ds, TempSql,null);
             if (ds.Tables[0].Columns.IndexOf(aFieldName) < 0)
@@ -286,9 +285,9 @@ namespace BSF.Db.ConnAdapter
         public override DateTime GetServerDate()
         {
             DateTime Result = new DateTime(0);
-            SqlCommand cmdSql = new SqlCommand("select GetDate() as aDate", privateconn);
+            MySqlCommand cmdSql = new MySqlCommand("select now() as aDate", privateconn);
             cmdSql.Transaction = ts;
-            SqlDataReader DrSql = cmdSql.ExecuteReader();
+            MySqlDataReader DrSql = cmdSql.ExecuteReader();
             if (DrSql.Read())
                 Result = DrSql.GetDateTime(0);
             DrSql.Close();
@@ -299,7 +298,7 @@ namespace BSF.Db.ConnAdapter
         {
             var r = DbCatch.Catch<int>(_isWatchTime, privateconn.DataSource, Sql, ProcedurePar, () =>
           {
-            SqlCommand selectCmd = new SqlCommand();
+            MySqlCommand selectCmd = new MySqlCommand();
             selectCmd.CommandTimeout = 0;
             selectCmd.Transaction = ts;
             selectCmd.Connection = privateconn;
@@ -309,58 +308,58 @@ namespace BSF.Db.ConnAdapter
             {
                 for (int i = 0; i < ProcedurePar.Count; i++)
                 {
-                    SqlParameter p = ParameterTransform(ProcedurePar[i]);
+                    MySqlParameter p = ParameterTransform(ProcedurePar[i]);
                     selectCmd.Parameters.Add(p);
                 }
             }
-            SqlDataAdapter da = new SqlDataAdapter();
+            MySqlDataAdapter da = new MySqlDataAdapter();
             da.SelectCommand = selectCmd;
             da.Fill(ds);
               return 0;
           });
         }
-        /*
-        public override void SqlBulkCopy(DataTable dt, string datatablename, string Sql, List<ProcedureParameter> ProcedurePar, int BatchSize = 0)
-        {
-            var r = DbCatch.Catch<int>(_isWatchTime, privateconn.DataSource, (string.IsNullOrWhiteSpace(Sql) ? datatablename : Sql), ProcedurePar, () =>
-            {
-                SqlBulkCopy sqlBulkCopy = new SqlBulkCopy(privateconn, SqlBulkCopyOptions.Default,ts);
-                sqlBulkCopy.DestinationTableName = datatablename;
-                if (BatchSize > 0)
-                {
-                    sqlBulkCopy.BatchSize = BatchSize;
-                }
-                sqlBulkCopy.WriteToServer(dt);
-                sqlBulkCopy.Close();
-                return 0;
-            });
-        }
 
-         public override void SqlBulkCopy(DataTable dt, string datatablename, string Sql, List<ProcedureParameter> ProcedurePar,Dictionary<string,string> mapps, int BatchSize = 0)
-        {
-            var r = DbCatch.Catch<int>(_isWatchTime, privateconn.DataSource, (string.IsNullOrWhiteSpace(Sql)?datatablename:Sql), ProcedurePar, () =>
-            {
-                SqlBulkCopy sqlBulkCopy = new SqlBulkCopy(privateconn, SqlBulkCopyOptions.Default,ts);
-                sqlBulkCopy.DestinationTableName = datatablename;
-                foreach (var mapp in mapps)
-                {
-                    sqlBulkCopy.ColumnMappings.Add(mapp.Key, mapp.Value);
-                }
-                if (BatchSize > 0)
-                {
-                    sqlBulkCopy.BatchSize = BatchSize;
-                }
-                sqlBulkCopy.WriteToServer(dt);
-                sqlBulkCopy.Close();
-                return 0;
-            });
-        }
-        */
+        //public override void SqlBulkCopy(DataTable dt, string datatablename, string Sql, List<ProcedureParameter> ProcedurePar, int BatchSize = 0)
+        //{
+        //    var r = DbCatch.Catch<int>(_isWatchTime, privateconn.DataSource, (string.IsNullOrWhiteSpace(Sql) ? datatablename : Sql), ProcedurePar, () =>
+        //    {
+        //        MySqlBulkCopy sqlBulkCopy = new SqlBulkCopy(privateconn, SqlBulkCopyOptions.Default,ts);
+        //        sqlBulkCopy.DestinationTableName = datatablename;
+        //        if (BatchSize > 0)
+        //        {
+        //            sqlBulkCopy.BatchSize = BatchSize;
+        //        }
+        //        sqlBulkCopy.WriteToServer(dt);
+        //        sqlBulkCopy.Close();
+        //        return 0;
+        //    });
+        //}
+
+        // public override void SqlBulkCopy(DataTable dt, string datatablename, string Sql, List<ProcedureParameter> ProcedurePar,Dictionary<string,string> mapps, int BatchSize = 0)
+        //{
+        //    var r = DbCatch.Catch<int>(_isWatchTime, privateconn.DataSource, (string.IsNullOrWhiteSpace(Sql)?datatablename:Sql), ProcedurePar, () =>
+        //    {
+        //        SqlBulkCopy sqlBulkCopy = new SqlBulkCopy(privateconn, SqlBulkCopyOptions.Default,ts);
+        //        sqlBulkCopy.DestinationTableName = datatablename;
+        //        foreach (var mapp in mapps)
+        //        {
+        //            sqlBulkCopy.ColumnMappings.Add(mapp.Key, mapp.Value);
+        //        }
+        //        if (BatchSize > 0)
+        //        {
+        //            sqlBulkCopy.BatchSize = BatchSize;
+        //        }
+        //        sqlBulkCopy.WriteToServer(dt);
+        //        sqlBulkCopy.Close();
+        //        return 0;
+        //    });
+        //}
+
         public override void SqlToDataSet(DataSet ds, string Sql, List<ProcedureParameter> ProcedurePar, string TableName)
         {
             var r = DbCatch.Catch<int>(_isWatchTime, privateconn.DataSource, Sql, ProcedurePar, () =>
           {
-              SqlCommand selectCmd = new SqlCommand();
+              MySqlCommand selectCmd = new MySqlCommand();
               selectCmd.CommandTimeout = 0;
               selectCmd.Transaction = ts;
               selectCmd.Connection = privateconn;
@@ -370,11 +369,11 @@ namespace BSF.Db.ConnAdapter
               {
                   for (int i = 0; i < ProcedurePar.Count; i++)
                   {
-                      SqlParameter p = ParameterTransform(ProcedurePar[i]);
+                      MySqlParameter p = ParameterTransform(ProcedurePar[i]);
                       selectCmd.Parameters.Add(p);
                   }
               }
-              SqlDataAdapter da = new SqlDataAdapter();
+              MySqlDataAdapter da = new MySqlDataAdapter();
               da.SelectCommand = selectCmd;
               da.Fill(ds, TableName);
               return 0;
