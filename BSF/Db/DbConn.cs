@@ -80,9 +80,9 @@ namespace BSF.Db
                 //case DbType.ORACLE_NEW:
                 //    cn = new DbConnOracleNew();
                 //    break;
-                //case DbType.MYSQL:
-                //    cn = new DbConnMySql();
-                //    break;
+                case DbType.MYSQL:
+                    cn = new DbConnMySql();
+                    break;
                 default:
                     throw new Exception("该数据库类型不适合使用CreateConn，请用new创建！");
             }
@@ -114,6 +114,9 @@ namespace BSF.Db
             {
                 case DbType.SQLSERVER:
                     cn = new DbConnSqlServer();
+                    break;
+                case DbType.MYSQL:
+                    cn = new DbConnMySql();
                     break;
                 //case DbType.ORACLE:
                 //    cn = new DbConnOracle();
