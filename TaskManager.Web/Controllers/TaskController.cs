@@ -20,6 +20,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Authorization;
+using System.Threading;
 
 namespace TaskManager.Web.Controllers
 {
@@ -323,7 +324,7 @@ namespace TaskManager.Web.Controllers
         public JsonResult CheckTaskState(int id, int state)
         {
             return this.Visit(EnumUserRole.None, () =>
-            {
+            {              
                 tb_task_dal dal = new tb_task_dal();
                 using (DbConn PubConn = DbConn.CreateConn(Config.TaskConnectString))
                 {

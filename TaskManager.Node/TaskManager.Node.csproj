@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Quartz" Version="3.0.7" />
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="4.6.0-preview.19073.11" />
   </ItemGroup>
 
   <ItemGroup>
@@ -14,6 +15,15 @@
     <ProjectReference Include="..\BSF\BSF.csproj" />
     <ProjectReference Include="..\TaskManager.Core\TaskManager.Core.csproj" />
     <ProjectReference Include="..\TaskManager.Domain\TaskManager.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="App.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Shell.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

@@ -271,6 +271,20 @@ namespace TaskManager.Domain.Dal
             });
         }
 
+        public List<tb_task_model> GetTaskByNodeID(DbConn PubConn,int nodeID)
+        {
+            return SqlHelper.Visit(ps =>
+            {
+                ps.Add("nodeid", nodeID);
+                string sql = "select * from tb_task where nodeid=@nodeid";
+                DataSet ds = new DataSet();
+                PubConn.SqlToDataSet(ds, sql, ps.ToParameters());
+                List<tb_task_model> model = new List<tb_task_model>();
+                model.Add(CreateModel(ds.Tables[0].Rows[0]));
+                return model;
+            });
+        }
+
         public int AddTask(DbConn PubConn, tb_task_model model)
         {
             return SqlHelper.Visit<int>(ps =>

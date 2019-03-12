@@ -1,22 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-
+﻿using BSF.Db;
 using BSF.Extensions;
+using BSF.Log;
+using System;
 using TaskManager.Domain.Dal;
 using TaskManager.Domain.Model;
-using BSF.Log;
-using BSF.Db;
 
 namespace TaskManager.Node.Tools
 {
-    /// <summary>
-    /// 节点内部日志操作类
-    /// </summary>
-    public static class LogHelper
+    public class LogHelper
     {
         /// <summary>
         /// 添加日志
@@ -26,7 +17,7 @@ namespace TaskManager.Node.Tools
         {
             try
             {
-                SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (c) =>
+                SqlHelper.ExcuteSql(GlobalConfig.ConnectionString, (c) =>
                 {
                     tb_log_dal logdal = new tb_log_dal();
                     model.msg = model.msg.SubString2(1000);
@@ -35,7 +26,7 @@ namespace TaskManager.Node.Tools
             }
             catch (Exception exp)
             {
-                BSF.Log.ErrorLog.Write("添加日志至数据库出错", exp);
+                ErrorLog.Write("添加日志至数据库出错", exp);
             }
         }
         /// <summary>
@@ -46,8 +37,15 @@ namespace TaskManager.Node.Tools
         {
             try
             {
-                AddLog(new tb_log_model { logcreatetime = model.errorcreatetime, logtype = model.errortype, msg = model.msg, taskid = model.taskid,nodeid=GlobalConfig.NodeID });
-                SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (c) =>
+                AddLog(new tb_log_model
+                {
+                    logcreatetime = model.errorcreatetime,
+                    logtype = model.errortype,
+                    msg = model.msg,
+                    taskid = model.taskid,
+                    nodeid = GlobalConfig.NodeID
+                });
+                SqlHelper.ExcuteSql(GlobalConfig.ConnectionString, (c) =>
                 {
                     tb_error_dal errordal = new tb_error_dal();
                     model.msg = model.msg.SubString2(1000);
@@ -56,7 +54,7 @@ namespace TaskManager.Node.Tools
             }
             catch (Exception exp)
             {
-                BSF.Log.ErrorLog.Write("添加错误日志至数据库出错", exp);
+                ErrorLog.Write("添加错误日志至数据库出错", exp);
             }
         }
         /// <summary>
@@ -89,7 +87,7 @@ namespace TaskManager.Node.Tools
             {
                 errorcreatetime = DateTime.Now,
                 errortype = (byte)BSF.BaseService.TaskManager.SystemRuntime.EnumTaskLogType.SystemError,
-                msg = msg+" 错误信息:"+exp.Message + " 堆栈:"+exp.StackTrace,
+                msg = msg + " 错误信息:" + exp.Message + " 堆栈:" + exp.StackTrace,
                 taskid = 0,
                 nodeid = GlobalConfig.NodeID
             };
@@ -117,7 +115,7 @@ namespace TaskManager.Node.Tools
         /// <param name="msg"></param>
         public static void AddTaskError(string msg, int taskid, Exception exp)
         {
-            ErrorLog.Write(msg+"[taskid:"+taskid+"]", exp);
+            ErrorLog.Write(msg + "[taskid:" + taskid + "]", exp);
             if (exp == null)
                 exp = new Exception();
             tb_error_model model = new tb_error_model()

@@ -15,7 +15,30 @@ namespace TaskManager.Core
     /// </summary>
     public class CompressHelper
     {
-
+        /// <summary>
+        /// 二进制数组转压缩文件
+        /// </summary>
+        /// <param name="buff"></param>
+        /// <param name="path"></param>
+        public static void ConvertToFile(byte[] buff, string path)
+        {
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+            try
+            {
+                FileStream _FileStream = new FileStream(path, FileMode.CreateNew);
+                BinaryWriter _BinaryWriter = new BinaryWriter(_FileStream);
+                _BinaryWriter.Write(buff, 0, buff.Length);
+                _BinaryWriter.Close();
+                _FileStream.Close();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
         /// <summary>
         /// 通用解压 支持rar,zip  TBD
         /// </summary>
