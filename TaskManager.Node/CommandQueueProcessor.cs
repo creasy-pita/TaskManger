@@ -25,7 +25,7 @@ namespace TaskManager.Node
             {
                 try
                 {
-                    msg = "{'CommondType':2,'nodeid':1}";
+                    //msg = "{'CommondType':2,'nodeid':1}";
                     RedisCommondInfo redisCommondInfo = null;
                     redisCommondInfo = new BSF.Serialization.JsonProvider().Deserialize<RedisCommondInfo>(msg);
                     if (redisCommondInfo != null)
@@ -33,6 +33,10 @@ namespace TaskManager.Node
                         if (redisCommondInfo.CommondType == EnumCommondType.TaskCommand && redisCommondInfo.NodeId == GlobalConfig.NodeID)
                         {
                             RunCommond();
+                        }
+                        else if (redisCommondInfo.CommondType == EnumCommondType.ConfigUpdate)
+                        {
+                            RedisHelper.RefreashRedisServerIP();
                         }
                     }
                 }
@@ -78,6 +82,7 @@ namespace TaskManager.Node
                     foreach (var c in commands)
                     {
                         EnumTaskCommandState enumTaskCommandState=EnumTaskCommandState.Error;
+                        EnumTaskState enumTaskState = EnumTaskState.UnInstall;
                         try
                         {
                             SqlHelper.ExcuteSql(GlobalConfig.ConnectionString, (conn) =>
@@ -92,78 +97,94 @@ namespace TaskManager.Node
                                 if (!Directory.Exists(path))
                                 {
                                     Directory.CreateDirectory(path);
+                                    if (version != null)
+                                    {
+                                        string zipFilePath = $"{path}\\{version.zipfilename}";
+                                        ///数据库二进制转压缩文件
+                                        CompressHelper.ConvertToFile(version.zipfile, zipFilePath);
+                                        CompressHelper.UnCompress(zipFilePath, path);
+                                        ///删除压缩文件
+                                        File.Delete(zipFilePath);
+                                        ///初始化shell脚本
+                                        InitScript.InstallScript(task.taskname, task.taskmainclassdllfilename);
+
+                                        InitScript.UninstallScript(task.taskname);
+
+                                        InitScript.StartScript(task.taskname);
+
+                                        InitScript.StopScript(task.taskname);
+                                    }
+                                    else
+                                    {
+                                        throw new Exception($"在tb_version表中未查到taskid:{c.taskid}数据");
+                                    }
                                 }
-                                if (version != null)
+                                if (c.commandname == EnumTaskCommandName.StartTask.Tostring())
                                 {
-                                    string zipFilePath = $"{path}\\{version.zipfilename}";
-                                    //数据库二进制转压缩文件
-                                    CompressHelper.ConvertToFile(version.zipfile, zipFilePath);
-                                    CompressHelper.UnCompress(zipFilePath, path);
-                                    //初始化shell脚本
-                                    InitScript.InstallScript(task.taskname, task.taskmainclassdllfilename);
-                                    InitScript.UninstallScript(task.taskname);
-                                    InitScript.StartScript(task.taskname);
-                                    InitScript.StopScript(task.taskname);
-
-                                    if (c.commandname == EnumTaskCommandName.StartTask.Tostring())
+                                    if (ServiceHelper.ServiceState(task.taskname) == EnumTaskState.UnInstall)
                                     {
-                                        if (ServiceHelper.ServiceState(task.taskname) == EnumTaskState.UnInstall)
-                                        {
-                                            CommandFactory.Execute(path + "\\install.bat");
-                                        }
-
-                                        Thread.Sleep(5000);//线程睡眠5s，等待服务安装
-                                        CommandFactory.Execute(path + "\\start.bat");
-
-                                        Thread.Sleep(2000);//线程睡眠2s，等到脚本执行
-                                        if (ServiceHelper.ServiceState(task.taskname) == EnumTaskState.Running)
-                                        {
-                                            enumTaskCommandState = EnumTaskCommandState.Success;
-                                        }
+                                        CommandFactory.Execute(path + "\\install.bat");
                                     }
-                                    else if (c.commandname == EnumTaskCommandName.ReStartTask.Tostring())
+
+                                    ///线程睡眠5s，等待服务安装完成
+                                    Thread.Sleep(5000);
+                                    CommandFactory.Execute(path + "\\start.bat");
+
+                                    ///线程睡眠2s，等到脚本执行完成
+                                    Thread.Sleep(2000);
+                                    if (ServiceHelper.ServiceState(task.taskname) == EnumTaskState.Running)
                                     {
-                                        CommandFactory.Execute(path + "\\start.bat");
-
-                                        Thread.Sleep(2000);//线程睡眠2s，等到脚本执行
-                                        if (ServiceHelper.ServiceState(task.taskname) == EnumTaskState.Running)
-                                        {
-                                            enumTaskCommandState = EnumTaskCommandState.Success;
-                                        }
+                                        enumTaskCommandState = EnumTaskCommandState.Success;
+                                        enumTaskState = EnumTaskState.Running;
                                     }
-                                    else if (c.commandname == EnumTaskCommandName.StopTask.Tostring())
+                                }
+                                else if (c.commandname == EnumTaskCommandName.ReStartTask.Tostring())
+                                {
+                                    CommandFactory.Execute(path + "\\start.bat");
+                                    ///线程睡眠2s，等到脚本执行完成
+                                    Thread.Sleep(2000);
+                                    if (ServiceHelper.ServiceState(task.taskname) == EnumTaskState.Running)
+                                    {
+                                        enumTaskCommandState = EnumTaskCommandState.Success;
+                                        enumTaskState = EnumTaskState.Running;
+                                    }
+                                }
+                                else if (c.commandname == EnumTaskCommandName.StopTask.Tostring())
+                                {
+                                    CommandFactory.Execute(path + "\\stop.bat");
+
+                                    ///线程睡眠2s，等到脚本执行完成
+                                    Thread.Sleep(2000);
+                                    if (ServiceHelper.ServiceState(task.taskname) == EnumTaskState.Stop)
+                                    {
+                                        enumTaskCommandState = EnumTaskCommandState.Success;
+                                        enumTaskState = EnumTaskState.Stop;
+                                    }
+                                }
+                                else if (c.commandname == EnumTaskCommandName.UninstallTask.Tostring())
+                                {
+                                    if (ServiceHelper.ServiceState(task.taskname) == EnumTaskState.Running)
                                     {
                                         CommandFactory.Execute(path + "\\stop.bat");
-
-                                        Thread.Sleep(2000);//线程睡眠2s，等到脚本执行
-                                        if (ServiceHelper.ServiceState(task.taskname) == EnumTaskState.Stop)
-                                        {
-                                            enumTaskCommandState = EnumTaskCommandState.Success;
-                                        }
-                                    }
-                                    else if (c.commandname == EnumTaskCommandName.UninstallTask.Tostring())
-                                    {
-                                        CommandFactory.Execute(path + "\\stop.bat");
-
                                         Thread.Sleep(2000);
-                                        CommandFactory.Execute(path + "\\uninstall.bat");
+                                    }                                 
+                                    CommandFactory.Execute(path + "\\uninstall.bat");
 
-                                        Thread.Sleep(2000);//线程睡眠2s，等到脚本执行
-                                        if (ServiceHelper.ServiceState(task.taskname) == EnumTaskState.UnInstall)
-                                        {
-                                            enumTaskCommandState = EnumTaskCommandState.Success;
-                                        }
+                                    ///线程睡眠2s，等到脚本执行完成
+                                    Thread.Sleep(2000);
+                                    if (ServiceHelper.ServiceState(task.taskname) == EnumTaskState.UnInstall)
+                                    {
+                                        enumTaskCommandState = EnumTaskCommandState.Success;
                                     }
-                                }
-                                else
-                                {
-                                    throw new Exception($"在tb_version表中未查到taskid:{c.taskid}对应的数据");
-                                }
+                                }                               
+                                ///更新命令状态
                                 new tb_command_dal().UpdateCommandState(conn, c.id, (int)enumTaskCommandState);
+                                ///更新服务状态
+                                new tb_task_dal().UpdateTaskState(conn, c.taskid, (int)enumTaskState);
 
                                 if (enumTaskCommandState == EnumTaskCommandState.Success)
                                 {
-                                    LogHelper.AddNodeLog($"节点:{c.nodeid}成功执行任务:{c.taskid}……");                                    
+                                    LogHelper.AddNodeLog($"节点:{c.nodeid}成功执行任务:{c.taskid}……");
                                 }
                             });                                                                                                                                          
                         }

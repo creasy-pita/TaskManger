@@ -39,7 +39,7 @@ namespace TaskManager.Domain.Dal
             return SqlHelper.Visit(ps =>
             {
                 StringBuilder stringSql = new StringBuilder();
-                stringSql.Append(@"select max(id) from tb_command s ");
+                stringSql.Append(@"select max(id) from tb_command s where s.commandstate=2");
                 DataSet ds = new DataSet();
                 PubConn.SqlToDataSet(ds, stringSql.ToString(), ps.ToParameters());
                 if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)

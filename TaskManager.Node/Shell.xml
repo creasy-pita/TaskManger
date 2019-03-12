@@ -16,7 +16,7 @@ exit
     </Operation>
     <Operation Type="uninstall">
       <Value>
-        <![CDATA[nssm remove {0}]]>
+        <![CDATA[nssm remove {0} confirm]]>
       </Value>
     </Operation>
     <Operation Type="start">
