@@ -17,9 +17,26 @@ namespace TaskManager.Node
 
     public class CommandQueueProcessor
     {
-        public static int lastMaxID = -1;
         private static object _lockRunLoop = new object();
-        public static void ServiceRunning()
+
+        private static System.Threading.Thread thread;
+        /// <summary>
+        /// 上一次日志扫描的最大id
+        /// </summary>
+        public static int lastMaxID = -1;
+        static CommandQueueProcessor()
+        {
+            thread = new System.Threading.Thread(Running);
+            thread.IsBackground = true;
+            thread.Start();
+        }
+        /// <summary>
+        /// 运行处理循环
+        /// </summary>
+        public static void Run()
+        { }
+
+        static void Running()
         {
             RedisHelper.RedisListner((channel, msg) =>
             {
@@ -51,6 +68,21 @@ namespace TaskManager.Node
                        LogHelper.AddNodeError("Redis订阅出错," + info.Message.NullToEmpty(), info.Exception);
                    }
                });
+            RuningCommandLoop();
+        }
+
+        /// <summary>
+        /// 运行消息循环
+        /// </summary>
+        static void RuningCommandLoop()
+        {
+            LogHelper.AddNodeLog("准备接受命令并运行消息循环...");
+            while (true)
+            {
+                System.Threading.Thread.Sleep(1000);
+                RunCommond();
+                System.Threading.Thread.Sleep(5000);
+            }
         }
         static void RunCommond()
         {
@@ -59,15 +91,17 @@ namespace TaskManager.Node
                 try
                 {
                     List<tb_command_model> commands = new List<tb_command_model>();
+                    tb_node_model node = new tb_node_model();
                     try
                     {
-                        SqlHelper.ExcuteSql(GlobalConfig.ConnectionString, (conn) =>
+                        SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (conn) =>
                         {
                             tb_command_dal commanddal = new tb_command_dal();
                             if (lastMaxID < 0)
                             {
                                 lastMaxID = commanddal.GetMaxCommandID(conn);
                             }
+                            node = new tb_node_dal().Get(conn, GlobalConfig.NodeID);
                             commands = commanddal.GetNodeCommands(conn, GlobalConfig.NodeID, lastMaxID);
                         });
                     }
@@ -79,12 +113,81 @@ namespace TaskManager.Node
                     {
                         LogHelper.AddNodeLog("当前节点扫描到" + commands.Count + "条命令,并执行中....");
                     }
-                    LinuxRun(commands);
+                    LogHelper.AddNodeLog("node.nodeostype" + node.nodeostype);
+                    LogHelper.AddNodeLog("EnumOSState.Linux.ToString()" + EnumOSState.Linux.ToString());
+                    
+                    //if (Enum.Parse(typeof(EnumOSState), node.nodeostype) as EnumOSState == EnumOSState.Linux)
+                    if(node.nodeostype =="1")
+                        LinuxRun(commands);
+                    else
+                        WindowsRun(commands);
                 }
                 catch(Exception ex)
                 {
                     LogHelper.AddNodeLog($"节点执行错误，错误原因:{ex.Message}");
                 }
+            }
+        }
+
+        /// <summary>
+        /// 恢复已开启的任务
+        /// </summary>
+        static void RecoveryStartTasks()
+        {
+            try
+            {
+                LogHelper.AddNodeLog("当前节点启动成功,准备恢复已经开启的任务...");
+                List<int> taskids = new List<int>();
+                tb_node_model node = null;
+                SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (c) =>
+                {
+                    node = new tb_node_dal().Get(c, GlobalConfig.NodeID);
+                    tb_task_dal taskdal = new tb_task_dal();
+                    taskids = taskdal.GetTaskIDsByState(c, (int)EnumTaskState.Running, GlobalConfig.NodeID);
+                });
+                List<tb_command_model> commands = new List<tb_command_model>();
+
+                foreach (var taskid in taskids)
+                {
+                    try
+                    {
+                        tb_command_model command = new tb_command_model()
+                        {
+                            command = "",
+                            commandcreatetime = DateTime.Now,
+                            commandname = EnumTaskCommandName.StartTask.ToString(),
+                            commandstate = (int)EnumTaskCommandState.None,
+                            nodeid = GlobalConfig.NodeID,
+                            taskid = taskid,
+                            id = -1
+                        };
+                        commands.Add(command);
+
+                        //CommandFactory.Execute(new tb_command_model()
+                        //{
+                        //    command = "",
+                        //    commandcreatetime = DateTime.Now,
+                        //    commandname = EnumTaskCommandName.StartTask.ToString(),
+                        //    commandstate = (int)EnumTaskCommandState.None,
+                        //    nodeid = GlobalConfig.NodeID,
+                        //    taskid = taskid,
+                        //    id = -1
+                        //});
+                    }
+                    catch (Exception exp)
+                    {
+                        LogHelper.AddTaskError(string.Format("恢复已经开启的任务{0}失败", taskid), taskid, exp);
+                    }
+                }
+                if (node.nodeostype == "1")
+                    LinuxRun(commands);
+                else
+                    WindowsRun(commands);
+                LogHelper.AddNodeLog(string.Format("恢复已经开启的任务完毕，共{0}条任务重启", taskids.Count));
+            }
+            catch (Exception exp)
+            {
+                LogHelper.AddNodeError("恢复已经开启的任务失败", exp);
             }
         }
 
@@ -96,21 +199,22 @@ namespace TaskManager.Node
                 EnumTaskState enumTaskState = EnumTaskState.UnInstall;
                 try
                 {
-                    SqlHelper.ExcuteSql(GlobalConfig.ConnectionString, (conn) =>
+                    SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (conn) =>
                     {
                         tb_task_dal taskDAL = new tb_task_dal();
                         var task = taskDAL.GetOneTask(conn, c.taskid);
 
                         tb_version_dal versionDAL = new tb_version_dal();
                         var version = versionDAL.GetVersionByTaskID(conn, c.taskid);
-
-                        string path = $"{AppDomain.CurrentDomain.BaseDirectory}{task.taskname}";
+                        string rootPath = AppDomain.CurrentDomain.BaseDirectory + GlobalConfig.TaskDllDir;
+                        BSF.Tool.IOHelper.CreateDirectory(rootPath);
+                        string path = $"{AppDomain.CurrentDomain.BaseDirectory}{GlobalConfig.TaskDllDir}/{task.taskname}";
                         if (!Directory.Exists(path))
                         {
                             Directory.CreateDirectory(path);
                             if (version != null)
                             {
-                                string zipFilePath = $"{path}\\{version.zipfilename}";
+                                string zipFilePath = $"{path}/{version.zipfilename}";
                                 ///数据库二进制转压缩文件
                                 CompressHelper.ConvertToFile(version.zipfile, zipFilePath);
                                 CompressHelper.UnCompress(zipFilePath, path);
@@ -130,10 +234,9 @@ namespace TaskManager.Node
                                 //关闭 之前的进程
                                 ProcessHelper.KillProcess(pId);
                             }
-                            ///线程睡眠5s，等待服务安装完成
-                            Thread.Sleep(5000);
-
-                            CommandFactory.LinuxExecute(task.taskname, task.taskmainclassdllfilename);
+                            ////线程睡眠5s，等待服务安装完成
+                            //Thread.Sleep(5000);
+                            CommandFactory.LinuxExecute(rootPath, task.taskname, task.taskmainclassdllfilename);
 
                             ///线程睡眠2s，等到脚本执行完成
                             Thread.Sleep(2000);
@@ -154,7 +257,7 @@ namespace TaskManager.Node
                             ///线程睡眠5s，等待服务安装完成
                             Thread.Sleep(5000);
 
-                            CommandFactory.LinuxExecute(task.taskname, task.taskmainclassdllfilename);
+                            CommandFactory.LinuxExecute(rootPath, task.taskname, task.taskmainclassdllfilename);
 
                             ///线程睡眠2s，等到脚本执行完成
                             Thread.Sleep(2000);
@@ -222,7 +325,7 @@ namespace TaskManager.Node
                 EnumTaskState enumTaskState = EnumTaskState.UnInstall;
                 try
                 {
-                    SqlHelper.ExcuteSql(GlobalConfig.ConnectionString, (conn) =>
+                    SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (conn) =>
                     {
                         tb_task_dal taskDAL = new tb_task_dal();
                         var task = taskDAL.GetOneTask(conn, c.taskid);
@@ -230,7 +333,8 @@ namespace TaskManager.Node
                         tb_version_dal versionDAL = new tb_version_dal();
                         var version = versionDAL.GetVersionByTaskID(conn, c.taskid);
 
-                        string path = $"{AppDomain.CurrentDomain.BaseDirectory}{task.taskname}";
+                        BSF.Tool.IOHelper.CreateDirectory($"{AppDomain.CurrentDomain.BaseDirectory}{GlobalConfig.TaskDllDir}");
+                        string path = $"{AppDomain.CurrentDomain.BaseDirectory}{GlobalConfig.TaskDllDir}\\{task.taskname}";
                         if (!Directory.Exists(path))
                         {
                             Directory.CreateDirectory(path);

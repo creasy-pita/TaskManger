@@ -21,7 +21,12 @@ namespace TaskManager.Domain.Model
         /// 
         /// </summary>
         public string nodename { get; set; }
-        
+
+        /// <summary>
+        /// 0 window  1 linux
+        /// </summary>
+        public string nodeostype { get; set; }
+
         /// <summary>
         /// 
         /// </summary>

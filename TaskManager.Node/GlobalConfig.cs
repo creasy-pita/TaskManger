@@ -23,7 +23,9 @@ namespace TaskManager.Node
             }
         }
         private static string _nodeID;
-
+        /// <summary>
+        /// 当前节点标识
+        /// </summary>
         public static int NodeID
         {
             get
@@ -34,10 +36,13 @@ namespace TaskManager.Node
                 }
                 return Convert.ToInt32(_nodeID);
             }
+           set { _nodeID = value.ToString(); }
         }
-        public static string _connectionString;
-
-        public static string ConnectionString
+        private static string _connectionString;
+        /// <summary>
+        /// 任务数据库连接
+        /// </summary>
+        public static string TaskDataBaseConnectString
         {
             get
             {
@@ -47,23 +52,17 @@ namespace TaskManager.Node
                 }
                 return _connectionString;
             }
+            set { _connectionString = value; }
         }
-        /// <summary>
-        /// 任务数据库连接
-        /// </summary>
-        ///public static string TaskDataBaseConnectString { get; set; }
-        /// <summary>
-        /// 当前节点标识
-        /// </summary>
-        ///public static int NodeID { get; set; }
+        
         /// <summary>
         /// 任务调度平台web url地址
         /// </summary>
-        //public static string TaskManagerWebUrl { get { return System.Configuration.ConfigurationSettings.AppSettings["TaskManagerWebUrl"]; } }
-        ///// <summary>
-        ///// 任务dll根目录
-        ///// </summary>
-        //public static string TaskDllDir = "任务dll根目录";
+        public static string TaskManagerWebUrl { get { return ConfigurationManager.AppSettings["TaskManagerWebUrl"]; } }
+        /// <summary>
+        /// 任务dll根目录
+        /// </summary>
+        public static string TaskDllDir = "taskdllroot";
         ///// <summary>
         ///// 任务dll本地版本缓存
         ///// </summary>
@@ -75,7 +74,7 @@ namespace TaskManager.Node
         /// <summary>
         /// 任务平台节点使用的监控插件
         /// </summary>
-        //public static List<SystemMonitor.BaseMonitor> Monitors = new List<SystemMonitor.BaseMonitor>();
+        public static List<SystemMonitor.BaseMonitor> Monitors = new List<SystemMonitor.BaseMonitor>();
         
     }
 }

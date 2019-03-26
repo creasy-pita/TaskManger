@@ -46,6 +46,17 @@ namespace TaskManager.Core
         Running=1,      
     }
     /// <summary>
+    /// 任务执行状态
+    /// </summary>
+    public enum EnumOSState
+    {
+        [Description("window")]
+        Windows = 0,
+        [Description("linux")]
+        Linux = 1,
+    }
+
+    /// <summary>
     /// 系统用户角色
     /// </summary>
     public enum EnumUserRole

@@ -43,6 +43,15 @@
             <label>节点ip/host</label><input type="text" id="nodeip" name="nodeip" />
         </li>
         <li>
+            <label>os系统类型</label>
+            <select  id="nodeostype" name="nodeostype">
+                @foreach (var o in (TaskManager.Core.EnumUtils<TaskManager.Core.EnumOSState>.GetAllEnumsOfList2()))
+                {
+                    <option value="@o.Value" >@o.Text</option>
+                }
+            </select>
+        </li>
+        <li>
             <input type="submit" class="btn1" value="提交" />
         </li>
     </ul>

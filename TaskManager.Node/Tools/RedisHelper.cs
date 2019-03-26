@@ -34,7 +34,7 @@ namespace TaskManager.Node.Tools
         {
             try
             {
-                using (DbConn PubConn = DbConn.CreateConn(GlobalConfig.ConnectionString))
+                using (DbConn PubConn = DbConn.CreateConn(GlobalConfig.TaskDataBaseConnectString))
                 {
                     PubConn.Open();
                     var dal = new tb_config_dal();

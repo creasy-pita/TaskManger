@@ -17,7 +17,7 @@ namespace TaskManager.Node
     {
         public static void CheckRunning()
         {
-            SqlHelper.ExcuteSql(GlobalConfig.ConnectionString, (conn) =>
+            SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (conn) =>
             {
                 tb_task_dal taskDAL = new tb_task_dal();
                 var tasks = taskDAL.GetTaskByNodeID(conn, GlobalConfig.NodeID);

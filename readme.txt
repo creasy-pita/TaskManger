@@ -41,3 +41,9 @@ dotnet workingdirectory 和 arguments
 
 	可能存在问题 
 		kill  没有完全删除 进程， 需要进一步处理
+待优化
+	区分节点是  linux ，window 类型
+	启动任务进程 和 关闭  是  操作的优化， 现在是通过 线程等待固定时间来进入下一步的啊
+
+功能
+	监视 taskmanager.node 节点

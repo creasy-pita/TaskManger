@@ -105,8 +105,12 @@ namespace TaskManager.Domain.Dal
 			{
 				o.nodename = dr["nodename"].Tostring();
 			}
-			//
-			if(dr.Table.Columns.Contains("nodecreatetime"))
+            if (dr.Table.Columns.Contains("nodeostype"))
+            {
+                o.nodeostype = dr["nodeostype"].Tostring();
+            }
+            //
+            if (dr.Table.Columns.Contains("nodecreatetime"))
 			{
 				o.nodecreatetime = dr["nodecreatetime"].ToDateTime();
 			}

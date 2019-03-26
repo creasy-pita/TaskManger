@@ -17,7 +17,7 @@ namespace TaskManager.Node.Tools
         {
             try
             {
-                SqlHelper.ExcuteSql(GlobalConfig.ConnectionString, (c) =>
+                SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (c) =>
                 {
                     tb_log_dal logdal = new tb_log_dal();
                     model.msg = model.msg.SubString2(1000);
@@ -45,7 +45,7 @@ namespace TaskManager.Node.Tools
                     taskid = model.taskid,
                     nodeid = GlobalConfig.NodeID
                 });
-                SqlHelper.ExcuteSql(GlobalConfig.ConnectionString, (c) =>
+                SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (c) =>
                 {
                     tb_error_dal errordal = new tb_error_dal();
                     model.msg = model.msg.SubString2(1000);

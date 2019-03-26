@@ -33,8 +33,9 @@ namespace TaskManager.Node.Commands
             }
         }
 
-        public static void LinuxExecute(string taskName, string serviceName)
+        public static void LinuxExecute(string rootPath, string taskName, string serviceName)
         {
+            LogHelper.AddTaskLog($"rootPath + taskName:{rootPath}/{taskName}",17);
             //new CommandFactory().ShowCurrentDirectory();
             var psi = new ProcessStartInfo
             {
@@ -44,7 +45,7 @@ namespace TaskManager.Node.Commands
                 RedirectStandardOutput = true,
                 //RedirectStandardError = false,
                 CreateNoWindow = true,
-                WorkingDirectory = $"{System.AppContext.BaseDirectory+taskName}/",
+                WorkingDirectory = $"{rootPath}/{taskName}/",
             };
             var ProcessStart = Process.Start(psi);
             if (ProcessStart == null)

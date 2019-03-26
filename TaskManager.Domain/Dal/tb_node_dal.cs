@@ -19,12 +19,13 @@ namespace TaskManager.Domain.Dal
                 ps.Add("@nodename", model.nodename);
                 ps.Add("@nodecreatetime", model.nodecreatetime);
                 ps.Add("@nodeip", model.nodeip);
+                ps.Add("@nodeostype", model.nodeostype);
                 ps.Add("@nodelastupdatetime", model.nodelastupdatetime);
                 ps.Add("@ifcheckstate", model.ifcheckstate);
                 ps.Add("@id", model.id);
                 string updatecmd = "update tb_node set nodeip=@nodeip,nodelastupdatetime=@nodelastupdatetime where id=@id";
-                string insertcmd = @"insert into tb_node(nodename,nodecreatetime,nodeip,ifcheckstate)
-										   values(@nodename,@nodecreatetime,@nodeip,@ifcheckstate)";
+                string insertcmd = @"insert into tb_node(nodename,nodecreatetime,nodeip,nodeostype,ifcheckstate)
+										   values(@nodename,@nodecreatetime,@nodeip,@nodeostype,@ifcheckstate)";
                 if (PubConn.ExecuteSql(updatecmd, ps.ToParameters()) <= 0)
                 {
                     PubConn.ExecuteSql(insertcmd, ps.ToParameters());
@@ -56,7 +57,7 @@ namespace TaskManager.Domain.Dal
             DataSet dsList = SqlHelper.Visit<DataSet>(ps =>
             {
                 string sqlwhere = "";
-                string sql = "select ROW_NUMBER() over(order by id desc) as rownum,id,nodename,nodecreatetime,nodeip,nodelastupdatetime,ifcheckstate from tb_node where 1=1 ";
+                string sql = "select ROW_NUMBER() over(order by id desc) as rownum,id,nodename,nodeostype,nodecreatetime,nodeip,nodelastupdatetime,ifcheckstate from tb_node where 1=1 ";
                 //string sql = "select * from tb_node where 1=1 ";
                 if (!string.IsNullOrWhiteSpace(keyword))
                 {

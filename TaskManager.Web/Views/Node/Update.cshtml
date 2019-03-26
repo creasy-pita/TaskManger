@@ -35,7 +35,7 @@
     <input type="hidden" value="@Model.id" id="id" />
     @using (Html.BeginForm("Update", "Node", FormMethod.Post, new { @onsubmit = "return sub()" }))
     {
-    <ul  class="mydetail">
+    <ul class="mydetail">
         <li>
             <label>节点名</label><span><input type="text" id="nodename" name="nodename" value="@Model.nodename" /></span>
         </li>
@@ -43,7 +43,16 @@
             <label>节点ip/host</label><input type="text" id="nodeip" name="nodeip" value="@Model.nodeip" />
         </li>
         <li>
-            <label>是否检测节点状态</label><input type="checkbox" id="ifcheckstate" name="ifcheckstate" value="@(Model.ifcheckstate.ToString())" @(Model.ifcheckstate==true?"checked=checked":"") onclick=" $(this).val($(this).is(':checked'));"  />(若开启，若检测到节点停止，则发邮件)
+            <label>状态</label>
+            <select name="ostype">
+                @foreach (var o in (TaskManager.Core.EnumUtils<TaskManager.Core.EnumOSState>.GetAllEnumsOfList2()))
+                {
+                    <option value="@o.Value" @(Model.nodeostype == o.Value ? "selected='selected'" : "")>@o.Text</option>
+                }
+            </select>
+        </li>
+        <li>
+            <label>是否检测节点状态</label><input type="checkbox" id="ifcheckstate" name="ifcheckstate" value="@(Model.ifcheckstate.ToString())" @(Model.ifcheckstate == true ? "checked=checked" : "") onclick=" $(this).val($(this).is(':checked'));" />(若开启，若检测到节点停止，则发邮件)
             <script type="text/javascript">
             </script>
         <li>

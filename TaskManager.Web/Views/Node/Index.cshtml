@@ -62,6 +62,7 @@
                 <tr>
                     <th>id</th>
                     <th>节点</th>
+                    <th>系统类型</th>
                     <th>创建时间</th>
                     <th>IP/Host</th>
                     <th>心跳更新时间</th>
@@ -71,29 +72,30 @@
                 </tr>
                 @foreach (var item in Model)
                 {
-                    <tr>
-                        <td>@item.id</td>
-                        <td>@item.nodename</td>
-                        <td>@item.nodecreatetime</td>
-                        <td>@item.nodeip</td>
-                        <td>@item.nodelastupdatetime</td>
-                        <td>
-                            @if ((ViewBag.sqldatetimenow - item.nodelastupdatetime) > TimeSpan.FromSeconds(10))
-                            { 
-                                <span class="stopstate">停止</span>
-                            }
-                            else
-                            {
-                                <span class="runstate">运行</span>
-                            }
-                        </td>
-                        <td>@(Convert.ToBoolean(item.ifcheckstate) == true ? "是" : "否")</td>
-                        <td>
-                            <a href="@Url.Action("Update", "Node", new { id = @item.id })">修改</a>
-                            <input type="button" value="删除" onclick="Delete('@item.id    ')" />
-                            <a href="@Url.Action("Index", "Task", new { nodeid = @item.id })">查看任务</a>
-                        </td>
-                    </tr>
+                <tr>
+                    <td>@item.id</td>
+                    <td>@item.nodename</td>
+                    <td>@(item.nodeostype == "0" ? "windows" : "linux")</td>
+                    <td>@item.nodecreatetime</td>
+                    <td>@item.nodeip</td>
+                    <td>@item.nodelastupdatetime</td>
+                    <td>
+                        @if ((ViewBag.sqldatetimenow - item.nodelastupdatetime) > TimeSpan.FromSeconds(10))
+                        {
+                            <span class="stopstate">停止</span>
+                        }
+                        else
+                        {
+                            <span class="runstate">运行</span>
+                        }
+                    </td>
+                    <td>@(Convert.ToBoolean(item.ifcheckstate) == true ? "是" : "否")</td>
+                    <td>
+                        <a href="@Url.Action("Update", "Node", new { id = @item.id })">修改</a>
+                        <input type="button" value="删除" onclick="Delete('@item.id    ')" />
+                        <a href="@Url.Action("Index", "Task", new { nodeid = @item.id })">查看任务</a>
+                    </td>
+                </tr>
                 }
             </table>
             <div class="total pt10">
