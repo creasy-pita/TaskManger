@@ -1,12 +1,30 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
+using TaskManager.Domain.Model;
 using TaskManager.Node.Tools;
 
 namespace TaskManager.Node.Commands
 {
     public class CommandFactory
     {
+        /// <summary>
+        /// 执行命令
+        /// </summary>
+        /// <param name="commandInfo"></param>
+        public static void Execute(tb_command_model commandInfo)
+        {
+            string namespacestr = typeof(BaseCommand).Namespace;
+            var obj = Assembly.GetAssembly(typeof(BaseCommand)).CreateInstance(namespacestr + "." + commandInfo.commandname.ToString() + "Command", true);
+            if (obj != null && obj is BaseCommand)
+            {
+                var command = (obj as BaseCommand);
+                command.CommandInfo = commandInfo;
+                command.Execute();
+            }
+        }
+
         public static void Execute(string filePath)
         {
             try

@@ -1,4 +1,11 @@
+2019年3月26日
+1 调度平台  增加 对TaskManage.node 心跳测试， TaskMnager.web 的心跳测试
+2 调度平台  增加 TaskManage.node 增加统一文件夹  放置 任务程序dll
+3 调度平台  使用 命令工厂处理不同的操作命令  比如   StartTaskCommand  StopTaskCommand
+？？？？
+ 重新启动时，之前的日志会被清除的问题   
 
+ 
 2019年3月25日
 1 调度平台   查找 程序进程是否已经存在并返回  pid
 	ps aux | grep name | grep -v grep | awk '{print $2}'
@@ -20,6 +27,14 @@
 				Directory.GetCurrentDirectory():/root/Software/netcore/TaskManager.Node
 				this.GetType().Assembly.Location:/root/Software/netcore/TaskManager.Node/TaskManager.Node.dll
 				System.AppContext.BaseDirectory:/root/Software/netcore/TaskManager.Node/
+
+
+
+
+2019年2月28日
+run microsoft/mssql-server  container
+	docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=Str0ngPassword!' -p 1401:1433 -v=/docker/mssql/data:/var/opt/mssql -d --name=tomssl_sql microsoft/mssql-server-linux:latest
+
 
 1 
 dotnet workingdirectory 和 arguments 

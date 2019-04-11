@@ -113,14 +113,37 @@ namespace TaskManager.Node
                     {
                         LogHelper.AddNodeLog("当前节点扫描到" + commands.Count + "条命令,并执行中....");
                     }
-                    LogHelper.AddNodeLog("node.nodeostype" + node.nodeostype);
-                    LogHelper.AddNodeLog("EnumOSState.Linux.ToString()" + EnumOSState.Linux.ToString());
-                    
+                    foreach (var c in commands)
+                    {
+                        try
+                        {
+                            CommandFactory.Execute(c);
+                            SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (conn) =>
+                            {
+                                new tb_command_dal().UpdateCommandState(conn, c.id, (int)EnumTaskCommandState.Success);
+                            });
+                            LogHelper.AddNodeLog(string.Format("当前节点执行命令成功! id:{0},命令名:{1},命令内容:{2}", c.id, c.commandname, c.command));
+                        }
+                        catch (Exception exp1)
+                        {
+                            try
+                            {
+                                SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (conn) =>
+                                {
+                                    new tb_command_dal().UpdateCommandState(conn, c.id, (int)EnumTaskCommandState.Error);
+                                });
+                            }
+                            catch { }
+                            LogHelper.AddTaskError("执行节点命令失败", c.taskid, exp1);
+                        }
+                        lastMaxID = Math.Max(lastMaxID, c.id);
+                    }
+
                     //if (Enum.Parse(typeof(EnumOSState), node.nodeostype) as EnumOSState == EnumOSState.Linux)
-                    if(node.nodeostype =="1")
-                        LinuxRun(commands);
-                    else
-                        WindowsRun(commands);
+                    //if (node.nodeostype =="1")
+                    //    LinuxRun(commands);
+                    //else
+                    //    WindowsRun(commands);
                 }
                 catch(Exception ex)
                 {
