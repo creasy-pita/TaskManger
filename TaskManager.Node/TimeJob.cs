@@ -8,10 +8,14 @@ namespace TaskManager.Node
 {
     public class TimeJob : IJob
     {
+        private static object obj= new object();
         public Task Execute(IJobExecutionContext context)
         {
-            CheckState.CheckRunning();
-            return null;
+            lock (obj)
+            {
+                CheckState.CheckRunning();
+                return null;
+            }
         }
 
 

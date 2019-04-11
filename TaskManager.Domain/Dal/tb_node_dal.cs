@@ -41,10 +41,11 @@ namespace TaskManager.Domain.Dal
                 ps.Add("@nodename", model.nodename);
               
                 ps.Add("@nodeip", model.nodeip);
-              
+                ps.Add("@nodeostype", model.nodeostype);
+                
                 ps.Add("@id", model.id);
                 ps.Add("@ifcheckstate", model.ifcheckstate);
-                string updatecmd = "update tb_node set nodeip=@nodeip,nodename=@nodename,ifcheckstate=@ifcheckstate where id=@id";
+                string updatecmd = "update tb_node set nodeip=@nodeip,nodename=@nodename,nodeostype=@nodeostype,ifcheckstate=@ifcheckstate where id=@id";
                 
                 return PubConn.ExecuteSql(updatecmd, ps.ToParameters()) ;
             });
@@ -96,7 +97,7 @@ namespace TaskManager.Domain.Dal
             return SqlHelper.Visit<List<tb_node_model>>(ps =>
             {
                 List<tb_node_model> Model = new List<tb_node_model>();
-                string sql = "select id,nodename,nodecreatetime,nodeip,nodelastupdatetime,ifcheckstate from tb_node";
+                string sql = "select id,nodename,nodecreatetime,nodeip,nodeostype,nodelastupdatetime,ifcheckstate from tb_node";
                 DataSet ds = new DataSet();
                 PubConn.SqlToDataSet(ds, sql, ps.ToParameters());
                 foreach (DataRow dr in ds.Tables[0].Rows)
@@ -113,7 +114,7 @@ namespace TaskManager.Domain.Dal
             return SqlHelper.Visit(ps =>
             {
                 ps.Add("id", id);
-                string sql = "select id,nodename,nodecreatetime,nodeip,nodelastupdatetime,ifcheckstate from tb_node where id=@id";
+                string sql = "select id,nodename,nodecreatetime,nodeip,nodeostype,nodelastupdatetime,ifcheckstate from tb_node where id=@id";
                 DataSet ds=new DataSet();
                 PubConn.SqlToDataSet(ds, sql, ps.ToParameters());
                 DataRow dr = ds.Tables[0].Rows[0];
@@ -158,7 +159,7 @@ namespace TaskManager.Domain.Dal
             return SqlHelper.Visit(ps =>
             {
                 ps.Add("@nodelastupdatetime", PubConn.GetServerDate().AddMinutes(-5));
-                string sql = "select id,nodename,nodecreatetime,nodeip,nodelastupdatetime,ifcheckstate from tb_node where nodelastupdatetime<@nodelastupdatetime and ifcheckstate='true'";
+                string sql = "select id,nodename,nodecreatetime,nodeip,nodeostype,nodelastupdatetime,ifcheckstate from tb_node where nodelastupdatetime<@nodelastupdatetime and ifcheckstate='true'";
                 DataSet ds = new DataSet();
                 List<tb_node_model> rs = new List<tb_node_model>();
                 PubConn.SqlToDataSet(ds, sql, ps.ToParameters());

@@ -20,43 +20,57 @@ namespace TaskManager.Node
             SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (conn) =>
             {
                 tb_task_dal taskDAL = new tb_task_dal();
+                var taskNode = (new tb_node_dal()).GetOneNode(conn, GlobalConfig.NodeID);
                 var tasks = taskDAL.GetTaskByNodeID(conn, GlobalConfig.NodeID);
                 foreach(tb_task_model task in tasks)
                 {
-                    if (task.taskstate == 1 && ServiceHelper.ServiceState(task.taskname)!= EnumTaskState.Running)
-                    {                      
+                    string processId = string.Empty;
+                    if (taskNode.nodeostype == "0")
+                    {
+                        processId = ProcessHelper.GetWindowsProcess(task.taskmainclassdllfilename);
+                    }
+                    else
+                    {
+                        processId = ProcessHelper.GetProcess(task.taskmainclassdllfilename);
+                    }
+                    if (task.taskstate == 1 && string.IsNullOrEmpty( processId))
+                    {
                         try
                         {
-                            string path = $"{AppDomain.CurrentDomain.BaseDirectory}{task.taskname}";
-                            if (!Directory.Exists(path))
+                            tb_command_model c = new tb_command_model()
                             {
-                                throw new Exception($"目录{path}不存在");
-                            }
-                            CommandFactory.Execute(path + "\\start.bat");
-                            ///线程睡眠2s，等到脚本执行完成
-                            Thread.Sleep(2000);
-                            if (ServiceHelper.ServiceState(task.taskname) != EnumTaskState.Running)
-                            {
-                                ///服务停止开启失败，发送邮件提醒                               
-                            }
+                                command = "",
+                                commandcreatetime = DateTime.Now,
+                                commandname = EnumTaskCommandName.StartTask.ToString() ,
+                                taskid = task.id,
+                                nodeid = task.nodeid,
+                                commandstate = (int)EnumTaskCommandState.None
+                            };
+                            CommandFactory.Execute(c);
                         }
                         catch(Exception e)
                         {
                             LogHelper.AddTaskError("服务节点无法开启", task.id, e);
                         }
                     }
-                    ///如果当前服务运行状态和数据库服务状态不一致，更新数据库服务状态
-                    if (task.taskstate != (int)ServiceHelper.ServiceState(task.taskname))
+                    //再次匹配状态 如果当前服务运行状态和数据库服务状态不一致，更新数据库服务状态
+                    processId = string.Empty;
+                    if (taskNode.nodeostype == "0")
                     {
-                        int state = (int)ServiceHelper.ServiceState(task.taskname);
-                        if (ServiceHelper.ServiceState(task.taskname) == EnumTaskState.UnInstall)
-                        {
-                            state = 0;
-                        }
+                        processId = ProcessHelper.GetWindowsProcess(task.taskmainclassdllfilename);
+                    }
+                    else
+                    {
+                        processId = ProcessHelper.GetProcess(task.taskmainclassdllfilename);
+                    }
+                    int state = string.IsNullOrEmpty(processId)?0:1;
+                    if (task.taskstate != state)
+                    {
                         taskDAL.UpdateTaskState(conn, task.id, state);
                     }
                 }
             });
         }
+
     }
 }

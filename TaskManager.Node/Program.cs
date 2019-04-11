@@ -12,6 +12,7 @@ namespace TaskManager.Node
         static void Main(string[] args)
         {
             NodeMain_Load();
+            //CheckState.CheckRunning();
             Thread t2 = new Thread(Monitor);
             t2.Start();
             Console.ReadKey();

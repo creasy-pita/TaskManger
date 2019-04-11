@@ -43,7 +43,7 @@ namespace TaskManager.Node.SystemRuntime
         /// 注意：windows中 使用dotnet xx.dll 启动的程序集xx.dll并非进程名， 进程名是dotnet
         /// TBD 只处理进程名为dotnet 进程，其他类型暂时不加入
         /// </summary>
-        /// <param name="serviceName">启动的程序集名称</param>
+        /// <param name="serviceName">启动的入口程序集名称</param>
         /// <returns></returns>
         public static string GetWindowsProcess(string serviceName)
         {
@@ -51,7 +51,7 @@ namespace TaskManager.Node.SystemRuntime
             foreach(var p in proclist)
             {
                 string cmdName = ProcessCommonLine.GetCommandLineOfProcess(p);
-                if (cmdName.Trim().IndexOf($"dotnet{serviceName}") > -1)
+                if (cmdName.IndexOf($"\"dotnet\" {serviceName}") > -1)
                 {
                     return p.Id.ToString();
                 }

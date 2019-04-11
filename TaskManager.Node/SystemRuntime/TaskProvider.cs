@@ -31,6 +31,7 @@ namespace TaskManager.Node.SystemRuntime
         /// <returns></returns>
         public bool Start(int taskid)
         {
+
             tb_node_model node = new tb_node_model();
             tb_task_model task = new tb_task_model();
             SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (conn) =>
@@ -56,11 +57,11 @@ namespace TaskManager.Node.SystemRuntime
             }
             SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (conn) =>
             {
-                string rootPath = AppDomain.CurrentDomain.BaseDirectory + GlobalConfig.TaskDllDir + "/";
+                string rootPath = AppDomain.CurrentDomain.BaseDirectory + GlobalConfig.TaskDllDir + "\\";
                 BSF.Tool.IOHelper.CreateDirectory(rootPath);
                 LogHelper.AddNodeLog($"rootPath:{rootPath}……");
 
-                string path = $"{rootPath}/{task.taskname}/";
+                string path = $"{rootPath}{task.taskname}\\";
                 //判断程序目录是否已经存在
                 if (!Directory.Exists(path))
                 {
