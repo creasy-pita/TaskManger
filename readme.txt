@@ -1,3 +1,7 @@
+2019年4月12日
+	TBD lastTimeDic 的数据是按照pid的方式维护的，可能随着进程关闭而过期引起 混乱使用的问题，需要
+
+
 2019年3月26日
 1 调度平台  增加 对TaskManage.node 心跳测试， TaskMnager.web 的心跳测试
 2 调度平台  增加 TaskManage.node 增加统一文件夹  放置 任务程序dll

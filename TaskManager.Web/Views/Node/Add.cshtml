@@ -47,7 +47,7 @@
             <select  id="nodeostype" name="nodeostype">
                 @foreach (var o in (TaskManager.Core.EnumUtils<TaskManager.Core.EnumOSState>.GetAllEnumsOfList2()))
                 {
-                    <option value="@o.Value" >@o.Text</option>
+                    <option value="@o.Text" >@o.Text</option>
                 }
             </select>
         </li>

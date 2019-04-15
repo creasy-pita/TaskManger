@@ -47,7 +47,7 @@
             <select name="ostype">
                 @foreach (var o in (TaskManager.Core.EnumUtils<TaskManager.Core.EnumOSState>.GetAllEnumsOfList2()))
                 {
-                    <option value="@o.Value" @(Model.nodeostype == o.Value ? "selected='selected'" : "")>@o.Text</option>
+                    <option value="@o.Text" @(Model.nodeostype == o.Text ? "selected='selected'" : "")>@o.Text</option>
                 }
             </select>
         </li>

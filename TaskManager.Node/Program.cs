@@ -12,7 +12,6 @@ namespace TaskManager.Node
         static void Main(string[] args)
         {
             NodeMain_Load();
-            //CheckState.CheckRunning();
             Thread t2 = new Thread(Monitor);
             t2.Start();
             Console.ReadKey();
@@ -58,10 +57,9 @@ namespace TaskManager.Node
                 CommandQueueProcessor.Run();
                 //注册后台监控
                 //GlobalConfig.Monitors.Add(new SystemMonitor.TaskRecoverMonitor());
-                //GlobalConfig.Monitors.Add(new SystemMonitor.TaskPerformanceMonitor());
+                GlobalConfig.Monitors.Add(new SystemMonitor.TaskPerformanceMonitor());
                 GlobalConfig.Monitors.Add(new SystemMonitor.NodeHeartBeatMonitor());
                 //GlobalConfig.Monitors.Add(new SystemMonitor.TaskStopMonitor());
-               // this.Text = this.Text + GlobalConfig.NodeID;
             }
             catch (Exception exp)
             {

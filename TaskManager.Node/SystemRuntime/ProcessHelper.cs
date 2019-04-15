@@ -8,6 +8,12 @@ namespace TaskManager.Node.SystemRuntime
 {
     class ProcessHelper
     {
+        public static Process GetProcessById(int processId)
+        {
+            Process.GetProcessById(processId);
+            return null;
+        }
+
         public static string GetProcess(string serviceName)
         {
             var pro = new Process

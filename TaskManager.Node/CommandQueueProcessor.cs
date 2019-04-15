@@ -202,7 +202,7 @@ namespace TaskManager.Node
                         LogHelper.AddTaskError(string.Format("恢复已经开启的任务{0}失败", taskid), taskid, exp);
                     }
                 }
-                if (node.nodeostype == "1")
+                if (node.nodeostype == EnumOSState.Linux.Tostring())
                     LinuxRun(commands);
                 else
                     WindowsRun(commands);

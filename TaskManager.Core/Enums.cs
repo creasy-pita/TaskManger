@@ -50,9 +50,9 @@ namespace TaskManager.Core
     /// </summary>
     public enum EnumOSState
     {
-        [Description("window")]
+        [Description("Windows")]
         Windows = 0,
-        [Description("linux")]
+        [Description("Linux")]
         Linux = 1,
     }
 

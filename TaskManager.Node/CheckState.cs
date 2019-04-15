@@ -25,7 +25,7 @@ namespace TaskManager.Node
                 foreach(tb_task_model task in tasks)
                 {
                     string processId = string.Empty;
-                    if (taskNode.nodeostype == "0")
+                    if (taskNode.nodeostype == EnumOSState.Windows.ToString())
                     {
                         processId = ProcessHelper.GetWindowsProcess(task.taskmainclassdllfilename);
                     }
@@ -55,7 +55,7 @@ namespace TaskManager.Node
                     }
                     //再次匹配状态 如果当前服务运行状态和数据库服务状态不一致，更新数据库服务状态
                     processId = string.Empty;
-                    if (taskNode.nodeostype == "0")
+                    if (taskNode.nodeostype == EnumOSState.Windows.ToString())
                     {
                         processId = ProcessHelper.GetWindowsProcess(task.taskmainclassdllfilename);
                     }

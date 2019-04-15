@@ -14,7 +14,7 @@ namespace TaskManager.Node
             lock (obj)
             {
                 CheckState.CheckRunning();
-                return null;
+                return Task.CompletedTask;
             }
         }
 
