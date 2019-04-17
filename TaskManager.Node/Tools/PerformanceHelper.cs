@@ -4,9 +4,11 @@ using BSF.Log;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using TaskManager.Core;
 using TaskManager.Domain.Dal;
 using TaskManager.Domain.Model;
 using TaskManager.Node.SystemRuntime;
+using TaskManager.Node.SystemRuntime.ProcessService;
 
 namespace TaskManager.Node.Tools
 {
@@ -25,7 +27,8 @@ namespace TaskManager.Node.Tools
         {
             try
             {
-                string pIdStr = ProcessHelper.GetWindowsProcess(serviceName);
+                IProcessService ps = ProcessServiceFactory.CreateProcessService(EnumOSState.Windows.ToString());
+                string pIdStr = ps.GetProcessByName(serviceName);
                 if (string.IsNullOrEmpty(pIdStr)) return (0,0);
                 Process p = Process.GetProcessById(int.Parse(pIdStr));
                 DateTime lastTime=new DateTime();

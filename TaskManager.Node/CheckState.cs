@@ -9,6 +9,7 @@ using TaskManager.Domain.Dal;
 using TaskManager.Domain.Model;
 using TaskManager.Node.Commands;
 using TaskManager.Node.SystemRuntime;
+using TaskManager.Node.SystemRuntime.ProcessService;
 using TaskManager.Node.Tools;
 
 namespace TaskManager.Node
@@ -32,13 +33,15 @@ namespace TaskManager.Node
                 foreach(tb_task_model task in tasks)
                 {
                     string processId = string.Empty;
+                    IProcessService ps = ProcessServiceFactory.CreateProcessService(taskNode.nodeostype);
+
                     if (taskNode.nodeostype == EnumOSState.Windows.ToString())
                     {
-                        processId = ProcessHelper.GetWindowsProcess(task.taskmainclassdllfilename);
+                        processId = ps.GetProcessByName(task.taskmainclassdllfilename);
                     }
                     else
                     {
-                        processId = ProcessHelper.GetProcess(task.taskmainclassdllfilename);
+                        processId = ps.GetProcessByName(task.taskmainclassdllfilename);
                     }
                     if (task.taskstate == 1 && string.IsNullOrEmpty( processId))
                     {
@@ -62,14 +65,8 @@ namespace TaskManager.Node
                     }
                     //再次匹配状态 如果当前服务运行状态和数据库服务状态不一致，更新数据库服务状态
                     processId = string.Empty;
-                    if (taskNode.nodeostype == EnumOSState.Windows.ToString())
-                    {
-                        processId = ProcessHelper.GetWindowsProcess(task.taskmainclassdllfilename);
-                    }
-                    else
-                    {
-                        processId = ProcessHelper.GetProcess(task.taskmainclassdllfilename);
-                    }
+                    processId = ps.GetProcessByName(task.taskmainclassdllfilename);
+
                     int state = string.IsNullOrEmpty(processId)?0:1;
                     if (task.taskstate != state)
                     {

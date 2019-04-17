@@ -3,6 +3,7 @@
 	* 表示待做
 
 	代码设计结构优化
+		2019年4月16日
 		*ITaskProvider   使用依赖注入 方式，可以减少每次判断任务节点的操作系统类型
 		*ProcessHelper  可以改写为接口方式 并采用依赖注入，与ITaskProvider 做相同处理
 		*TimeJob 内的定时任务 代码 可以不使用 Quartz的定时任务方式，可以简单使用线程类定时来完成
@@ -12,6 +13,10 @@
 	功能问题
 		2019年4月16日
 		* 节点性能分析列表中的统计问题  会统计所有任务的内存使用，但已经停止运行的任务也会去统计之前的内存使用量
+	测试
+		2019年4月17日
+		*测试 启动大的任务服务时 任务状态上的更新会否异常
+
 select p.*, n.nodename,'' as taskname 
 	from ( 
 			select nodeid,0 as taskid,sum(cpu) as cpu,sum(memory) as memory,sum(installdirsize) as installdirsize,max(lastupdatetime) as lastupdatetime 

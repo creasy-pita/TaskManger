@@ -46,6 +46,7 @@ TestResult.xml
 dlldata.c
 #dll
 *.dll
+!TaskManager.Node/DllImport/*.dll
 
 # Benchmark Results
 BenchmarkDotNet.Artifacts/

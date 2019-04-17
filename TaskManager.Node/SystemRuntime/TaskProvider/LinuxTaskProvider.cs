@@ -1,6 +1,5 @@
 ﻿using System;
 using TaskManager.Core;
-using TaskManager.Domain;
 using TaskManager.Domain.Dal;
 using TaskManager.Domain.Model;
 using TaskManager.Node.Tools;
@@ -8,14 +7,15 @@ using BSF.Db;
 using System.IO;
 using System.Diagnostics;
 using System.Threading;
+using TaskManager.Node.SystemRuntime.ProcessService;
 
 namespace TaskManager.Node.SystemRuntime
 {
     /// <summary>
-    /// windows任务程序操作提供者
+    /// linux任务程序操作提供者
     /// 提供任务的开始，关闭,重启，卸载
     /// </summary>
-    public class WindowsTaskProvider:ITaskProvider
+    public class LinuxTaskProvider:ITaskProvider
     {
         /// <summary>
         /// 任务的开启
@@ -30,24 +30,25 @@ namespace TaskManager.Node.SystemRuntime
                 tb_task_dal taskDAL = new tb_task_dal();
                 task = taskDAL.GetOneTask(conn, taskid);
             });
-            return WindowsStart(task);
+            return LinuxStart(task);
         }
-
-        public bool WindowsStart(tb_task_model task)
+        
+        public bool LinuxStart(tb_task_model task)
         {
+            IProcessService ps = ProcessServiceFactory.CreateProcessService(EnumOSState.Linux.ToString());
             //判断是否已经运行
-            string pId = ProcessHelper.GetWindowsProcess(task.taskmainclassdllfilename);
+            string pId = ps.GetProcessByName(task.taskmainclassdllfilename);
             if (!string.IsNullOrEmpty(pId))
             {
                 throw new Exception("任务已在运行中");
             }
             SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (conn) =>
             {
-                string rootPath = AppDomain.CurrentDomain.BaseDirectory + GlobalConfig.TaskDllDir + "\\";
+                string rootPath = AppDomain.CurrentDomain.BaseDirectory + GlobalConfig.TaskDllDir+"/";
                 BSF.Tool.IOHelper.CreateDirectory(rootPath);
                 LogHelper.AddNodeLog($"rootPath:{rootPath}……");
 
-                string path = $"{rootPath}{task.taskname}\\";
+                string path = $"{rootPath}/{task.taskname}/";
                 //判断程序目录是否已经存在
                 if (!Directory.Exists(path))
                 {
@@ -95,7 +96,7 @@ namespace TaskManager.Node.SystemRuntime
                 Thread.Sleep(2000);
                 EnumTaskCommandState enumTaskCommandState = EnumTaskCommandState.Error;
                 EnumTaskState enumTaskState = EnumTaskState.UnInstall;
-                if (!string.IsNullOrEmpty(ProcessHelper.GetWindowsProcess(task.taskmainclassdllfilename)))
+                if (!string.IsNullOrEmpty(ps.GetProcessByName(task.taskmainclassdllfilename)))
                 {
                     enumTaskCommandState = EnumTaskCommandState.Success;
                     enumTaskState = EnumTaskState.Running;
@@ -109,35 +110,8 @@ namespace TaskManager.Node.SystemRuntime
                     LogHelper.AddNodeLog($"节点:{task.nodeid}成功执行任务:{task.id}……");
                 }
             });
-            return true;
+                return true;
         }
-
-        public bool WindowsStop(tb_task_model task)
-        {
-            string pId = ProcessHelper.GetWindowsProcess(task.taskmainclassdllfilename);
-            if (string.IsNullOrEmpty(pId))
-            {
-                throw new Exception("任务不在运行中");
-            }
-            bool result = false;
-            ProcessHelper.KillWindowProcess(pId);
-            EnumTaskCommandState enumTaskCommandState = EnumTaskCommandState.Error;
-            EnumTaskState enumTaskState = EnumTaskState.UnInstall;
-            if (string.IsNullOrEmpty(ProcessHelper.GetWindowsProcess(task.taskmainclassdllfilename)))
-            {
-                enumTaskCommandState = EnumTaskCommandState.Success;
-                enumTaskState = EnumTaskState.Stop;
-                result = true;
-            }
-            SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (c) =>
-            {
-                tb_task_dal taskdal = new tb_task_dal();
-                taskdal.UpdateTaskState(c, task.id, (int)EnumTaskState.Stop);
-            });
-            LogHelper.AddTaskLog("节点关闭任务成功", task.id);
-            return result;
-        }
-
         /// <summary>
         /// 任务的关闭
         /// </summary>
@@ -150,9 +124,35 @@ namespace TaskManager.Node.SystemRuntime
             {
                 tb_task_dal taskDAL = new tb_task_dal();
                 task = taskDAL.GetOneTask(conn, taskid);
-
             });
-            return WindowsStop(task);
+            return LinuxStop(task);
+        }
+
+        public bool LinuxStop(tb_task_model task)
+        {
+            IProcessService ps = ProcessServiceFactory.CreateProcessService(EnumOSState.Linux.ToString());
+            string pId = ps.GetProcessByName(task.taskmainclassdllfilename);
+            if (string.IsNullOrEmpty(pId))
+            {
+                throw new Exception("任务不在运行中");
+            }
+            bool result = false;
+            ps.ProcessKill(int.Parse(pId));
+            EnumTaskCommandState enumTaskCommandState = EnumTaskCommandState.Error;
+            EnumTaskState enumTaskState = EnumTaskState.UnInstall;
+            if (string.IsNullOrEmpty(ps.GetProcessByName(task.taskmainclassdllfilename)))
+            {
+                enumTaskCommandState = EnumTaskCommandState.Success;
+                enumTaskState = EnumTaskState.Stop;
+                result = true;
+            }
+            SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (c) =>
+            {
+                tb_task_dal taskdal = new tb_task_dal();
+                taskdal.UpdateTaskState(c, task.id, (int)EnumTaskState.Stop);
+            });
+            LogHelper.AddTaskLog("节点关闭任务成功", task.id);
+            return result;
         }
         /// <summary>
         /// 任务的卸载
