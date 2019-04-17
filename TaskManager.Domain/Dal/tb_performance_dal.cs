@@ -86,11 +86,26 @@ namespace TaskManager.Domain.Dal
                 StringBuilder whereSql = new StringBuilder();
                 if (lastupdatetime != null)
                 {
-                    whereSql.Append(@" and lastupdatetime>@lastupdatetime ");
+                    whereSql.Append(@" and p.lastupdatetime>@lastupdatetime ");
                     ps.Add("@lastupdatetime", lastupdatetime);
                 }
-                stringSql.AppendFormat(@"select p.*, n.nodename,'' as taskname from ( select nodeid,0 as taskid,sum(cpu) as cpu,sum(memory) as memory,sum(installdirsize) as installdirsize,max(lastupdatetime) as lastupdatetime from tb_performance where 1=1 {0} group by nodeid ) p,tb_node n where p.nodeid=n.id",
-                    whereSql.ToString());
+                //stringSql.AppendFormat(@"select p.*, n.nodename,'' as taskname from ( select nodeid,0 as taskid,sum(cpu) as cpu,sum(memory) as memory,sum(installdirsize) as installdirsize,max(lastupdatetime) as lastupdatetime from tb_performance where 1=1 {0} group by nodeid ) p,tb_node n where p.nodeid=n.id",
+                //    whereSql.ToString());
+                stringSql.AppendFormat(@"
+                    select p.*, n.nodename,'' as taskname
+                        from(
+                            select p.nodeid, 0 as taskid, sum(p.cpu) as cpu, sum(p.memory) as memory, sum(p.installdirsize) as installdirsize, max(p.lastupdatetime) as lastupdatetime
+                                from tb_performance p
+                                , tb_task t
+                                where 1 = 1 and t.id = p.taskid  and t.taskstate=1 {0}
+                                group by p.nodeid
+                            )
+                        p
+	                    ,tb_node n
+                        where p.nodeid = n.id"
+                    , whereSql.ToString());
+
+
                 if (!string.IsNullOrEmpty(orderby))
                 {
                     stringSql.Append(@" order by  "+orderby);

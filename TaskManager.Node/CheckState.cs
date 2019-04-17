@@ -15,6 +15,13 @@ namespace TaskManager.Node
 {
     public class CheckState
     {
+        /// <summary>
+        ///后台 检查任务程序 运行状态与 数据库中标记的状态是否一致
+        ///1 如果不一致
+        ///数据库中标记状态为 任务执行中， 则启动任务服务
+		///2 再次检查 是否一致， 更新数据库服务状态为当前任务的状态
+		///3 CheckRunning 中检查时加锁，此处主要里边不要出现长时阻塞的方法
+        /// </summary>
         public static void CheckRunning()
         {
             SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (conn) =>

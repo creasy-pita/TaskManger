@@ -280,7 +280,10 @@ namespace TaskManager.Domain.Dal
                 DataSet ds = new DataSet();
                 PubConn.SqlToDataSet(ds, sql, ps.ToParameters());
                 List<tb_task_model> model = new List<tb_task_model>();
-                model.Add(CreateModel(ds.Tables[0].Rows[0]));
+                foreach(DataRow dr in ds.Tables[0].Rows)
+                {
+                    model.Add(CreateModel(dr));
+                }
                 return model;
             });
         }

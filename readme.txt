@@ -1,3 +1,38 @@
+
+优化
+	* 表示待做
+
+	代码设计结构优化
+		*ITaskProvider   使用依赖注入 方式，可以减少每次判断任务节点的操作系统类型
+		*ProcessHelper  可以改写为接口方式 并采用依赖注入，与ITaskProvider 做相同处理
+		*TimeJob 内的定时任务 代码 可以不使用 Quartz的定时任务方式，可以简单使用线程类定时来完成
+		* BSF.BaseService.TaskManager.Dal.Dal 与 model 类是否多余 与  TaskManager.Domain中重复 
+	功能优化
+
+	功能问题
+		2019年4月16日
+		* 节点性能分析列表中的统计问题  会统计所有任务的内存使用，但已经停止运行的任务也会去统计之前的内存使用量
+select p.*, n.nodename,'' as taskname 
+	from ( 
+			select nodeid,0 as taskid,sum(cpu) as cpu,sum(memory) as memory,sum(installdirsize) as installdirsize,max(lastupdatetime) as lastupdatetime 
+				from tb_performance 
+				where 1=1  and lastupdatetime>@lastupdatetime  group by nodeid 
+		) p,
+		tb_node n 
+	where p.nodeid=n.id order by  p.nodeid desc
+
+select p.*, n.nodename,'' as taskname 
+	from ( 
+			select p.nodeid,0 as taskid,sum(p.cpu) as cpu,sum(p.memory) as memory,sum(p.installdirsize) as installdirsize,max(p.lastupdatetime) as lastupdatetime 
+				from tb_performance p
+				,tb_task t
+				where 1=1 and t.id = p.taskid and lastupdatetime>@lastupdatetime  group by nodeid 
+		) p,
+		tb_node n 
+	where p.nodeid=n.id order by  p.nodeid desc
+----------------------------------------------------------------		
+
+
 2019年4月12日
 	TBD lastTimeDic 的数据是按照pid的方式维护的，可能随着进程关闭而过期引起 混乱使用的问题，需要
 
