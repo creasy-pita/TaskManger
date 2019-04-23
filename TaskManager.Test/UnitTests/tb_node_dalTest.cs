@@ -13,7 +13,7 @@ namespace TaskManager.Test.UnitTests
         [Fact]
         public void tt()
         {
-            string TaskConnectString = "Server=localhost;Database=dyd_bs_task;Uid=root;Pwd=123456;";
+            string TaskConnectString = "Server=localhost;Database=dyd_bs_task;Uid=root;Pwd=123456;CharSet=utf8;";
             using (DbConn PubConn = DbConn.CreateConn(TaskConnectString))
             {
                 tb_node_dal dal = new tb_node_dal();

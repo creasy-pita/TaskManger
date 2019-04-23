@@ -19,7 +19,7 @@ namespace TaskManager.Domain.Dal
 					new ProcedureParameter("@categoryname",    categoryname),
                 };
             int rev = PubConn.ExecuteSql(@"insert into tb_category(categoryname,categorycreatetime)
-										   values(@categoryname,getdate())", Par);
+										   values(@categoryname,now())", Par);
             return rev == 1;
         }
 

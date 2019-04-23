@@ -72,7 +72,8 @@ namespace TaskManager.Domain.Dal
             DataSet dsList = SqlHelper.Visit<DataSet>(ps =>
             {
                 string sqlwhere = "";
-                string sql = "select ROW_NUMBER() over(order by C.id desc) as rownum,C.*,T.taskname,n.nodename from tb_command C LEFT JOIN tb_task T on  C.taskid=T.id left join tb_node n on C.nodeid=n.id where 1=1 ";
+                //string sql = "select ROW_NUMBER() over(order by C.id desc) as rownum,C.*,T.taskname,n.nodename from tb_command C LEFT JOIN tb_task T on  C.taskid=T.id left join tb_node n on C.nodeid=n.id where 1=1 ";
+                string sql = "select C.*,T.taskname,n.nodename from tb_command C 	LEFT JOIN tb_task T on  C.taskid=T.id left join tb_node n on C.nodeid=n.id where 1=1";
                 if (taskid!=-1)
                 {
                     ps.Add("taskid", taskid);
@@ -90,7 +91,8 @@ namespace TaskManager.Domain.Dal
                 }
                 _count = Convert.ToInt32(PubConn.ExecuteScalar("select count(1) from tb_command C where 1=1 " + sqlwhere, ps.ToParameters()));
                 DataSet ds = new DataSet();
-                string sqlSel = "select * from (" + sql + sqlwhere + ") A where rownum between " + ((pageindex - 1) * pagesize + 1) + " and " + pagesize * pageindex;
+                //string sqlSel = "select * from (" + sql + sqlwhere + ") A where rownum between " + ((pageindex - 1) * pagesize + 1) + " and " + pagesize * pageindex;
+                string sqlSel = sql + sqlwhere + " order by c.id desc limit " + ((pageindex - 1) * pagesize ) + "," + pagesize;
                 PubConn.SqlToDataSet(ds, sqlSel, ps.ToParameters());
                 return ds;
             });

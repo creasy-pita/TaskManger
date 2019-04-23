@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TaskManager.Domain.Dal;
-
+using TaskManager.Domain.Model;
 
 namespace TaskManager.Node.SystemMonitor
 {
@@ -28,13 +28,13 @@ namespace TaskManager.Node.SystemMonitor
             {
                 var sqldatetime = c.GetServerDate();
                 tb_node_dal nodedal = new tb_node_dal();
-                nodedal.AddOrUpdate(c, new Domain.Model.tb_node_model()
+                tb_node_model node = nodedal.GetOneNode(c, GlobalConfig.NodeID);
+                if (node != null)
                 {
-                    nodecreatetime = sqldatetime, 
-                    nodeip=System.Net.Dns.GetHostName(),
-                    nodelastupdatetime = sqldatetime, 
-                    nodename="xxxxxxx", 
-                    id=GlobalConfig.NodeID});
+                    node.nodecreatetime = sqldatetime;
+                    node.nodelastupdatetime = sqldatetime;
+                    nodedal.AddOrUpdate(c, node);
+                }
             });
             
         }

@@ -44,7 +44,7 @@
         </li>
         <li>
             <label>状态</label>
-            <select name="ostype">
+            <select name="nodeostype">
                 @foreach (var o in (TaskManager.Core.EnumUtils<TaskManager.Core.EnumOSState>.GetAllEnumsOfList2()))
                 {
                     <option value="@o.Text" @(Model.nodeostype == o.Text ? "selected='selected'" : "")>@o.Text</option>

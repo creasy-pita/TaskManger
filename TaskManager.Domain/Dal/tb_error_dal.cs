@@ -32,7 +32,7 @@ namespace TaskManager.Domain.Dal
             {
                 ps.Add("@lastlogid", lastlogid);
                 StringBuilder stringSql = new StringBuilder();
-                stringSql.Append(@"select top 100 s.*,t.taskcreateuserid,t.taskname from tb_error s,tb_task t where s.id>@lastlogid and s.taskid=t.id order by s.id desc");
+                stringSql.Append(@"select s.*,t.taskcreateuserid,t.taskname from tb_error s,tb_task t where s.id>@lastlogid and s.taskid=t.id order by s.id desc limit 0,100");
                 DataSet ds = new DataSet();
                 PubConn.SqlToDataSet(ds, stringSql.ToString(), ps.ToParameters());
                 List<tb_senderror_model> rs = new List<tb_senderror_model>();
@@ -58,7 +58,8 @@ namespace TaskManager.Domain.Dal
             DataSet dsList = SqlHelper.Visit<DataSet>(ps =>
             {
                 string sqlwhere = "";
-                string sql = "select ROW_NUMBER() over(order by E.id desc) as rownum,E.*,ISNULL(T.taskcreateuserid,0) taskcreateuserid,T.taskname,u.username as taskcreateusername,n.nodename as tasknodename from tb_error E left join tb_task T on E.taskid=T.id left join tb_user u on u.id=T.taskcreateuserid left join tb_node n on n.id=E.nodeid where 1=1 ";
+                //string sql = "select ROW_NUMBER() over(order by E.id desc) as rownum,E.*,ISNULL(T.taskcreateuserid,0) taskcreateuserid,T.taskname,u.username as taskcreateusername,n.nodename as tasknodename from tb_error E left join tb_task T on E.taskid=T.id left join tb_user u on u.id=T.taskcreateuserid left join tb_node n on n.id=E.nodeid where 1=1 ";
+                string sql = "select E.*, IFNULL(T.taskcreateuserid,0) taskcreateuserid,T.taskname,u.username as taskcreateusername,n.nodename as tasknodename from tb_error E left join tb_task T on E.taskid=T.id left join tb_user u on u.id=T.taskcreateuserid left join tb_node n on n.id=E.nodeid where 1=1 ";
                 if (!string.IsNullOrWhiteSpace(keyword))
                 {
                     ps.Add("keyword", keyword);
@@ -97,7 +98,8 @@ namespace TaskManager.Domain.Dal
                 }
                 _count = Convert.ToInt32(PubConn.ExecuteScalar("select count(1) from tb_error E where 1=1 " + sqlwhere, ps.ToParameters()));
                 DataSet ds = new DataSet();
-                string sqlSel = "select * from (" + sql + sqlwhere + ") A where rownum between " + ((pageindex - 1) * pagesize + 1) + " and " + pagesize * pageindex;
+                //string sqlSel = "select * from (" + sql + sqlwhere + ") A where rownum between " + ((pageindex - 1) * pagesize + 1) + " and " + pagesize * pageindex;
+                string sqlSel = sql + sqlwhere + " order by E.id desc limit " + ((pageindex - 1) * pagesize ) + "," + pagesize;
                 PubConn.SqlToDataSet(ds, sqlSel, ps.ToParameters());
                 return ds;
             });

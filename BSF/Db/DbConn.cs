@@ -56,7 +56,7 @@ namespace BSF.Db
             }
             if (cn == null)
             {
-                cn = CreateConn(DbType.SQLSERVER, connectionString);
+                cn = CreateConn(DbType.MYSQL, connectionString);
             }
             return cn;
             

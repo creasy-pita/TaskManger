@@ -68,7 +68,8 @@ namespace TaskManager.Domain.Dal
             {
                 string sqlwhere = "";
                 StringBuilder sql = new StringBuilder();
-                sql.Append("select ROW_NUMBER() over(order by T.id desc) as rownum,T.*,C.categoryname,N.nodename,U.username from tb_task T ");
+                //sql.Append("select ROW_NUMBER() over(order by T.id desc) as rownum,T.*,C.categoryname,N.nodename,U.username from tb_task T ");
+                sql.Append("select T.*,C.categoryname,N.nodename,U.username from tb_task T ");
                 sql.Append("left join tb_category C on C.id=T.categoryid ");
                 sql.Append("left join tb_user U on U.id=T.taskcreateuserid ");
                 sql.Append("left join tb_node N on N.id=T.nodeid where 1=1 ");
@@ -115,7 +116,8 @@ namespace TaskManager.Domain.Dal
                 }
                 _count = Convert.ToInt32(PubConn.ExecuteScalar("select count(1) from tb_task T where 1=1 " + sqlwhere, ps.ToParameters()));
                 DataSet ds = new DataSet();
-                string sqlSel = "select * from (" + sql + sqlwhere + ") A where rownum between " + ((pageindex - 1) * pagesize + 1) + " and " + pagesize * pageindex;
+                //string sqlSel = "select * from (" + sql + sqlwhere + ") A where rownum between " + ((pageindex - 1) * pagesize + 1) + " and " + pagesize * pageindex;
+                string sqlSel = sql + sqlwhere + " order by T.id desc limit " + ((pageindex - 1) * pagesize ) + "," + pagesize;
                 PubConn.SqlToDataSet(ds, sqlSel, ps.ToParameters());
                 return ds;
             });
@@ -307,9 +309,17 @@ namespace TaskManager.Domain.Dal
                 ps.Add("@taskmainclassnamespace", model.taskmainclassnamespace);
                 ps.Add("@taskremark", model.taskremark);
                 ps.Add("@taskmainclassdllfilename", model.taskmainclassdllfilename);
-                int rev = Convert.ToInt32(PubConn.ExecuteScalar(@"insert into tb_task(taskname,categoryid,nodeid,taskcreatetime,taskruncount,taskcreateuserid,taskstate,taskversion,taskappconfigjson,taskcron,taskmainclassnamespace,taskremark,taskmainclassdllfilename)
-										   values(@taskname,@categoryid,@nodeid,@taskcreatetime,@taskruncount,@taskcreateuserid,@taskstate,@taskversion,@taskappconfigjson,@taskcron,@taskmainclassnamespace,@taskremark,@taskmainclassdllfilename) select @@IDENTITY", ps.ToParameters()));
-                return rev;
+             //   int rev = Convert.ToInt32(PubConn.ExecuteScalar(@"insert into tb_task(taskname,categoryid,nodeid,taskcreatetime,taskruncount,taskcreateuserid,taskstate,taskversion,taskappconfigjson,taskcron,taskmainclassnamespace,taskremark,taskmainclassdllfilename)
+										   //values(@taskname,@categoryid,@nodeid,@taskcreatetime,@taskruncount,@taskcreateuserid,@taskstate,@taskversion,@taskappconfigjson,@taskcron,@taskmainclassnamespace,@taskremark,@taskmainclassdllfilename) select @@IDENTITY", ps.ToParameters()));
+                PubConn.ExecuteScalar(@"insert into tb_task(taskname,categoryid,nodeid,taskcreatetime,taskupdatetime,taskruncount,taskcreateuserid,taskstate,taskversion,taskappconfigjson,taskcron,taskmainclassnamespace,taskremark,taskmainclassdllfilename)
+										   values(@taskname,@categoryid,@nodeid,@taskcreatetime,@taskupdatetime,@taskruncount,@taskcreateuserid,@taskstate,@taskversion,@taskappconfigjson,@taskcron,@taskmainclassnamespace,@taskremark,@taskmainclassdllfilename)", ps.ToParameters());
+
+                DataTable dt = PubConn.SqlToDataTable("SELECT LAST_INSERT_ID() AS id_value", null);
+                if (dt != null && dt.Rows.Count > 0)
+                {
+                    return Convert.ToInt32(dt.Rows[0][0]);
+                }
+                return -1;
             });
         }
 

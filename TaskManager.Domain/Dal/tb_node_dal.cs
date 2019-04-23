@@ -24,8 +24,8 @@ namespace TaskManager.Domain.Dal
                 ps.Add("@ifcheckstate", model.ifcheckstate);
                 ps.Add("@id", model.id);
                 string updatecmd = "update tb_node set nodeip=@nodeip,nodelastupdatetime=@nodelastupdatetime where id=@id";
-                string insertcmd = @"insert into tb_node(nodename,nodecreatetime,nodeip,nodeostype,ifcheckstate)
-										   values(@nodename,@nodecreatetime,@nodeip,@nodeostype,@ifcheckstate)";
+                string insertcmd = @"insert into tb_node(nodename,nodecreatetime,nodeip,nodeostype,ifcheckstate,nodelastupdatetime)
+										   values(@nodename,@nodecreatetime,@nodeip,@nodeostype,@ifcheckstate,@nodelastupdatetime)";
                 if (PubConn.ExecuteSql(updatecmd, ps.ToParameters()) <= 0)
                 {
                     PubConn.ExecuteSql(insertcmd, ps.ToParameters());
@@ -58,8 +58,8 @@ namespace TaskManager.Domain.Dal
             DataSet dsList = SqlHelper.Visit<DataSet>(ps =>
             {
                 string sqlwhere = "";
-                string sql = "select ROW_NUMBER() over(order by id desc) as rownum,id,nodename,nodeostype,nodecreatetime,nodeip,nodelastupdatetime,ifcheckstate from tb_node where 1=1 ";
-                //string sql = "select * from tb_node where 1=1 ";
+                //string sql = "select ROW_NUMBER() over(order by id desc) as rownum,id,nodename,nodeostype,nodecreatetime,nodeip,nodelastupdatetime,ifcheckstate from tb_node where 1=1 ";
+                string sql = "select * from tb_node where 1=1 ";
                 if (!string.IsNullOrWhiteSpace(keyword))
                 {
                     ps.Add("keyword", keyword);
@@ -78,8 +78,8 @@ namespace TaskManager.Domain.Dal
                 }
                 _count = Convert.ToInt32(PubConn.ExecuteScalar("select count(1) from tb_node where 1=1 " + sqlwhere, ps.ToParameters()));
                 DataSet ds = new DataSet();
-                string sqlSel = "select * from (" + sql + sqlwhere + ") A where rownum between " + ((pageindex - 1) * pagesize + 1) + " and " + pagesize * pageindex;
-                //string sqlSel = sql + sqlwhere + " order by id desc limit " + ((pageindex - 1) * pagesize ) + "," + pagesize;
+                //string sqlSel = "select * from (" + sql + sqlwhere + ") A where rownum between " + ((pageindex - 1) * pagesize + 1) + " and " + pagesize * pageindex;
+                string sqlSel = sql + sqlwhere + " order by id desc limit " + ((pageindex - 1) * pagesize ) + "," + pagesize;
                 PubConn.SqlToDataSet(ds, sqlSel, ps.ToParameters());
                 return ds;
             });
@@ -137,7 +137,7 @@ namespace TaskManager.Domain.Dal
         {
             return SqlHelper.Visit(ps =>
             {
-                string sql = "select top 1 id from tb_node where (nodelastupdatetime='' or DATEDIFF(minute ,nodecreatetime,GETDATE())>20)";
+                string sql = "select id from tb_node where (nodelastupdatetime='' or TIMESTAMPDIFF(minute ,nodecreatetime,now())>20) limit 0,1";
                 DataSet ds = new DataSet();
                 PubConn.SqlToDataSet(ds, sql, null);
                 if (ds.Tables[0].Rows.Count > 0)
@@ -147,9 +147,14 @@ namespace TaskManager.Domain.Dal
                 }
                 else
                 {
-                    string sqlinsert = "insert into tb_node (nodename,nodecreatetime,nodeip)values('新增节点',getdate(),'') select @@IDENTITY";
-                    int id = Convert.ToInt32(PubConn.ExecuteScalar(sqlinsert, null));
-                    return id;
+                    string sqlinsert = "insert into tb_node (nodename,nodecreatetime,nodeip)values('新增节点',now(),'')";
+                    PubConn.ExecuteScalar(sqlinsert, null);
+                    DataTable dt = PubConn.SqlToDataTable("SELECT LAST_INSERT_ID() AS id_value", null);
+                    if (dt != null && dt.Rows.Count > 0)
+                    {
+                        return Convert.ToInt32(dt.Rows[0][0]);
+                    }
+                    return -1;
                 }
             });
         }

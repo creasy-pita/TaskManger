@@ -1,4 +1,3 @@
-
 优化
 	* 表示待做
 
@@ -11,12 +10,36 @@
 	功能优化
 
 	功能问题
+		2019年4月18日
+		* mysql 插入中文字符乱码问题
+		2019年4月17日
+		* 使用Windows taskkill Process.kill(),   Linux: shell kill的 对程序的安全性考虑
+
+			Windows 和 linux 使用shell 脚本关闭服务程序进程 对程序的安全性考虑：windows 使用 taskkill processId,  Linux 使用 shell kill processId的 对程序的安全性考虑
+				程序 kill 时是 kernel 发送  信号给进程， 进程卸载退出，此刻后续的程序代码指令不会再执行
+				程序运行时主要是读取和写入， 
+					读取主要读取各类文档数据和 db的数据
+					写入
+						操作日志类：关闭时刚好再写日志，可能会出现这部分日志没有写入
+						配置文件的改动， 后台服务类程序 ， 配置文件的改动一般时手动修改， 不用程序修改，所以没有什么影响
+							疑问： system file类库的操作 有没有 事务性  应该是没有的
+						数据库： 
+							使用事务的操作，如果未提交程序就退出，则数据库检查到这个事务没有后续操作，会自动回滚
+								注 大批量的数据 并采用事务操作的 程序功能代码最好要做优化
+							没有事务操作
+								比如跨多个库 没有办法使用事务操作的
+									需要检查错误的情况，并恢复
+								可以使用事务操作的
+									建议修改为事务操作， 或者 需要检查错误的情况，并恢复
+				说明： 对以上情况可以编写测试用例测试
+			参考资料： https://stackoverflow.com/questions/31950623/what-happens-if-we-kill-the-jvm-process-during-transaction-execution
+			https://en.wikipedia.org/wiki/Kill_(command)
 		2019年4月16日
 		* 节点性能分析列表中的统计问题  会统计所有任务的内存使用，但已经停止运行的任务也会去统计之前的内存使用量
 	测试
 		2019年4月17日
 		*测试 启动大的任务服务时 任务状态上的更新会否异常
-
+	
 select p.*, n.nodename,'' as taskname 
 	from ( 
 			select nodeid,0 as taskid,sum(cpu) as cpu,sum(memory) as memory,sum(installdirsize) as installdirsize,max(lastupdatetime) as lastupdatetime 

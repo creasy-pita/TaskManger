@@ -383,7 +383,8 @@ namespace BSF.Db.ConnAdapter
         public override bool TableIsExist(string aTableName)
         {
             DataSet Ds = new DataSet();
-            SqlToDataSet(Ds, "Select name from sysobjects where Name='" + aTableName + "'",null);
+            //SqlToDataSet(Ds, "Select name from sysobjects where Name='" + aTableName + "'",null);
+            SqlToDataSet(Ds, "SELECT t.table_name FROM information_schema.tables t WHERE t.table_name = '" + aTableName + "'",null);
             if (Ds.Tables[0].Rows.Count == 0)
                 return false;
             else

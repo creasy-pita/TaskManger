@@ -255,7 +255,7 @@ namespace BSF.Db.ConnAdapter
 
         public override bool FieldIsExist(string aTableName, string aFieldName)
         {
-            string TempSql = "select top 0 * from " + aTableName;
+            string TempSql = "select * from " + aTableName + " limit 0,0";
             DataSet ds = new DataSet();
             SqlToDataSet(ds, TempSql, null);
             if (ds.Tables[0].Columns.IndexOf(aFieldName) < 0)
@@ -270,7 +270,7 @@ namespace BSF.Db.ConnAdapter
 
         public override bool FieldIsExist(string aDbName, string aTableName, string aFieldName)
         {
-            string TempSql = "select top 0 * from " + aDbName + ".." + aTableName;
+            string TempSql = "select * from " + aDbName + ".." + aTableName + " limit 0,0";
             DataSet ds = new DataSet();
             SqlToDataSet(ds, TempSql,null);
             if (ds.Tables[0].Columns.IndexOf(aFieldName) < 0)
@@ -286,7 +286,7 @@ namespace BSF.Db.ConnAdapter
         public override DateTime GetServerDate()
         {
             DateTime Result = new DateTime(0);
-            SqlCommand cmdSql = new SqlCommand("select GetDate() as aDate", privateconn);
+            SqlCommand cmdSql = new SqlCommand("select now() as aDate", privateconn);
             cmdSql.Transaction = ts;
             SqlDataReader DrSql = cmdSql.ExecuteReader();
             if (DrSql.Read())

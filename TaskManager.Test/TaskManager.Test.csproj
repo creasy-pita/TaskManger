@@ -13,6 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BSF.BaseService.TaskManager\BSF.BaseService.TaskManager.csproj" />
+    <ProjectReference Include="..\BSF\BSF.csproj" />
     <ProjectReference Include="..\TaskManager.Core\TaskManager.Core.csproj" />
     <ProjectReference Include="..\TaskManager.Domain\TaskManager.Domain.csproj" />
     <ProjectReference Include="..\TaskManager.Node\TaskManager.Node.csproj" />
