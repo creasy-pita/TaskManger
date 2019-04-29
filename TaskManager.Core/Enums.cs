@@ -38,8 +38,6 @@ namespace TaskManager.Core
     /// </summary>
     public enum EnumTaskState
     {
-        [Description("未安装")]
-        UnInstall=-1,
         [Description("停止")]
         Stop=0,
         [Description("运行中")]

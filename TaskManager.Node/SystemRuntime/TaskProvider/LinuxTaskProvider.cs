@@ -95,16 +95,16 @@ namespace TaskManager.Node.SystemRuntime
                 ///线程睡眠2s，等到脚本执行完成
                 Thread.Sleep(2000);
                 EnumTaskCommandState enumTaskCommandState = EnumTaskCommandState.Error;
-                EnumTaskState enumTaskState = EnumTaskState.UnInstall;
+                EnumTaskState enumTaskState = EnumTaskState.Stop;
                 if (!string.IsNullOrEmpty(ps.GetProcessByName(task.taskmainclassdllfilename)))
                 {
                     enumTaskCommandState = EnumTaskCommandState.Success;
                     enumTaskState = EnumTaskState.Running;
                 }
-
                 ///更新服务状态
-                new tb_task_dal().UpdateTaskState(conn, task.id, (int)enumTaskState);
-
+                task.tasklaststarttime = DateTime.Now;
+                task.taskstate = (byte)enumTaskState;
+                new tb_task_dal().UpdateTask(conn, task);
                 if (enumTaskCommandState == EnumTaskCommandState.Success)
                 {
                     LogHelper.AddNodeLog($"节点:{task.nodeid}成功执行任务:{task.id}……");
@@ -139,17 +139,19 @@ namespace TaskManager.Node.SystemRuntime
             bool result = false;
             ps.ProcessKill(int.Parse(pId));
             EnumTaskCommandState enumTaskCommandState = EnumTaskCommandState.Error;
-            EnumTaskState enumTaskState = EnumTaskState.UnInstall;
+            EnumTaskState enumTaskState = EnumTaskState.Stop;
             if (string.IsNullOrEmpty(ps.GetProcessByName(task.taskmainclassdllfilename)))
             {
                 enumTaskCommandState = EnumTaskCommandState.Success;
                 enumTaskState = EnumTaskState.Stop;
                 result = true;
             }
-            SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (c) =>
+            SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (conn) =>
             {
                 tb_task_dal taskdal = new tb_task_dal();
-                taskdal.UpdateTaskState(c, task.id, (int)EnumTaskState.Stop);
+                task.tasklastendtime = DateTime.Now;
+                task.taskstate = (byte)enumTaskState;
+                taskdal.UpdateTask(conn, task);
             });
             LogHelper.AddTaskLog("节点关闭任务成功", task.id);
             return result;

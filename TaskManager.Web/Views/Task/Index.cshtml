@@ -18,7 +18,7 @@
     }
 
     function ChangeTaskState(id, nodeid, taskname,state) {
-        if (confirm("是否启动？") == true) {
+        if (confirm(state == 1 ? "是否启动？" : "是否停止？") == true) {
             $.ajax({
                 url: '@Url.Action("ChangeTaskState", "Task")',
                 type: "post",
@@ -231,14 +231,10 @@
                             【最近开始时间】@item.tasklaststarttime<br/>
                             【最近结束时间】@item.tasklastendtime<br/>@{var state=TaskManager.Core.EnumUtils<TaskManager.Core.EnumTaskState>.GetText((TaskManager.Core.EnumTaskState)item.taskstate);}
                             【任务运行状态】@Html.Raw((item.taskstate == (int)TaskManager.Core.EnumTaskState.Stop) ? string.Format("<b class='runstate'>{0}</b>",state) : string.Format("<b class='stopstate'>{0}</b>",state))<br/>
-                            【运行成功次数】@item.taskruncount<br/>
-                            【上次出错时间】@item.tasklasterrortime<br/>
-                            【连续错误次数】@item.taskerrorcount<br/>
                         </td>
                         <td style="word-break:break-all; text-align:left">
                             【分类】@item.categoryname [@item.categoryid]<br/>
                             【节点】@item.nodename [@item.nodeid]<br/>
-                            【cron】@item.taskcron<br/>
                             【版本】@item.taskversion<br/>
                             【修改时间】@item.taskupdatetime<br/>
                             【创建时间】@item.taskcreatetime<br/>

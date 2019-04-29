@@ -12,7 +12,7 @@ namespace TaskManager.Node.SystemRuntime
             var Service = ServiceControllers.FirstOrDefault(s => s.ServiceName == ServiceName);
             if (Service == null)
             {
-                return EnumTaskState.UnInstall;
+                return EnumTaskState.Stop;
             }
             else if (Service.Status == ServiceControllerStatus.Running)
             {

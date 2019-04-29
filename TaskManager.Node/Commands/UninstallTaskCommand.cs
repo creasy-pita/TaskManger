@@ -26,7 +26,6 @@ namespace TaskManager.Node.Commands
             string providerTypeName = $"{namespacestr}.{node.nodeostype}TaskProvider";
             ITaskProvider tp = (ITaskProvider)System.Reflection.Assembly
                 .GetAssembly(typeof(ITaskProvider)).CreateInstance(providerTypeName);
-            tp.Stop(this.CommandInfo.taskid);
             tp.Uninstall(this.CommandInfo.taskid);
         }
     }

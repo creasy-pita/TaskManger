@@ -8,12 +8,17 @@
 		*TimeJob 内的定时任务 代码 可以不使用 Quartz的定时任务方式，可以简单使用线程类定时来完成
 		* BSF.BaseService.TaskManager.Dal.Dal 与 model 类是否多余 与  TaskManager.Domain中重复 
 	功能优化
-
+		2019年4月25日
+		*删除 任务后，任务的文件夹没有删除应该删除
+		* 更新后如何恢复原有的包配置，考虑加一个备份管理
+		* 调度了以后对 程序的调整只能通过web调度管理界面进行， 不能手动去操作程序文件，带来的不便和可能的问题
 	功能问题
+		2019年4月25日
+		*任务列表中的 当前运行状态的 最近开始时间和最近结束时间没有
 		2019年4月18日
-		* mysql 插入中文字符乱码问题
+		mysql 插入中文字符乱码问题
 		2019年4月17日
-		* 使用Windows taskkill Process.kill(),   Linux: shell kill的 对程序的安全性考虑
+		使用Windows taskkill Process.kill(),   Linux: shell kill的 对程序的安全性考虑
 
 			Windows 和 linux 使用shell 脚本关闭服务程序进程 对程序的安全性考虑：windows 使用 taskkill processId,  Linux 使用 shell kill processId的 对程序的安全性考虑
 				程序 kill 时是 kernel 发送  信号给进程， 进程卸载退出，此刻后续的程序代码指令不会再执行
@@ -35,7 +40,7 @@
 			参考资料： https://stackoverflow.com/questions/31950623/what-happens-if-we-kill-the-jvm-process-during-transaction-execution
 			https://en.wikipedia.org/wiki/Kill_(command)
 		2019年4月16日
-		* 节点性能分析列表中的统计问题  会统计所有任务的内存使用，但已经停止运行的任务也会去统计之前的内存使用量
+		节点性能分析列表中的统计问题  会统计所有任务的内存使用，但已经停止运行的任务也会去统计之前的内存使用量
 	测试
 		2019年4月17日
 		*测试 启动大的任务服务时 任务状态上的更新会否异常

@@ -23,6 +23,5 @@ namespace TaskManager.Test.UnitTests
                 Console.WriteLine("list.count" + List.Count);
             }
         }
-
     }
 }

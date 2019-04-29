@@ -9,6 +9,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Threading;
 using TaskManager.Node.SystemRuntime.ProcessService;
+using TaskManager.Node.Exceptions;
 
 namespace TaskManager.Node.SystemRuntime
 {
@@ -47,16 +48,15 @@ namespace TaskManager.Node.SystemRuntime
             {
                 string rootPath = AppDomain.CurrentDomain.BaseDirectory + GlobalConfig.TaskDllDir + "\\";
                 BSF.Tool.IOHelper.CreateDirectory(rootPath);
-                LogHelper.AddNodeLog($"rootPath:{rootPath}……");
 
                 string path = $"{rootPath}{task.taskname}\\";
                 //判断程序目录是否已经存在
                 if (!Directory.Exists(path))
                 {
+                    //下载程序集
                     tb_version_dal versionDAL = new tb_version_dal();
                     var version = versionDAL.GetVersionByTaskID(conn, task.id);
                     BSF.Tool.IOHelper.CreateDirectory(path);
-                    LogHelper.AddNodeLog($"path:{path}……");
                     if (version != null)
                     {
                         string zipFilePath = $"{path}{version.zipfilename}";
@@ -72,14 +72,12 @@ namespace TaskManager.Node.SystemRuntime
                     }
                 }
                 //使用 shell 命令开启 任务程序
-                //Thread.Sleep(5000);
                 var psi = new ProcessStartInfo
                 {
                     FileName = "dotnet",
                     Arguments = $@"{task.taskmainclassdllfilename}",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
-                    //RedirectStandardError = false,
                     CreateNoWindow = true,
                     WorkingDirectory = $"{path}",
                 };
@@ -91,21 +89,30 @@ namespace TaskManager.Node.SystemRuntime
                 else
                 {
                     var Output = ProcessStart.StandardOutput;
-                    //Console.WriteLine(Output.ReadLine());
                 }
-                ///线程睡眠2s，等到脚本执行完成
-                Thread.Sleep(2000);
+
                 EnumTaskCommandState enumTaskCommandState = EnumTaskCommandState.Error;
-                EnumTaskState enumTaskState = EnumTaskState.UnInstall;
-                if (!string.IsNullOrEmpty(ps.GetProcessByName(task.taskmainclassdllfilename)))
+                EnumTaskState enumTaskState = EnumTaskState.Stop;
+                int RetryCount = 10;
+                while (RetryCount-- > 0)
                 {
-                    enumTaskCommandState = EnumTaskCommandState.Success;
-                    enumTaskState = EnumTaskState.Running;
+                    if (!string.IsNullOrEmpty(ps.GetProcessByName(task.taskmainclassdllfilename)))
+                    {
+                        enumTaskCommandState = EnumTaskCommandState.Success;
+                        enumTaskState = EnumTaskState.Running;
+                        RetryCount = 0;
+                    }
+                    else
+                    {
+                        Thread.Sleep(500);
+                    }
                 }
 
-                ///更新服务状态
-                new tb_task_dal().UpdateTaskState(conn, task.id, (int)enumTaskState);
-
+                ///更新服务状态 服务启动时间
+                //new tb_task_dal().UpdateTaskState(conn, task.id, (int)enumTaskState);
+                task.tasklaststarttime = DateTime.Now;
+                task.taskstate = (byte)enumTaskState;
+                new tb_task_dal().UpdateTask(conn, task);
                 if (enumTaskCommandState == EnumTaskCommandState.Success)
                 {
                     LogHelper.AddNodeLog($"节点:{task.nodeid}成功执行任务:{task.id}……");
@@ -120,22 +127,34 @@ namespace TaskManager.Node.SystemRuntime
             string pId = ps.GetProcessByName(task.taskmainclassdllfilename);
             if (string.IsNullOrEmpty(pId))
             {
-                throw new Exception("任务不在运行中");
+                throw new TaskAlreadyRunningException("任务不在运行中");
             }
             bool result = false;
             ps.ProcessKill(int.Parse(pId));
             EnumTaskCommandState enumTaskCommandState = EnumTaskCommandState.Error;
-            EnumTaskState enumTaskState = EnumTaskState.UnInstall;
-            if (string.IsNullOrEmpty(ps.GetProcessByName(task.taskmainclassdllfilename)))
+            EnumTaskState enumTaskState = EnumTaskState.Stop;
+            //调用进程终止后会又延时，以下采用重试判断的方式
+            int RetryCount = 10;
+            while (RetryCount-- > 0)
             {
-                enumTaskCommandState = EnumTaskCommandState.Success;
-                enumTaskState = EnumTaskState.Stop;
-                result = true;
+                if (string.IsNullOrEmpty(ps.GetProcessByName(task.taskmainclassdllfilename)))
+                {
+                    enumTaskCommandState = EnumTaskCommandState.Success;
+                    enumTaskState = EnumTaskState.Stop;
+                    result = true;
+                    RetryCount = 0;
+                }
+                else
+                {
+                    Thread.Sleep(500);
+                }
             }
-            SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (c) =>
+            SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (conn) =>
             {
                 tb_task_dal taskdal = new tb_task_dal();
-                taskdal.UpdateTaskState(c, task.id, (int)EnumTaskState.Stop);
+                task.tasklastendtime = DateTime.Now;
+                task.taskstate = (byte)enumTaskState;
+                taskdal.UpdateTask(conn, task);
             });
             LogHelper.AddTaskLog("节点关闭任务成功", task.id);
             return result;
@@ -153,7 +172,6 @@ namespace TaskManager.Node.SystemRuntime
             {
                 tb_task_dal taskDAL = new tb_task_dal();
                 task = taskDAL.GetOneTask(conn, taskid);
-
             });
             return WindowsStop(task);
         }
@@ -164,7 +182,41 @@ namespace TaskManager.Node.SystemRuntime
         /// <returns></returns>
         public bool Uninstall(int taskid)
         {
-            return false;
+            tb_task_model task = new tb_task_model();
+            try
+            {
+                bool re = false;
+                try
+                {
+                    re = Stop(taskid);
+                }
+                catch (TaskAlreadyRunningException)//捕获此类异常不做处理
+                {
+                }
+                if (re)
+                {
+                    SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (conn) =>
+                    {
+                        tb_task_dal taskDAL = new tb_task_dal();
+                        task = taskDAL.GetOneTask(conn, taskid);
+                    });
+                    string rootPath = AppDomain.CurrentDomain.BaseDirectory + GlobalConfig.TaskDllDir + "\\";
+                    string path = $"{rootPath}{task.taskname}\\";
+                    if (Directory.Exists(path))
+                    {
+                        //TBD 考虑后期 先备份这个文件
+                        Directory.Delete(path,true);
+                    }
+                    LogHelper.AddTaskLog("节点卸载任务成功", task.id);
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.AddTaskError($"节点:{task.nodeid}执行卸载任务失败", taskid, ex);
+                return false;
+            }
         }
     }
 }

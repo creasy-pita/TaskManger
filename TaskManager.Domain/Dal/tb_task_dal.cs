@@ -332,6 +332,8 @@ namespace TaskManager.Domain.Dal
                 ps.Add("@categoryid", model.categoryid);
                 ps.Add("@nodeid", model.nodeid);
                 ps.Add("@taskupdatetime", model.taskupdatetime);
+                ps.Add("@tasklaststarttime", model.tasklaststarttime);
+                ps.Add("@tasklastendtime", model.tasklastendtime);
                 ps.Add("@taskcreateuserid", model.taskcreateuserid);
                 ps.Add("@taskappconfigjson", model.taskappconfigjson.NullToEmpty());
                 ps.Add("@taskcron", model.taskcron);
@@ -339,9 +341,10 @@ namespace TaskManager.Domain.Dal
                 ps.Add("@taskremark", model.taskremark);
                 ps.Add("@taskmainclassdllfilename", model.taskmainclassdllfilename);
                 ps.Add("@taskversion", model.taskversion);
-                string sql = "Update tb_task Set taskname=@taskname,categoryid=@categoryid,nodeid=@nodeid,taskupdatetime=@taskupdatetime,";
-                sql += "taskappconfigjson=@taskappconfigjson,taskcron=@taskcron,taskcreateuserid=@taskcreateuserid,";
-                sql += "taskmainclassnamespace=@taskmainclassnamespace,taskremark=@taskremark,taskmainclassdllfilename=@taskmainclassdllfilename,taskversion=@taskversion";
+                ps.Add("@taskstate", model.taskstate);
+                string sql = "Update tb_task Set taskname=@taskname,categoryid=@categoryid,nodeid=@nodeid,taskupdatetime=@taskupdatetime,tasklaststarttime=@tasklaststarttime,";
+                sql += "tasklastendtime=@tasklastendtime,taskappconfigjson=@taskappconfigjson,taskcron=@taskcron,taskcreateuserid=@taskcreateuserid,";
+                sql += "taskmainclassnamespace=@taskmainclassnamespace,taskremark=@taskremark,taskmainclassdllfilename=@taskmainclassdllfilename,taskversion=@taskversion,taskstate=@taskstate";
                 sql += " where id=@id";
                 int i = PubConn.ExecuteSql(sql, ps.ToParameters());
                 return i;

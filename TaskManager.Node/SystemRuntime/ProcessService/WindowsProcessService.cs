@@ -24,14 +24,16 @@ namespace TaskManager.Node.SystemRuntime.ProcessService
 
         public void ProcessKill(int pId)
         {
-            try
-            {
-                Process proc = Process.GetProcessById(pId);
-                proc.Kill();
-            }
-            catch (Exception ex)
-            {
-            }
+            Process proc = Process.GetProcessById(pId);
+            proc.Kill();
+            //try
+            //{
+            //    Process proc = Process.GetProcessById(pId);
+            //    proc.Kill();
+            //}
+            //catch (Exception ex)
+            //{
+            //}
         }
     }
 
