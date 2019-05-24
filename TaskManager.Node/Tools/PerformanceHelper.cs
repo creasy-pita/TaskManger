@@ -71,5 +71,53 @@ namespace TaskManager.Node.Tools
             }
         }
 
+        public static (double CPU, long memory) GetPerformenceInfoByPort(string port)
+        {
+            try
+            {
+                IProcessService ps = ProcessServiceFactory.CreateProcessService(EnumOSState.Windows.ToString());
+                string pIdStr = ps.GetProcessByPort(port);
+                if (string.IsNullOrEmpty(pIdStr)) return (0, 0);
+                Process p = Process.GetProcessById(int.Parse(pIdStr));
+                DateTime lastTime = new DateTime();
+                TimeSpan lastTotalProcessorTime = new TimeSpan();
+
+                if (lastTimeDic.ContainsKey(pIdStr))
+                {
+                    lastTime = lastTimeDic[pIdStr];
+                    lastTotalProcessorTime = lastTotalProcessorTimeDic[pIdStr];
+                }
+
+                DateTime curTime;
+                TimeSpan curTotalProcessorTime;
+                double CPUUsage = 0; long memorySize;
+                //cpu
+                if (lastTime == null || lastTime == new DateTime())
+                {
+                    lastTime = DateTime.Now;
+                    lastTotalProcessorTime = p.TotalProcessorTime;
+                    lastTimeDic.Add(pIdStr, lastTime);
+                    lastTotalProcessorTimeDic.Add(pIdStr, lastTotalProcessorTime);
+                }
+                else
+                {
+                    curTime = DateTime.Now;
+                    curTotalProcessorTime = p.TotalProcessorTime;
+                    CPUUsage = (curTotalProcessorTime.TotalMilliseconds - lastTotalProcessorTime.TotalMilliseconds) / curTime.Subtract(lastTime).TotalMilliseconds / Convert.ToDouble(Environment.ProcessorCount);
+                    lastTime = curTime;
+                    lastTotalProcessorTime = curTotalProcessorTime;
+                    lastTimeDic[pIdStr] = curTime;
+                    lastTotalProcessorTimeDic[pIdStr] = curTotalProcessorTime;
+                }
+                //memory
+                memorySize = p.WorkingSet64;
+                return (CPUUsage, memorySize);
+            }
+            catch (Exception exp)
+            {
+                return (0, 0);
+            }
+        }
+
     }
 }

@@ -35,7 +35,11 @@ namespace TaskManager.Node.SystemRuntime.ProcessService
             return processId;
         }
 
-        public void ProcessKill(int pId)
+        public string GetProcessByPort(string port)
+        {
+            return "";
+        }
+            public void ProcessKill(int pId)
         {
             var pro = new Process
             {

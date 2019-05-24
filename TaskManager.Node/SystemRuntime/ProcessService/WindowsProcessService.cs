@@ -22,6 +22,35 @@ namespace TaskManager.Node.SystemRuntime.ProcessService
             return string.Empty;
         }
 
+        public string GetProcessByPort(string port)
+        {
+            var pro = new Process
+            {
+                StartInfo =
+                {
+                    FileName = "cmd.exe",
+                    UseShellExecute = false,
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                }
+            };
+            pro.Start();
+            pro.StandardInput.WriteLine("netstat -ano | findstr " + port);
+            pro.StandardInput.WriteLine("exit");
+            var line = "";
+            var process = "";
+            while ((line = pro.StandardOutput.ReadLine()) != null)
+                if (!string.IsNullOrEmpty(line) && line.IndexOf("TCP", StringComparison.Ordinal) > -1)
+                {
+                    process = line.Substring(line.LastIndexOf(" ", StringComparison.Ordinal),
+                        line.Length - line.LastIndexOf(" ", StringComparison.Ordinal));
+                    break;
+                }
+            return process;
+        }
+
         public void ProcessKill(int pId)
         {
             Process proc = Process.GetProcessById(pId);
