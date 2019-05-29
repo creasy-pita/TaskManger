@@ -110,6 +110,7 @@ namespace TaskManager.Node.SystemRuntime.Services
             CmdProcess.StartInfo.FileName = StartFileName;      // 命令
             CmdProcess.StartInfo.Arguments = StartFileArg;      // 参数
             CmdProcess.EnableRaisingEvents = true;                      // 启用Exited事件
+           // CmdProcess.StartInfo.CreateNoWindow = false;
             CmdProcess.Start();
         }
 
