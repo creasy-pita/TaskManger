@@ -20,6 +20,10 @@ namespace TaskManager.Core
         ReStartTask=2,
         [Description("卸载任务")]
         UninstallTask=3,
+        [Description("关闭web任务")]
+        StopWebTask = 10,
+        [Description("开启web任务")]
+        StartWebTask = 11,
     }
     /// <summary>
     /// 任务命令状态

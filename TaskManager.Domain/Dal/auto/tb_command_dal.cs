@@ -26,13 +26,15 @@ namespace TaskManager.Domain.Dal
 					new ProcedureParameter("@commandstate",    model.commandstate),
 					//任务id
 					new ProcedureParameter("@taskid",    model.taskid),
+
+					new ProcedureParameter("@tasktype",    model.tasktype),
 					//节点id
 					new ProcedureParameter("@nodeid",    model.nodeid),
 					//命令创建时间
 					new ProcedureParameter("@commandcreatetime",    model.commandcreatetime)   
                 };
-            int rev = PubConn.ExecuteSql(@"insert into tb_command(command,commandname,commandstate,taskid,nodeid,commandcreatetime)
-										   values(@command,@commandname,@commandstate,@taskid,@nodeid,@commandcreatetime)", Par);
+            int rev = PubConn.ExecuteSql(@"insert into tb_command(command,commandname,commandstate,taskid,tasktype,nodeid,commandcreatetime)
+										   values(@command,@commandname,@commandstate,@taskid,@tasktype,@nodeid,@commandcreatetime)", Par);
             return rev == 1;
 
         }
@@ -50,6 +52,7 @@ namespace TaskManager.Domain.Dal
 					new ProcedureParameter("@commandstate",    model.commandstate),
 					//任务id
 					new ProcedureParameter("@taskid",    model.taskid),
+					new ProcedureParameter("@tasktype",    model.tasktype),
 					//节点id
 					new ProcedureParameter("@nodeid",    model.nodeid),
 					//命令创建时间
@@ -57,7 +60,7 @@ namespace TaskManager.Domain.Dal
             };
 			Par.Add(new ProcedureParameter("@id",  model.id));
 
-            int rev = PubConn.ExecuteSql("update tb_command set command=@command,commandname=@commandname,commandstate=@commandstate,taskid=@taskid,nodeid=@nodeid,commandcreatetime=@commandcreatetime where id=@id", Par);
+            int rev = PubConn.ExecuteSql("update tb_command set command=@command,commandname=@commandname,commandstate=@commandstate,taskid=@taskid,tasktype=@tasktype,nodeid=@nodeid,commandcreatetime=@commandcreatetime where id=@id", Par);
             return rev == 1;
 
         }
@@ -124,8 +127,12 @@ namespace TaskManager.Domain.Dal
 			{
 				o.taskid = dr["taskid"].Toint();
 			}
-			//节点id
-			if(dr.Table.Columns.Contains("nodeid"))
+            if (dr.Table.Columns.Contains("tasktype"))
+            {
+                o.tasktype = dr["tasktype"].Toint();
+            }
+            //节点id
+            if (dr.Table.Columns.Contains("nodeid"))
 			{
 				o.nodeid = dr["nodeid"].Toint();
 			}

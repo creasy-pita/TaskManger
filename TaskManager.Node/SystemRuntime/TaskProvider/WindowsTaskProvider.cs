@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Threading;
 using TaskManager.Node.SystemRuntime.ProcessService;
 using TaskManager.Node.Exceptions;
+using System.Collections.Generic;
 
 namespace TaskManager.Node.SystemRuntime
 {
@@ -44,9 +45,12 @@ namespace TaskManager.Node.SystemRuntime
             {
                 throw new Exception("任务已在运行中");
             }
-            SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (conn) =>
+            SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, async (conn) =>
             {
-                string rootPath = AppDomain.CurrentDomain.BaseDirectory + GlobalConfig.TaskDllDir + "\\";
+                //TBD 修改为 AppDomain.CurrentDomain.BaseDirectory + GlobalConfig.TaskDllDir 
+                //TBD 后期加入每个任务可定制部署目录
+                // string rootPath = AppDomain.CurrentDomain.BaseDirectory + GlobalConfig.TaskDllDir + "\\";
+                string rootPath ="F:\\" + GlobalConfig.TaskDllDir + "\\";
                 BSF.Tool.IOHelper.CreateDirectory(rootPath);
 
                 string path = $"{rootPath}{task.taskname}\\";
@@ -71,6 +75,33 @@ namespace TaskManager.Node.SystemRuntime
                         throw new Exception($"在tb_version表中未查到taskid:{task.id}数据");
                     }
                 }
+
+                #region//加载外部配置文件
+                tb_task_config_dal task_Config_Dal = new tb_task_config_dal();
+                List<tb_task_config_model> task_Config_Models = task_Config_Dal.GetList(conn, task.id);
+                try
+                {
+                    foreach (var task_config_Model in task_Config_Models)
+                    {
+                        string fullPath = path + task_config_Model.relativePath + task_config_Model.filename;
+                        if (File.Exists(fullPath))
+                        {
+                            File.Delete(fullPath);
+                        }
+                        using (FileStream fs = File.Create(fullPath))
+                        {
+                            byte[] buffer = System.Text.Encoding.UTF8.GetBytes(task_config_Model.filecontent);
+                            await fs.WriteAsync(buffer);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"任务在加载外部配置文件出错:{ex.Message}");
+                }
+
+                #endregion
+
                 //使用 shell 命令开启 任务程序
                 var psi = new ProcessStartInfo
                 {
@@ -127,7 +158,7 @@ namespace TaskManager.Node.SystemRuntime
             string pId = ps.GetProcessByName(task.taskmainclassdllfilename);
             if (string.IsNullOrEmpty(pId))
             {
-                throw new TaskAlreadyRunningException("任务不在运行中");
+                throw new TaskAlreadyNotRunningException("任务不在运行中");
             }
             bool result = false;
             ps.ProcessKill(int.Parse(pId));
@@ -190,8 +221,9 @@ namespace TaskManager.Node.SystemRuntime
                 {
                     re = Stop(taskid);
                 }
-                catch (TaskAlreadyRunningException)//捕获此类异常不做处理
+                catch (TaskAlreadyNotRunningException)//捕获此类异常不做处理
                 {
+                    re = true;
                 }
                 if (re)
                 {
@@ -200,7 +232,10 @@ namespace TaskManager.Node.SystemRuntime
                         tb_task_dal taskDAL = new tb_task_dal();
                         task = taskDAL.GetOneTask(conn, taskid);
                     });
-                    string rootPath = AppDomain.CurrentDomain.BaseDirectory + GlobalConfig.TaskDllDir + "\\";
+                    //TBD 修改为 AppDomain.CurrentDomain.BaseDirectory + GlobalConfig.TaskDllDir 
+                    //TBD 后期加入每个任务可定制部署目录
+                    // string rootPath = AppDomain.CurrentDomain.BaseDirectory + GlobalConfig.TaskDllDir + "\\";
+                    string rootPath = "F:\\" + GlobalConfig.TaskDllDir + "\\";
                     string path = $"{rootPath}{task.taskname}\\";
                     if (Directory.Exists(path))
                     {

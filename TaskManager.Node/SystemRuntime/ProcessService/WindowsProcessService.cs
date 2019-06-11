@@ -42,7 +42,7 @@ namespace TaskManager.Node.SystemRuntime.ProcessService
             var line = "";
             var process = "";
             while ((line = pro.StandardOutput.ReadLine()) != null)
-                if (!string.IsNullOrEmpty(line) && line.IndexOf("TCP", StringComparison.Ordinal) > -1)
+                if (!string.IsNullOrEmpty(line) && line.IndexOf("TCP", StringComparison.Ordinal) > -1 && line.IndexOf($":{port} ", StringComparison.Ordinal)>-1)
                 {
                     process = line.Substring(line.LastIndexOf(" ", StringComparison.Ordinal),
                         line.Length - line.LastIndexOf(" ", StringComparison.Ordinal));

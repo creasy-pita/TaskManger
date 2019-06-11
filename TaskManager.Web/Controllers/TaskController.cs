@@ -24,7 +24,7 @@ using System.Threading;
 
 namespace TaskManager.Web.Controllers
 {
-    [Authorize]
+    //[Authorize]//TBD 需要取消[Authorize]/ 的注释
     public class TaskController : BaseWebController
     {
         //
@@ -153,6 +153,84 @@ namespace TaskManager.Web.Controllers
             });
         }
 
+        [HttpPost]
+        public ActionResult AddFullInfo2([FromBody]SimpleModel info)
+        {
+            return Ok(info);
+        }
+
+        /// <summary>
+        /// 添加完整任务 并一次性保存
+        /// </summary>
+        /// <param name="info"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public string AddFullInfo([ModelBinder(Name = "json")][FromBody]FullTaskInfo info)
+        //public string AddFullInfo([FromBody]FullTaskInfo info)
+        {
+            IFormFile TaskDll = info.TaskDll;
+            tb_task_model model = info.model;
+            tb_task_config_model[] config_models = info.config_models;
+            string tempdatajson = info.tempdatajson;
+
+            string filename = TaskDll.FileName;
+            byte[] dllbyte;
+            using (var dll = TaskDll.OpenReadStream())
+            {
+                dllbyte = new byte[dll.Length];
+                dll.Read(dllbyte, 0, Convert.ToInt32(dll.Length));
+            }
+
+            tb_task_dal dal = new tb_task_dal();
+            tb_task_config_dal config_dal = new tb_task_config_dal();
+            tb_version_dal dalversion = new tb_version_dal();
+            tb_tempdata_dal tempdatadal = new tb_tempdata_dal();
+            //model.taskcreateuserid = Common.GetUserId(this);
+            using (DbConn PubConn = DbConn.CreateConn(Config.TaskConnectString))
+            {
+                PubConn.Open();
+                PubConn.BeginTransaction();
+                try
+                {
+                    model.taskcreatetime = DateTime.Now;
+                    model.taskversion = 1;
+                    int taskid = dal.AddTask(PubConn, model);
+                    dalversion.Add(PubConn, new tb_version_model()
+                    {
+                        taskid = taskid,
+                        version = 1,
+                        versioncreatetime = DateTime.Now,
+                        zipfile = dllbyte,
+                        zipfilename = System.IO.Path.GetFileName(filename)
+                    });
+                    foreach (var config_Model in config_models)
+                    {
+                        config_dal.Add(PubConn, new tb_task_config_model()
+                        {
+                            filecontent = config_Model.filecontent,
+                            filename = config_Model.filename,
+                            relativePath = config_Model.relativePath,
+                            taskid = taskid,
+                            lastupdatetime = DateTime.Now
+                        });
+                    }
+
+                    tempdatadal.Add(PubConn, new tb_tempdata_model()
+                    {
+                        taskid = taskid,
+                        tempdatajson = tempdatajson,
+                        tempdatalastupdatetime = DateTime.Now
+                    });
+                    PubConn.Commit();
+                }
+                catch (Exception ex)
+                {
+                    PubConn.Rollback();
+                }
+                finally { }
+            }
+            return info.config_models[0].filecontent;
+        }
         public ActionResult Update(int taskid)
         {
             return this.Visit(EnumUserRole.None, () =>

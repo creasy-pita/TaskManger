@@ -1,35 +1,45 @@
 ﻿using BSF.Db;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using TaskManager.Core;
 using TaskManager.Domain.Dal;
 using TaskManager.Domain.Model;
-using TaskManager.Web.Models;
 using Xunit;
 
 namespace TaskManager.Test.UnitTests
 {
-    public class tb_task_dalTest
+    public class tb_webtask_dalTest
     {
+
         [Fact]
-        public void Nothing_JustGetJsonData()
+        public void AddTask_InputOneTask_ReturnOk()
         {
             string TaskConnectString = "Server=localhost;Database=dyd_bs_task;Uid=root;Pwd=123456;CharSet=utf8;";
             using (DbConn PubConn = DbConn.CreateConn(TaskConnectString))
             {
-                tb_task_dal dal = new tb_task_dal();
+                tb_webtask_dal dal = new tb_webtask_dal();
                 PubConn.Open();
-                tb_task_model task = dal.GetOneTask(PubConn, 2);
-                tb_task_config_model task_Config_Model = new tb_task_config_model();
-                FullTaskInfo fullTaskInfo = new FullTaskInfo();
-                fullTaskInfo.config_models = new tb_task_config_model[] { task_Config_Model };
-                fullTaskInfo.model = task;
-                string aa = JsonConvert.SerializeObject(fullTaskInfo);
-                Console.WriteLine(aa);
+
+                tb_webtask_model task = new tb_webtask_model();
+                task.categoryid = 1;
+                //task.id =
+                task.nodeid = 3;
+                task.taskcreatetime = DateTime.Now;
+                task.taskname = "mynetcorewebapi";
+                task.taskupdatetime = DateTime.Now;
+                task.taskerrorcount = 0;
+                task.taskruncount = 0;
+                task.taskcreateuserid = 1;
+                task.taskstate = 0;
+                task.taskremark = string.Empty;
+                task.taskport = 5000;
+                task.taskhealthcheckurl = "http://localhost:5000/api/values";
+                task.taskpath = "E:\\work\\myproject\\netcore\\MyWebAPI\\bin\\Debug\\netcoreapp2.0";
+                task.taskstartfilename = "dotnet";
+                task.taskarguments = "MyWebAPI.dll";
+                Assert.True(dal.Add(PubConn, task));
             }
-            Console.WriteLine("ddddddd");
         }
 
 

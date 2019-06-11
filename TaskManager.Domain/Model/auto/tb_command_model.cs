@@ -40,7 +40,12 @@ namespace TaskManager.Domain.Model
         /// 节点id
         /// </summary>
         public int nodeid { get; set; }
-        
+
+        /// <summary>
+        /// 任务类型  0 控制台服务程序任务  1 web服务程序任务
+        /// </summary>
+        public int tasktype { get; set; }
+
         /// <summary>
         /// 命令创建时间
         /// </summary>

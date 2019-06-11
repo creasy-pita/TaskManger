@@ -7,6 +7,7 @@ using System.Threading;
 using TaskManager.Core;
 using TaskManager.Domain.Dal;
 using TaskManager.Domain.Model;
+using TaskManager.Node;
 using TaskManager.Node.Commands;
 using TaskManager.Node.SystemRuntime.ProcessService;
 using TaskManager.Node.SystemRuntime.Services;
@@ -18,12 +19,14 @@ namespace TaskManager.Test.UnitTests
     public class TomcatServiceTestTest
     {
 
-        //[Fact]
-        //public void dddd()
-        //{
-        //    StartWebTaskCommand command = new StartWebTaskCommand();
-        //    command.Execute();
-        //}
+        [Fact]
+        public void StartWebTaskCommandExecute_InputTaskId_ReturnNothingButTaskIsSuccessStarted()
+        {
+            GlobalConfig.TaskDataBaseConnectString = "Server=localhost;Database=dyd_bs_task;Uid=root;Pwd=123456;CharSet=utf8;";
+            StartWebTaskCommand command = new StartWebTaskCommand();
+            command.CommandInfo = new tb_command_model { taskid = 1};
+            command.Execute();
+        }
 
         [Fact]
         public void SimpleTest()
@@ -78,7 +81,7 @@ namespace TaskManager.Test.UnitTests
                     ,
                 StartArguments = "MyWebAPI.dll"
             };
-            TomcatService service = new TomcatService();
+            WebTaskProvider service = new WebTaskProvider();
             bool isOK = false;
             string isOKStr = "false";
             service.StartCompeleteEvent += (_ => { Console.WriteLine("I'm OK"); isOK = true; isOKStr = "true"; });
@@ -131,7 +134,7 @@ namespace TaskManager.Test.UnitTests
                     ,
                 StartArguments = "MyWebAPI.dll"
             };
-            TomcatService service = new TomcatService();
+            WebTaskProvider service = new WebTaskProvider();
             service.Stop(t);
         }
 

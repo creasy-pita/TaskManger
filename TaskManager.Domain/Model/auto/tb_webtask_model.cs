@@ -5,12 +5,11 @@ using System.Collections.Generic;
 namespace TaskManager.Domain.Model
 {
     /// <summary>
-    /// tb_task Data Structure.
+    /// tb_webtask Data Structure.
     /// </summary>
     [Serializable]
-    public partial class tb_task_model
+    public partial class tb_webtask_model
     {
-	/*代码自动生成工具自动生成,不要在这里写自己的代码，否则会被自动覆盖哦 - 车毅*/
         
         /// <summary>
         /// 
@@ -73,34 +72,35 @@ namespace TaskManager.Domain.Model
         public int taskcreateuserid { get; set; }
         
         /// <summary>
-        /// 0 停止  1 运行中
+        /// 
         /// </summary>
         public Byte taskstate { get; set; }
         
-        /// <summary>
-        /// 
-        /// </summary>
-        public int taskversion { get; set; }
         
         /// <summary>
         /// 
         /// </summary>
-        public string taskappconfigjson { get; set; }
+        public int taskport { get; set; }
         
         /// <summary>
         /// 
         /// </summary>
-        public string taskcron { get; set; }
+        public string taskhealthcheckurl { get; set; }
         
         /// <summary>
         /// 
         /// </summary>
-        public string taskmainclassnamespace { get; set; }
+        public string taskpath { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public string taskmainclassdllfilename { get; set; }
+        public string taskstartfilename { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string taskarguments { get; set; }
 
         /// <summary>
         /// 

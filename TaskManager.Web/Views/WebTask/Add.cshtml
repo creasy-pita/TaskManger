@@ -1,0 +1,86 @@
+﻿@using TaskManager.Domain.Model;
+@{
+    ViewBag.Title = "Add";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    List<tb_category_model> Category = ViewBag.Category as List<tb_category_model>;
+    List<tb_node_model> Node = ViewBag.Node as List<tb_node_model>;
+    List<tb_user_model> User = ViewBag.User as List<tb_user_model>;
+}
+<style>
+    
+</style>
+
+<script>
+    function save()
+    {
+        if ($("#taskremark").val().length < 20)
+        {
+            alert("备注不得少于20个字符" );
+            return false;
+        }
+    }
+</script>
+<div class="head">
+    <div class="title">
+        新增任务 @Html.Raw(TaskManager.Web.Models.Common.HelpHtml(""))
+    </div>
+</div>
+<div>
+    @using (Html.BeginForm("Add", "WebTask", FormMethod.Post, new { enctype = "multipart/form-data", @onsubmit = "return true" }))
+    {
+    <ul class="mydetail">
+        <li>
+            <label>任务名</label><input class="mylongtext" type="text" id="taskname" name="taskname" />
+        </li>
+        <li>
+            <label>组别</label>
+            <select name="categoryid">
+                @foreach (var c in Category)
+                {
+                    <option value="@c.id">@c.categoryname</option>
+                }
+            </select>
+        </li>
+        <li>
+            <label>创建人</label>
+            <select name="taskcreateuserid">
+                @foreach (var c in User)
+                {
+                    <option value="@c.id">@c.username</option>
+                }
+            </select>
+        </li>
+        <li>
+            <label>节点</label>
+            <select name="nodeid">
+                @foreach (var n in Node)
+                {
+                    <option value="@n.id">@n.nodename</option>
+                }
+            </select>
+        </li>
+        <li>
+            <label>端口</label><input class="mylongtext" type="text" id="taskport" name="taskport" />
+        </li>
+        <li>
+            <label>健康检查url</label><input class="mylongtext" type="text" id="taskhealthcheckurl" name="taskhealthcheckurl" />
+        </li>
+        <li>
+            <label>web程序根目录</label><input class="mylongtext" type="text" id="taskpath" name="taskpath" />
+        </li>
+        <li>
+            <label>启动命令</label><input class="mylongtext" type="text" id="taskstartfilename" name="taskstartfilename" />(启动tomcat 命令行脚本中的  exe名称(比如 java -jar xxx.jar 中  的java) 或者 bat脚本名,比如 start.bat run 中的 start.bat；脚本文件需要设置全路径, 如果没有设置环境变量的exe 也需要设置全路径)
+        </li>
+        <li>
+            <label>命令参数</label><input class="mylongtext" type="text" id="taskarguments" name="taskarguments" />(启动服务的命令行脚本中的  参数(比如 java -jar xxx.jar 中  的-jar xxx.jar))
+        </li>
+        <li>
+            <label>备注</label>
+            <textarea id="taskremark" name="taskremark" style="height:200px"></textarea>(不得少于20个字符)
+        </li>
+        <li>
+            <input type="submit" class="btn1" value="提交" onclick="return save()" />
+        </li>
+    </ul>
+    }
+</div>

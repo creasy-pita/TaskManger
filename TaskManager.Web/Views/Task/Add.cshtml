@@ -43,6 +43,218 @@
             return false;
         }
     }
+    function MySubmit() {
+        var formData = new FormData();
+        var taskDll = $('input[name="TaskDll"]').get(0).files[0];
+        formData.append("TaskDll", taskDll);
+
+        var data = {};
+        var model = {};
+        var config_models = [];
+        //组装 model 
+        model["id"] = 0;
+        model["taskname"] = $("#taskname").val();
+        model["categoryid"] = $("#categoryid").val();
+        model["nodeid"] = $("#nodeid").val();
+        model["taskcreatetime"] = "2019-04-19";
+        model["taskupdatetime"] = "2019-05-23";
+        model["tasklaststarttime"] = "2019-05-31";
+        model["tasklastendtime"] = "2019-05-31";
+        model["tasklasterrortime"] = "1900-01-01";
+        model["taskerrorcount"] = 0;
+        model["taskruncount"] = 0;
+        model["taskcreateuserid"] = $("#taskcreateuserid").val();;
+        model["taskstate"] = 0;
+        model["taskversion"] = 1;
+        model["taskappconfigjson"] = "";
+        model["taskcron"] = "0/5 * * * * ?";
+        model["taskmainclassnamespace"] = $("#taskmainclassnamespace").val();
+        model["taskmainclassdllfilename"] = $("#taskmainclassdllfilename").val();
+        model["taskremark"] = $("#taskremark").val();
+
+
+        //组装config_models
+        var config_model1 = {};
+        config_model1["id"] = 0;
+        config_model1["taskid"] = 0;
+        config_model1["relativePath"] = "/a/b/c/";
+        config_model1["filecontent"] = "<root>aa</root>";
+        config_model1["filename"] = "appconfig.xml";
+        config_model1["lastupdatetime"] = "0001-01-01";
+
+        var config_model2 = {};
+        config_model2["id"] = 0;
+        config_model2["taskid"] = 0;
+        config_model2["relativePath"] = "/a/b/c/";
+        config_model2["filecontent"] = "{\"Logging\": {\"LogLevel\":{\"Default\":\"Warning\"}},\"AllowedHosts\": \"*\"}";
+        config_model2["filename"] = "appconfig.json";
+        config_model2["lastupdatetime"] = "0001-01-01";
+        config_models.push(config_model1);
+        config_models.push(config_model2);
+
+        data["model"] = model;
+        data["config_models"] = config_models;
+
+        formData.append("json", JSON.stringify(data));
+        var url = window.location.href + "FullInfo";
+
+        $.ajax({
+            url: url,
+            type: "POST",
+            processData: false,
+            contentType: false,
+            data: formData,
+            complete: function (data) {
+                alert(data);
+                alert("success");
+            }
+        });
+    }
+
+    function MySubmit3() {
+        var data = {};
+        var model = {};
+        var config_models = [];
+        //组装 model 
+        model["id"] = 0;
+        model["taskname"] = $("#taskname").val();
+        model["categoryid"] = $("#categoryid").val();
+        model["nodeid"] = $("#nodeid").val();
+        model["taskcreatetime"] = "2019-04-19";
+        model["taskupdatetime"] = "2019-05-23";
+        model["tasklaststarttime"] = "2019-05-31";
+        model["tasklastendtime"] = "2019-05-31";
+        model["tasklasterrortime"] = "1900-01-01";
+        model["taskerrorcount"] = 0;
+        model["taskruncount"] = 0;
+        model["taskcreateuserid"] = $("#taskcreateuserid").val();;
+        model["taskstate"] = 0;
+        model["taskversion"] = 1;
+        model["taskappconfigjson"] = "";
+        model["taskcron"] = "0/5 * * * * ?";
+        model["taskmainclassnamespace"] = $("#taskmainclassnamespace").val();
+        model["taskmainclassdllfilename"] = $("#taskmainclassdllfilename").val();
+        model["taskremark"] = $("#taskremark").val();
+
+
+        //组装config_models
+        var config_model1 = {};
+        config_model1["id"] = 0;
+        config_model1["taskid"] = 0;
+        config_model1["relativePath"] = "/a/b/c/";
+        config_model1["filecontent"] = "<root>aa</root>";
+        config_model1["filename"] = "appconfig.xml";
+        config_model1["lastupdatetime"] = "0001-01-01";
+
+        var config_model2 = {};
+        config_model2["id"] = 0;
+        config_model2["taskid"] = 0;
+        config_model2["relativePath"] = "/a/b/c/";
+        config_model2["filecontent"] = "{\"Logging\": {\"LogLevel\":{\"Default\":\"Warning\"}},\"AllowedHosts\": \"*\"}";
+        config_model2["filename"] = "appconfig.json";
+        config_model2["lastupdatetime"] = "0001-01-01";
+        config_models.push(config_model1);
+        config_models.push(config_model2);
+
+        data["model"] = model;
+        data["config_models"] = config_models;
+
+
+        var url = window.location.href + "FullInfo";
+        alert(url);
+        sendPostRequest(url, data);
+
+    }
+
+
+    function MySubmit1() {
+        var data = {};
+        //组装 model 
+        data["age"] = 0;
+        data["name"] = "111";
+        var url = window.location.href + "FullInfo2";
+        alert(url);
+        sendPostRequest(url, data);
+    }
+    function MySubmit2() {
+        var data = {};
+        var model = {};
+        var config_models = [];
+        //组装 model 
+        model["id"] = 0;
+        model["taskname"] = "TasksTest";
+        model["categoryid"] = 1;
+        model["nodeid"] = 3;
+        model["taskcreatetime"] = "2019-04-19";
+        model["taskupdatetime"] = "2019-05-23";
+        model["tasklaststarttime"] = "2019-05-31";
+        model["tasklastendtime"] = "2019-05-31";
+        model["tasklasterrortime"] = "1900-01-01";
+        model["taskerrorcount"] = 0;
+        model["taskruncount"] = 0;
+        model["taskcreateuserid"] = 5;
+        model["taskstate"] = 0;
+        model["taskversion"] = 1;
+        model["taskappconfigjson"] = "";
+        model["taskcron"] = "0/5 * * * * ?";
+        model["taskmainclassnamespace"] = "BackgroundTasksSample";
+        model["taskmainclassdllfilename"] = "BackgroundTasksSample.dll aaa";
+        model["taskremark"] = "BackgroundTasksSampleWindowsVersion";
+
+
+        //组装config_models
+        var config_model1 = {};
+        config_model1["id"] = 0;
+        config_model1["taskid"] = 0;
+        config_model1["relativePath"] = "/a/b/c/";
+        config_model1["filecontent"] = "<root>aa</root>";
+        config_model1["filename"] = "appconfig.xml";
+        config_model1["lastupdatetime"] = "0001-01-01";
+
+        var config_model2 = {};
+        config_model2["id"] = 0;
+        config_model2["taskid"] = 0;
+        config_model2["relativePath"] = "/a/b/c/";
+        config_model2["filecontent"] = "{\"Logging\": {\"LogLevel\":{\"Default\":\"Warning\"}},\"AllowedHosts\": \"*\"}";
+        config_model2["filename"] = "appconfig.json";
+        config_model2["lastupdatetime"] = "0001-01-01";
+        config_models.push(config_model1);
+        config_models.push(config_model2);
+
+        data["model"] = model;
+        data["config_models"] = config_models;
+        
+
+        var url = window.location.href+"FullInfo";
+        alert(url);
+        sendPostRequest(url, data);
+
+    }
+//**
+// * 发送post请求
+ //*  {Object} url
+ //* {Object} obj 
+ //*/
+function sendPostRequest(url, obj) {
+	var xmlhttp;
+	if (window.XMLHttpRequest) {
+		xmlhttp = new XMLHttpRequest();
+	} else {
+		xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	xmlhttp.onreadystatechange = function() {
+		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+			alert(xmlhttp.responseText);
+		} else if (xmlhttp.readyState == 4 && xmlhttp.status == 0) {
+			alert("服务器未响应");
+		}
+	}
+	xmlhttp.open("POST", url, true);
+	xmlhttp.setRequestHeader('Content-Type', 'application/json');
+    //xmlhttp.send(obj);
+    xmlhttp.send(JSON.stringify(obj));
+}
+
 </script>
 <div class="head">
     <div class="title">
@@ -84,17 +296,20 @@
             </select>
         </li>
         <li>
+            <label>文件名</label>
+            <input class="mylongtext" type="text" id="configfilename_1" name="configfilename_1" />
+            <label>相对路径</label>
+            <input class="mylongtext" type="text" id="configfilepath_1" name="configfilepath_1" />
+            <label>文件内容</label>
+            <textarea id="configfilecontent_1" name="configfilecontent_1" style="height:200px"></textarea>
+        </li>
+        <li>
             <label>任务配置json</label>
             <textarea id="taskappconfigjson" name="taskappconfigjson" style="height:200px"></textarea>示范:{"key1":"value1","key2":"value2"}
         </li>
         <li>
             <label>数据库临时数据json</label>
             <textarea id="tempdatajson" name="tempdatajson" style="height:200px"></textarea>示范:{"key1":"value1","key2":"value2"}
-        </li>
-        <li>
-            <label>Cron表达式</label>
-            <input  type="text" id="taskcron" name="taskcron" />示范：0/5 * * * * ?  <a target="_blank" href="@Url.Action("cron", "Task", new {  })">Cron表达式生成器</a>（百度搜索:Cron表达式实例 ）<a target="_blank" href="@Url.Action("CustomCorn", "Task", new {  })">自定义cron表达式</a>
-
         </li>
         <li>
             <label>任务入口类的命名空间</label><input class="mylongtext" type="text" id="taskmainclassnamespace" name="taskmainclassnamespace" />示范：TaskManager.Demo.DemoTask
@@ -110,7 +325,8 @@
             <textarea id="taskremark" name="taskremark" style="height:200px"></textarea>(不得少于20个字符)
         </li>
         <li>
-            <input type="submit" class="btn1" value="提交" onclick="return save()" />
+            <!--            <input type="submit" class="btn1" value="提交" onclick="return save()" />-->
+            <input type="button" class="btn1" value="提交" onclick="MySubmit()" />
         </li>
     </ul>
     }

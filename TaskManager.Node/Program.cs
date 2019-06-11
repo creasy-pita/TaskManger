@@ -20,7 +20,8 @@ namespace TaskManager.Node
 
         static void Monitor()
         {
-            ScheduleJob.ExecuteInterval<TimeJob>(period, identityName);
+            //TBD 解决TimeJob 中修改 任务状态 会与 WebTaskProvider 修改任务状态 不同步的问题后 取消下行注释
+            //ScheduleJob.ExecuteInterval<TimeJob>(period, identityName);
         }
 
         public static void NodeMain_Load()

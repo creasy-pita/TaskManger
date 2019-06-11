@@ -5,10 +5,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TaskManager.Core;
 using TaskManager.Domain.Dal;
 using TaskManager.Domain.Model;
 using TaskManager.Node.SystemRuntime;
+using TaskManager.Node.SystemRuntime.ProcessService;
 using TaskManager.Node.SystemRuntime.Services;
+using TaskManager.Node.Tools;
 
 namespace TaskManager.Node.Commands
 {
@@ -19,30 +22,38 @@ namespace TaskManager.Node.Commands
     {
         public override void Execute()
         {
-            //TBD 默认 一个任务信息entity, 后续通过taskid 获取具体的任务信息entity
-            TomcatEntity t = new TomcatEntity
+            tb_webtask_model webtask = new tb_webtask_model();
+            SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (conn) =>
             {
-                Desc = "2222"
-                    ,
-                Path = "E:\\work\\myproject\\netcore\\MyWebAPI\\bin\\Debug\\netcoreapp2.0"
-                    ,
-                Port = "5000",
-                TableName = "111"
-                    ,
-                HealthCheckUrl = "http://localhost:5000/api/values"
-                    ,
-                StartFileName = "dotnet"
-                    ,
-                StartArguments = "MyWebAPI.dll"
+                webtask = new tb_webtask_dal().Get(conn, this.CommandInfo.taskid);
+            });
+            TomcatEntity t = new TomcatEntity {
+                Path = webtask.taskpath,
+                Port = webtask.taskport.ToString(),
+                HealthCheckUrl = webtask.taskhealthcheckurl,
+                StartFileName = webtask.taskstartfilename,
+                StartArguments = webtask.taskarguments
             };
-            TomcatService tomcatService = new TomcatService();
-            tomcatService.Start(t);
-
-            //string namespacestr = typeof(ITaskProvider).Namespace;
-            //string providerTypeName = $"{namespacestr}.{node.nodeostype}TaskProvider";
-            //ITaskProvider tp = (ITaskProvider)System.Reflection.Assembly
-            //    .GetAssembly(typeof(ITaskProvider)).CreateInstance(providerTypeName);
-            //tp.Start(this.CommandInfo.taskid);
+            IProcessService ps = ProcessServiceFactory.CreateProcessService(EnumOSState.Windows.ToString());
+            //判断是否已经运行
+            string pId = ps.GetProcessByPort(webtask.taskport.ToString());
+            if (!string.IsNullOrEmpty(pId))
+            {
+                throw new Exception("任务已在运行中");
+            }
+            WebTaskProvider webTaskProvider = new WebTaskProvider();
+            if (webTaskProvider.Start(t))
+            {
+                SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (conn) =>
+                {
+                    ///更新服务状态 服务启动时间
+                    //new tb_task_dal().UpdateTaskState(conn, task.id, (int)enumTaskState);
+                    webtask.tasklaststarttime = DateTime.Now;
+                    webtask.taskstate = (byte)EnumTaskState.Running;
+                    new tb_webtask_dal().UpdateTask(conn, webtask);
+                    LogHelper.AddNodeLog($"节点:{webtask.nodeid}成功执行任务:{webtask.id}……");
+                });
+            }
         }
     }
 }

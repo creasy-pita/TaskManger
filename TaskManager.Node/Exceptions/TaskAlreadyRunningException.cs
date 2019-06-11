@@ -4,9 +4,12 @@ using System.Text;
 
 namespace TaskManager.Node.Exceptions
 {
-    class TaskAlreadyRunningException:Exception
+    /// <summary>
+    /// 任务已经在运行中
+    /// </summary>
+    class TaskAlreadyNotRunningException:Exception
     {
-        public TaskAlreadyRunningException(string message):base(message)
+        public TaskAlreadyNotRunningException(string message):base(message)
         {
         }
     }

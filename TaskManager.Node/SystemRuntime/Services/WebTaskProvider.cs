@@ -9,7 +9,7 @@ using TaskManager.Node.SystemRuntime.ProcessService;
 
 namespace TaskManager.Node.SystemRuntime.Services
 {
-    public class TomcatService
+    public class WebTaskProvider
     {
         public delegate void StartDelegate(TomcatEventArgs args);
         public event StartDelegate OnStartingEvent;
@@ -17,35 +17,31 @@ namespace TaskManager.Node.SystemRuntime.Services
         public event StartDelegate StartCompeleteEvent;
         public event StartDelegate ServerRefuseEvent;
 
-        public void Start(TomcatEntity t)
+        public bool Start(TomcatEntity t)
         {
-            Thread th = new Thread(Worker);
-            th.Start(t);
-
-           // StartTomcat(t.Path, "startup.bat", "run");
-        }
-
-        private void Worker(object para)
-        {
-            TomcatEntity t = para as TomcatEntity;
-            TomcatEventArgs args = new TomcatEventArgs
+            try
             {
-                Message = $"正在启动1 服务名：{t.TableName} ;服务端口{t.Port}"
-            };
-            BeginStartEvent?.Invoke(args);
-            //StartTomcat(t.Path, "startup.bat", "run");
-            StartTomcat(t.Path, t.StartFileName, t.StartArguments);
-            if (DoCheck(t))
-            {
-                TomcatEventArgs args1 = new TomcatEventArgs
+                //TomcatEventArgs args = new TomcatEventArgs
+                //{
+                //    Message = $"正在启动1 服务名：{t.TableName} ;服务端口{t.Port}"
+                //};
+                //BeginStartEvent?.Invoke(args);
+                StartTomcat(t.Path, t.StartFileName, t.StartArguments);
+                if (DoCheck(t))
                 {
-                    Message = $"启动完成 服务名：{t.TableName} ;服务端口{t.Port}"
-                };
-                StartCompeleteEvent?.Invoke(args1);
-                //Console.WriteLine($"启动完成 服务名：{t.TableName} ;服务端口{t.Port}");
+                    //TomcatEventArgs args1 = new TomcatEventArgs
+                    //{
+                    //    Message = $"启动完成 服务名：{t.TableName} ;服务端口{t.Port}"
+                    //};
+                    //StartCompeleteEvent?.Invoke(args1);
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
             }
         }
-
         private bool DoCheck(TomcatEntity t)
         {
             bool flag = false;
@@ -70,34 +66,34 @@ namespace TaskManager.Node.SystemRuntime.Services
                 catch (Exception ex)
                 {
                     tw.Stop();
-                    TomcatEventArgs args = new TomcatEventArgs
-                    {
-                        //Message = $"Server Port:{t.Port} the {currTimes}  check finds tomcat server not ready, wait for another check! info:{ex.Message}"
-                        Message = $"{t.TableName} server refused, wait for another check in 3 seconds later! info:{ex.Message}"
-                    };
-                    OnStartingEvent?.Invoke(args);
+                    //TomcatEventArgs args = new TomcatEventArgs
+                    //{
+                    //    //Message = $"Server Port:{t.Port} the {currTimes}  check finds tomcat server not ready, wait for another check! info:{ex.Message}"
+                    //    Message = $"{t.TableName} server refused, wait for another check in 3 seconds later! info:{ex.Message}"
+                    //};
+                    //OnStartingEvent?.Invoke(args);
                     //Console.WriteLine($"Server Port:{t.Port} the {currTimes}  check finds tomcat server not ready, wait for another check! info:{ex.Message}");
                     continue;
                 }
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    TomcatEventArgs args = new TomcatEventArgs
-                    {
-                        // Message = $"Server Port:{t.TableName} the {currTimes}  check findstomcat server is ok ! time elapse:{tw.ElapsedMilliseconds}ms"
-                        Message = $"{t.TableName} server is ok !"
-                    };
-                    StartCompeleteEvent?.Invoke(args);
+                    //TomcatEventArgs args = new TomcatEventArgs
+                    //{
+                    //    // Message = $"Server Port:{t.TableName} the {currTimes}  check findstomcat server is ok ! time elapse:{tw.ElapsedMilliseconds}ms"
+                    //    Message = $"{t.TableName} server is ok !"
+                    //};
+                    //StartCompeleteEvent?.Invoke(args);
                     //Console.WriteLine($"Server Port:{t.Port} the {currTimes}  check findstomcat server is ok ! time elapse:{tw.ElapsedMilliseconds}ms");
                     flag = true;
                 }
                 else
                 {
-                    TomcatEventArgs args = new TomcatEventArgs
-                    {
-                        //Message = $"Server Port:{t.Port} the {currTimes}  check finds tomcat server not ready, wait for another checktime elapse:{tw.ElapsedMilliseconds}ms"
-                        Message = $"{t.TableName}  server not ready, wait for another check in 3 seconds later"
-                    };
-                    OnStartingEvent?.Invoke(args);
+                    //TomcatEventArgs args = new TomcatEventArgs
+                    //{
+                    //    //Message = $"Server Port:{t.Port} the {currTimes}  check finds tomcat server not ready, wait for another checktime elapse:{tw.ElapsedMilliseconds}ms"
+                    //    Message = $"{t.TableName}  server not ready, wait for another check in 3 seconds later"
+                    //};
+                    //OnStartingEvent?.Invoke(args);
                     //Console.WriteLine($"Server Port:{t.Port} the {currTimes}  check finds tomcat server not ready, wait for another checktime elapse:{tw.ElapsedMilliseconds}ms");
                 }
             }
@@ -114,7 +110,7 @@ namespace TaskManager.Node.SystemRuntime.Services
             CmdProcess.Start();
         }
 
-        public void Stop(TomcatEntity t)
+        public bool Stop(TomcatEntity t)
         {
             IProcessService ps = ProcessServiceFactory.CreateProcessService(EnumOSState.Windows.ToString());
             string processId = ps.GetProcessByPort(t.Port);
@@ -123,6 +119,20 @@ namespace TaskManager.Node.SystemRuntime.Services
                 var p = Process.GetProcessById(Convert.ToInt32(processId));
                 p.Kill();
             }
+            //调用进程终止后会又延时，以下采用重试判断的方式
+            int RetryCount = 10;
+            while (RetryCount-- > 0)
+            {
+                if (string.IsNullOrEmpty(ps.GetProcessByPort(t.Port)))
+                {
+                    RetryCount = 0;
+                }
+                else
+                {
+                    Thread.Sleep(500);
+                }
+            }
+            return true;
         }
     }
 
