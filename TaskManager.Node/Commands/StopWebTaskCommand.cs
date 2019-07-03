@@ -28,6 +28,9 @@ namespace TaskManager.Node.Commands
             TomcatEntity t = new TomcatEntity
             {
                 Port = webtask.taskport.ToString(),
+                StopFileName = webtask.taskstopfilename,
+                StopArguments = webtask.taskstoparguments,
+                Path = webtask.taskpath
             };
             WebTaskProvider webTaskProvider = new WebTaskProvider();
             webTaskProvider.Stop(t);

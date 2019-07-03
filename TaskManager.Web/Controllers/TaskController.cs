@@ -165,9 +165,10 @@ namespace TaskManager.Web.Controllers
         /// <param name="info"></param>
         /// <returns></returns>
         [HttpPost]
-        public string AddFullInfo([ModelBinder(Name = "json")][FromBody]FullTaskInfo info)
-        //public string AddFullInfo([FromBody]FullTaskInfo info)
+        public JsonResult AddFullInfo([ModelBinder(Name = "json")][FromBody]FullTaskInfo info)
         {
+            //TBD 保存失败时返回 code=-1
+           // return info.config_models[0].filecontent;
             IFormFile TaskDll = info.TaskDll;
             tb_task_model model = info.model;
             tb_task_config_model[] config_models = info.config_models;
@@ -229,7 +230,9 @@ namespace TaskManager.Web.Controllers
                 }
                 finally { }
             }
-            return info.config_models[0].filecontent;
+            return Json(new { code = 1, msg = "" } );
+            //return RedirectToAction("index");
+            //return info.config_models[0].filecontent;
         }
         public ActionResult Update(int taskid)
         {
@@ -429,10 +432,27 @@ namespace TaskManager.Web.Controllers
                 try
                 {
                     tb_task_dal dal = new tb_task_dal();
+                    tb_task_config_dal task_Config_Dal = new tb_task_config_dal();
                     using (DbConn PubConn = DbConn.CreateConn(Config.TaskConnectString))
                     {
                         PubConn.Open();
-                        bool state = dal.DeleteOneTask(PubConn, id);
+                        PubConn.BeginTransaction();
+                        bool state =false;
+                        try
+                        {
+                            state = dal.DeleteOneTask(PubConn, id);
+                            List<tb_task_config_model> task_config_models = task_Config_Dal.GetList(PubConn, id);
+                            foreach (var  task_config_model in task_config_models)
+                            {
+                                state = task_Config_Dal.Delete(PubConn, task_config_model.id);
+                            }
+                            PubConn.Commit();
+                        }
+                        catch (Exception ex)
+                        {
+                            PubConn.Rollback();
+                        }
+
                         return Json(new { code = 1, state = state });
                     }
                 }

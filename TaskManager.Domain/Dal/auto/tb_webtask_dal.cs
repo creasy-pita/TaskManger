@@ -53,10 +53,14 @@ namespace TaskManager.Domain.Dal
 					//
 					new ProcedureParameter("@taskarguments",    model.taskarguments),
 					//
+					new ProcedureParameter("@taskstopfilename",    model.taskstopfilename),
+					//
+					new ProcedureParameter("@taskstoparguments",    model.taskstoparguments),
+					//
 					new ProcedureParameter("@taskremark",    model.taskremark)   
                 };
-            int rev = PubConn.ExecuteSql(@"insert into tb_webtask(taskname,categoryid,nodeid,taskcreatetime,taskupdatetime,tasklaststarttime,tasklastendtime,tasklasterrortime,taskerrorcount,taskruncount,taskcreateuserid,taskstate,taskport,taskhealthcheckurl,taskpath,taskstartfilename,taskarguments,taskremark)
-										   values(@taskname,@categoryid,@nodeid,@taskcreatetime,@taskupdatetime,@tasklaststarttime,@tasklastendtime,@tasklasterrortime,@taskerrorcount,@taskruncount,@taskcreateuserid,@taskstate,@taskport,@taskhealthcheckurl,@taskpath,@taskstartfilename,@taskarguments,@taskremark)", Par);
+            int rev = PubConn.ExecuteSql(@"insert into tb_webtask(taskname,categoryid,nodeid,taskcreatetime,taskupdatetime,tasklaststarttime,tasklastendtime,tasklasterrortime,taskerrorcount,taskruncount,taskcreateuserid,taskstate,taskport,taskhealthcheckurl,taskpath,taskstartfilename,taskarguments,taskstopfilename,taskstoparguments,taskremark)
+										   values(@taskname,@categoryid,@nodeid,@taskcreatetime,@taskupdatetime,@tasklaststarttime,@tasklastendtime,@tasklasterrortime,@taskerrorcount,@taskruncount,@taskcreateuserid,@taskstate,@taskport,@taskhealthcheckurl,@taskpath,@taskstartfilename,@taskarguments,@taskstopfilename,@taskstoparguments,@taskremark)", Par);
             return rev == 1;
 
         }
@@ -101,11 +105,15 @@ namespace TaskManager.Domain.Dal
 					//
 					new ProcedureParameter("@taskarguments",    model.taskarguments),
 					//
+					new ProcedureParameter("@taskstopfilename",    model.taskstopfilename),
+					//
+					new ProcedureParameter("@taskstoparguments",    model.taskstoparguments),
+					//
 					new ProcedureParameter("@taskremark",    model.taskremark)
             };
 			Par.Add(new ProcedureParameter("@id",  model.id));
 
-            int rev = PubConn.ExecuteSql("update tb_webtask set taskname=@taskname,categoryid=@categoryid,nodeid=@nodeid,taskcreatetime=@taskcreatetime,taskupdatetime=@taskupdatetime,tasklaststarttime=@tasklaststarttime,tasklastendtime=@tasklastendtime,tasklasterrortime=@tasklasterrortime,taskerrorcount=@taskerrorcount,taskruncount=@taskruncount,taskcreateuserid=@taskcreateuserid,taskstate=@taskstate,taskport=@taskport,taskhealthcheckurl=@taskhealthcheckurl,taskpath=@taskpath,taskstartfilename=@taskstartfilename,taskarguments=@taskarguments,taskremark=@taskremark where id=@id", Par);
+            int rev = PubConn.ExecuteSql("update tb_webtask set taskname=@taskname,categoryid=@categoryid,nodeid=@nodeid,taskcreatetime=@taskcreatetime,taskupdatetime=@taskupdatetime,tasklaststarttime=@tasklaststarttime,tasklastendtime=@tasklastendtime,tasklasterrortime=@tasklasterrortime,taskerrorcount=@taskerrorcount,taskruncount=@taskruncount,taskcreateuserid=@taskcreateuserid,taskstate=@taskstate,taskport=@taskport,taskhealthcheckurl=@taskhealthcheckurl,taskpath=@taskpath,taskstartfilename=@taskstartfilename,taskarguments=@taskarguments,taskstopfilename=@taskstopfilename,taskstoparguments=@taskstoparguments,taskremark=@taskremark where id=@id", Par);
             return rev == 1;
 
         }
@@ -238,8 +246,18 @@ namespace TaskManager.Domain.Dal
             {
                 o.taskstartfilename = dr["taskstartfilename"].ToString();
             }
-			//
-			if(dr.Table.Columns.Contains("taskremark"))
+            //
+            if (dr.Table.Columns.Contains("taskstoparguments"))
+            {
+                o.taskstoparguments = dr["taskstoparguments"].Tostring();
+            }
+            //
+            if (dr.Table.Columns.Contains("taskstopfilename"))
+            {
+                o.taskstopfilename = dr["taskstopfilename"].ToString();
+            }
+            //
+            if (dr.Table.Columns.Contains("taskremark"))
 			{
 				o.taskremark = dr["taskremark"].Tostring();
 			}

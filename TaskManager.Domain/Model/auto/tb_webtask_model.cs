@@ -98,10 +98,18 @@ namespace TaskManager.Domain.Model
         public string taskstartfilename { get; set; }
 
         /// <summary>
-        /// 
+        /// 开启服务的命令行脚本中的  参数(比如 java -jar xxx.jar 中  的-jar xxx.jar)
         /// </summary>
         public string taskarguments { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string taskstopfilename { get; set; }
 
+        /// <summary>
+        /// 关闭服务的命令行脚本中的  参数(比如 java -jar xxx.jar 中  的-jar xxx.jar)
+        /// </summary>
+        public string taskstoparguments { get; set; }
         /// <summary>
         /// 
         /// </summary>

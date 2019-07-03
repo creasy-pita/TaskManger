@@ -10,7 +10,7 @@ CreateTask.prototype.CheckTaskState = function () {
     var Task = this;
     this.Num = window.setInterval(function () {
         $.ajax({
-            url: '/Task/CheckTaskState',
+            url: '/WebTask/CheckTaskState',
             type: "post",
             data: {
                 id: Task.id,

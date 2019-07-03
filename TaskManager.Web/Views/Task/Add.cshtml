@@ -7,7 +7,7 @@
     List<tb_user_model> User = ViewBag.User as List<tb_user_model>;
 }
 <style>
-    
+     
 </style>
 
 <script>
@@ -43,7 +43,19 @@
             return false;
         }
     }
+    function check() {
+        if ($("#taskremark").val().length < 20) {
+            alert("备注不得少于20个字符");
+            return false;
+        }
+
+        //TBD configrelativePath_1  configfilecontent_1 configfilename_1  同时填值 或者补填
+        //TBD relativePath 需要校验文件路径
+        return true;
+    }
+
     function MySubmit() {
+        if (!check()) return;
         var formData = new FormData();
         var taskDll = $('input[name="TaskDll"]').get(0).files[0];
         formData.append("TaskDll", taskDll);
@@ -56,6 +68,7 @@
         model["taskname"] = $("#taskname").val();
         model["categoryid"] = $("#categoryid").val();
         model["nodeid"] = $("#nodeid").val();
+        //TBD 需要调整 为动态的日期
         model["taskcreatetime"] = "2019-04-19";
         model["taskupdatetime"] = "2019-05-23";
         model["tasklaststarttime"] = "2019-05-31";
@@ -66,8 +79,11 @@
         model["taskcreateuserid"] = $("#taskcreateuserid").val();;
         model["taskstate"] = 0;
         model["taskversion"] = 1;
-        model["taskappconfigjson"] = "";
-        model["taskcron"] = "0/5 * * * * ?";
+        model["taskpath"] = $("#taskpath").val();
+        model["taskstartfilename"] = $("#taskstartfilename").val();
+        model["taskarguments"] = $("#taskarguments").val();
+
+
         model["taskmainclassnamespace"] = $("#taskmainclassnamespace").val();
         model["taskmainclassdllfilename"] = $("#taskmainclassdllfilename").val();
         model["taskremark"] = $("#taskremark").val();
@@ -75,22 +91,16 @@
 
         //组装config_models
         var config_model1 = {};
-        config_model1["id"] = 0;
-        config_model1["taskid"] = 0;
-        config_model1["relativePath"] = "/a/b/c/";
-        config_model1["filecontent"] = "<root>aa</root>";
-        config_model1["filename"] = "appconfig.xml";
-        config_model1["lastupdatetime"] = "0001-01-01";
+        if ($("#configrelativePath_1").val() != "" && $("#configfilecontent_1").val() != "" && $("#configfilename_1").val() != "" ) {
+            config_model1["id"] = 0;
+            config_model1["taskid"] = 0;
+            config_model1["relativePath"] = $("#configrelativePath_1").val();
+            config_model1["filecontent"] = $("#configfilecontent_1").val();
+            config_model1["filename"] = $("#configfilename_1").val();
+            config_model1["lastupdatetime"] = "0001-01-01";
 
-        var config_model2 = {};
-        config_model2["id"] = 0;
-        config_model2["taskid"] = 0;
-        config_model2["relativePath"] = "/a/b/c/";
-        config_model2["filecontent"] = "{\"Logging\": {\"LogLevel\":{\"Default\":\"Warning\"}},\"AllowedHosts\": \"*\"}";
-        config_model2["filename"] = "appconfig.json";
-        config_model2["lastupdatetime"] = "0001-01-01";
-        config_models.push(config_model1);
-        config_models.push(config_model2);
+            config_models.push(config_model1);
+        }
 
         data["model"] = model;
         data["config_models"] = config_models;
@@ -104,9 +114,12 @@
             processData: false,
             contentType: false,
             data: formData,
-            complete: function (data) {
-                alert(data);
-                alert("success");
+            success: function (data) {
+                alert(data.code);
+                if (data.code == 1)
+                    window.location.href = window.location.href.replace("/Add", "/Index").replace("/add", "/Index");
+                else
+                    alert("保存失败");
             }
         });
     }
@@ -272,16 +285,16 @@ function sendPostRequest(url, obj) {
             <label>组别</label>
             <select name="categoryid">
                 @foreach (var c in Category)
-                { 
+                {
                     <option value="@c.id">@c.categoryname</option>
                 }
             </select>
-        </li> 
+        </li>
         <li>
             <label>创建人</label>
             <select name="taskcreateuserid">
                 @foreach (var c in User)
-                { 
+                {
                     <option value="@c.id">@c.username</option>
                 }
             </select>
@@ -290,7 +303,7 @@ function sendPostRequest(url, obj) {
             <label>节点</label>
             <select name="nodeid">
                 @foreach (var n in Node)
-                { 
+                {
                     <option value="@n.id">@n.nodename</option>
                 }
             </select>
@@ -298,18 +311,26 @@ function sendPostRequest(url, obj) {
         <li>
             <label>文件名</label>
             <input class="mylongtext" type="text" id="configfilename_1" name="configfilename_1" />
+        </li>
+        <li>
             <label>相对路径</label>
-            <input class="mylongtext" type="text" id="configfilepath_1" name="configfilepath_1" />
+            <input class="mylongtext" type="text" id="configrelativePath_1" name="configrelativePath_1" />
+        </li>
+        <li>
             <label>文件内容</label>
             <textarea id="configfilecontent_1" name="configfilecontent_1" style="height:200px"></textarea>
         </li>
         <li>
-            <label>任务配置json</label>
-            <textarea id="taskappconfigjson" name="taskappconfigjson" style="height:200px"></textarea>示范:{"key1":"value1","key2":"value2"}
+            <label>程序根目录</label><input class="mylongtext" type="text" id="taskpath" name="taskpath" />程序会部署到这个目录下
         </li>
         <li>
-            <label>数据库临时数据json</label>
-            <textarea id="tempdatajson" name="tempdatajson" style="height:200px"></textarea>示范:{"key1":"value1","key2":"value2"}
+            <label>启动命令</label><input class="mylongtext" type="text" id="taskstartfilename" name="taskstartfilename" />(启动tomcat 命令行脚本中的  exe名称(比如 java -jar xxx.jar 中  的java) 或者 bat脚本名,比如 start.bat run 中的 start.bat；脚本文件需要设置全路径, 如果没有设置环境变量的exe 也需要设置全路径)
+        </li>
+        <li>
+            <label>启动命令参数</label><input class="mylongtext" type="text" id="taskarguments" name="taskarguments" />(启动服务的命令行脚本中的  参数(比如 java -jar xxx.jar 中  的-jar xxx.jar))
+        </li>
+        <li>
+            <label>查找进程批处理脚本</label><input class="mylongtext" type="text" id="taskfindbatchscript" name="taskfindbatchscript" />(查找此任务进程id的批处理脚本，一般运行在powershell或者cmd 目前支持powershell的脚本)
         </li>
         <li>
             <label>任务入口类的命名空间</label><input class="mylongtext" type="text" id="taskmainclassnamespace" name="taskmainclassnamespace" />示范：TaskManager.Demo.DemoTask

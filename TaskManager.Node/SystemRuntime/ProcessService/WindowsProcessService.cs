@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -22,6 +24,56 @@ namespace TaskManager.Node.SystemRuntime.ProcessService
             return string.Empty;
         }
 
+        public string GetProcessIdByBatchScript(string batchScript)
+        {
+            var pro = new Process
+            {
+                StartInfo =
+                {
+                    FileName = "powershell.exe",
+                    UseShellExecute = false,
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                }
+            };
+            pro.Start();
+            // pro.StandardInput.WriteLine("Get-WmiObject win32_service -filter \"name = 'GtCxService_LSSJ'\"| Select-Object -ExpandProperty ProcessId ");
+            pro.StandardInput.WriteLine(batchScript);
+            pro.StandardInput.WriteLine("exit");
+            pro.StandardInput.Flush();
+            string processId = GetSecondLastLine(pro.StandardOutput);
+            //if substring of the string endwiths batchScript means no result,so you should avoid batchScript of ProssesId-like
+            if (processId.EndsWith(batchScript))
+            {
+                processId = string.Empty;
+            }
+            return processId; 
+        }
+
+        public static string GetSecondLastLine(StreamReader streamReader)
+        {
+            var line = "";
+            Stack lineStack = new Stack();
+            while ((line = streamReader.ReadLine()) != null)
+            {
+                lineStack.Push(line);
+            }
+            if (lineStack.Pop() != null)
+            {
+                if ((line = lineStack.Pop().ToString()) != null)
+                {
+                    return line;
+                }
+                else
+                    return null;
+            }
+            else
+                return null;
+        }
+
+
         public string GetProcessByPort(string port)
         {
             var pro = new Process
@@ -42,7 +94,7 @@ namespace TaskManager.Node.SystemRuntime.ProcessService
             var line = "";
             var process = "";
             while ((line = pro.StandardOutput.ReadLine()) != null)
-                if (!string.IsNullOrEmpty(line) && line.IndexOf("TCP", StringComparison.Ordinal) > -1 && line.IndexOf($":{port} ", StringComparison.Ordinal)>-1)
+                if (!string.IsNullOrEmpty(line) && line.IndexOf("TCP", StringComparison.Ordinal) > -1 && line.IndexOf($":{port} ", StringComparison.Ordinal)>-1 && line.IndexOf($"LISTENING", StringComparison.Ordinal) > -1)
                 {
                     process = line.Substring(line.LastIndexOf(" ", StringComparison.Ordinal),
                         line.Length - line.LastIndexOf(" ", StringComparison.Ordinal));

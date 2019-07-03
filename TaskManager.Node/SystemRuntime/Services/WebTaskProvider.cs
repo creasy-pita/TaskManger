@@ -102,6 +102,20 @@ namespace TaskManager.Node.SystemRuntime.Services
         public static void StartTomcat(string WorkingDirectory, string StartFileName, string StartFileArg)
         {
             Process CmdProcess = new Process();
+            CmdProcess.StartInfo.UseShellExecute = true;
+            CmdProcess.StartInfo.CreateNoWindow = false;
+
+            CmdProcess.StartInfo.WorkingDirectory = WorkingDirectory;//工作目录
+            CmdProcess.StartInfo.FileName = StartFileName;      // 命令
+            CmdProcess.StartInfo.Arguments = StartFileArg;      // 参数
+            CmdProcess.EnableRaisingEvents = true;                      // 启用Exited事件
+                                                                        // CmdProcess.StartInfo.CreateNoWindow = false;
+            CmdProcess.Start();
+        }
+
+        public static void StartTomcat1(string WorkingDirectory, string StartFileName, string StartFileArg)
+        {
+            Process CmdProcess = new Process();
             CmdProcess.StartInfo.WorkingDirectory = WorkingDirectory;//工作目录
             CmdProcess.StartInfo.FileName = StartFileName;      // 命令
             CmdProcess.StartInfo.Arguments = StartFileArg;      // 参数
@@ -112,12 +126,24 @@ namespace TaskManager.Node.SystemRuntime.Services
 
         public bool Stop(TomcatEntity t)
         {
+
             IProcessService ps = ProcessServiceFactory.CreateProcessService(EnumOSState.Windows.ToString());
             string processId = ps.GetProcessByPort(t.Port);
             if(!string.IsNullOrEmpty( processId))
             {
-                var p = Process.GetProcessById(Convert.ToInt32(processId));
-                p.Kill();
+                //如果能通过命令形式关闭， 则命令关闭
+                //if (!string.IsNullOrEmpty(t.StopFileName) && !string.IsNullOrEmpty(t.StopArguments))
+                if (!string.IsNullOrEmpty(t.StopFileName))
+                {
+                    StartTomcat(t.Path, t.StopFileName, t.StopArguments);
+                    return true;
+                }
+                //否则使用 监听端口查找进程关闭
+                else
+                {
+                    var p = Process.GetProcessById(Convert.ToInt32(processId));
+                    p.Kill();
+                }
             }
             //调用进程终止后会又延时，以下采用重试判断的方式
             int RetryCount = 10;
@@ -163,6 +189,17 @@ namespace TaskManager.Node.SystemRuntime.Services
         /// 启动服务的命令行脚本中的  参数(比如 java -jar xxx.jar 中  的-jar xxx.jar) 
         /// </summary>
         public string StartArguments { get; set; }
+        /// <summary>
+        /// 关闭 命令行脚本中的  exe名称(比如 java -jar xxx.jar 中  的java) 或者 bat脚本名,比如 start.bat run 中的 start.bat
+        /// 脚本文件需要设置全路径, 如果没有设置环境变量的exe 也需要设置全路径
+        /// </summary>
+        public string StopFileName { get; set; }
+
+        /// <summary>
+        /// 关闭服务的命令行脚本中的  参数(比如 java -jar xxx.jar 中  的-jar xxx.jar) 
+        /// </summary>
+        public string StopArguments { get; set; }
+
     }
 
     public class TomcatEventArgs

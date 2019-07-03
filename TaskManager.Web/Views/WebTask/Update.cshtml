@@ -73,6 +73,12 @@
                     <label>命令参数</label><input class="mylongtext" type="text" @Html.Raw(Model.taskstate == (int)TaskManager.Core.EnumTaskState.Running ? "readonly=readonly" : "") id="taskarguments" name="taskarguments" value="@Model.taskarguments" />
                 </li>
                 <li>
+                    <label>关闭命令</label><input class="mylongtext" type="text" @Html.Raw(Model.taskstate == (int)TaskManager.Core.EnumTaskState.Running ? "readonly=readonly" : "") id="taskstopfilename" name="taskstopfilename" value="@Model.taskstopfilename" />
+                </li>
+                <li>
+                    <label>关闭命令参数</label><input class="mylongtext" type="text" @Html.Raw(Model.taskstate == (int)TaskManager.Core.EnumTaskState.Running ? "readonly=readonly" : "") id="taskstoparguments" name="taskstoparguments" value="@Model.taskstoparguments" />
+                </li>
+                <li>
                     <label>备注</label>
                     <textarea id="taskremark" name="taskremark" @Html.Raw(Model.taskstate == (int)TaskManager.Core.EnumTaskState.Running ? "readonly=readonly" : "") style="height:200px">@Model.taskremark</textarea>
                 </li>

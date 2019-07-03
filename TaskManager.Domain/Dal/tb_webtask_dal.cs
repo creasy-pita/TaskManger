@@ -243,6 +243,16 @@ namespace TaskManager.Domain.Dal
                 o.taskarguments = dr["taskarguments"].Tostring();
             }
             //
+            if (dr.Table.Columns.Contains("taskstopfilename"))
+            {
+                o.taskstopfilename = dr["taskstopfilename"].Tostring();
+            }
+            //
+            if (dr.Table.Columns.Contains("taskstoparguments"))
+            {
+                o.taskstoparguments = dr["taskstoparguments"].Tostring();
+            }
+            //
             if (dr.Table.Columns.Contains("taskremark"))
             {
                 o.taskremark = dr["taskremark"].Tostring();
@@ -314,10 +324,12 @@ namespace TaskManager.Domain.Dal
                 ps.Add("@taskarguments", model.taskarguments);
                 ps.Add("@taskremark", model.taskremark);
                 ps.Add("@taskstartfilename", model.taskstartfilename);
-             //   int rev = Convert.ToInt32(PubConn.ExecuteScalar(@"insert into tb_webtask(taskname,categoryid,nodeid,taskcreatetime,taskruncount,taskcreateuserid,taskstate,taskport,taskhealthcheckurl,taskpath,taskarguments,taskremark,taskstartfilename)
-										   //values(@taskname,@categoryid,@nodeid,@taskcreatetime,@taskruncount,@taskcreateuserid,@taskstate,@taskport,@taskhealthcheckurl,@taskpath,@taskarguments,@taskremark,@taskstartfilename) select @@IDENTITY", ps.ToParameters()));
-                PubConn.ExecuteScalar(@"insert into tb_webtask(taskname,categoryid,nodeid,taskcreatetime,taskupdatetime,taskruncount,taskcreateuserid,taskstate,taskport,taskhealthcheckurl,taskpath,taskarguments,taskremark,taskstartfilename)
-										   values(@taskname,@categoryid,@nodeid,@taskcreatetime,@taskupdatetime,@taskruncount,@taskcreateuserid,@taskstate,@taskport,@taskhealthcheckurl,@taskpath,@taskarguments,@taskremark,@taskstartfilename)", ps.ToParameters());
+                ps.Add("@taskstopfilename", model.taskstopfilename);
+                ps.Add("@taskstoparguments", model.taskstoparguments);
+                //   int rev = Convert.ToInt32(PubConn.ExecuteScalar(@"insert into tb_webtask(taskname,categoryid,nodeid,taskcreatetime,taskruncount,taskcreateuserid,taskstate,taskport,taskhealthcheckurl,taskpath,taskarguments,taskremark,taskstartfilename)
+                //values(@taskname,@categoryid,@nodeid,@taskcreatetime,@taskruncount,@taskcreateuserid,@taskstate,@taskport,@taskhealthcheckurl,@taskpath,@taskarguments,@taskremark,@taskstartfilename) select @@IDENTITY", ps.ToParameters()));
+                PubConn.ExecuteScalar(@"insert into tb_webtask(taskname,categoryid,nodeid,taskcreatetime,taskupdatetime,taskruncount,taskcreateuserid,taskstate,taskport,taskhealthcheckurl,taskpath,taskarguments,taskremark,taskstartfilename,taskstopfilename,taskstoparguments)
+										   values(@taskname,@categoryid,@nodeid,@taskcreatetime,@taskupdatetime,@taskruncount,@taskcreateuserid,@taskstate,@taskport,@taskhealthcheckurl,@taskpath,@taskarguments,@taskremark,@taskstartfilename,@taskstopfilename,@taskstoparguments)", ps.ToParameters());
                 //TBD ´Ë´¦
                 DataTable dt = PubConn.SqlToDataTable("SELECT LAST_INSERT_ID() AS id_value", null);
                 if (dt != null && dt.Rows.Count > 0)
@@ -342,14 +354,16 @@ namespace TaskManager.Domain.Dal
                 ps.Add("@taskcreateuserid", model.taskcreateuserid);
                 ps.Add("@taskhealthcheckurl", model.taskhealthcheckurl.NullToEmpty());
                 ps.Add("@taskpath", model.taskpath);
+                ps.Add("@taskstartfilename", model.taskstartfilename);
                 ps.Add("@taskarguments", model.taskarguments);
                 ps.Add("@taskremark", model.taskremark);
-                ps.Add("@taskstartfilename", model.taskstartfilename);
+                ps.Add("@taskstopfilename", model.taskstopfilename);
+                ps.Add("@taskstoparguments", model.taskstoparguments);
                 ps.Add("@taskport", model.taskport);
                 ps.Add("@taskstate", model.taskstate);
                 string sql = "Update tb_webtask Set taskname=@taskname,categoryid=@categoryid,nodeid=@nodeid,taskupdatetime=@taskupdatetime,tasklaststarttime=@tasklaststarttime,";
                 sql += "tasklastendtime=@tasklastendtime,taskhealthcheckurl=@taskhealthcheckurl,taskpath=@taskpath,taskcreateuserid=@taskcreateuserid,";
-                sql += "taskarguments=@taskarguments,taskremark=@taskremark,taskstartfilename=@taskstartfilename,taskport=@taskport,taskstate=@taskstate";
+                sql += "taskarguments=@taskarguments,taskremark=@taskremark,taskstartfilename=@taskstartfilename,taskstopfilename=@taskstopfilename,taskstoparguments=@taskstoparguments,taskport=@taskport,taskstate=@taskstate";
                 sql += " where id=@id";
                 int i = PubConn.ExecuteSql(sql, ps.ToParameters());
                 return i;

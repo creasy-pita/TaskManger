@@ -36,7 +36,7 @@ namespace TaskManager.Node.SystemRuntime
             return WindowsStart(task);
         }
 
-        public bool WindowsStart(tb_task_model task)
+        public bool WindowsStartOld(tb_task_model task)
         {
             IProcessService ps = ProcessServiceFactory.CreateProcessService(EnumOSState.Windows.ToString());
             //判断是否已经运行
@@ -45,6 +45,114 @@ namespace TaskManager.Node.SystemRuntime
             {
                 throw new Exception("任务已在运行中");
             }
+            SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (conn) =>
+            {
+                //TBD 修改为 AppDomain.CurrentDomain.BaseDirectory + GlobalConfig.TaskDllDir 
+                //TBD 后期加入每个任务可定制部署目录
+                // string rootPath = AppDomain.CurrentDomain.BaseDirectory + GlobalConfig.TaskDllDir + "\\";
+                string rootPath = "F:\\" + GlobalConfig.TaskDllDir + "\\";
+                BSF.Tool.IOHelper.CreateDirectory(rootPath);
+
+                string path = $"{rootPath}{task.taskname}\\";
+                //判断程序目录是否已经存在
+                if (!Directory.Exists(path))
+                {
+                    //下载程序集
+                    tb_version_dal versionDAL = new tb_version_dal();
+                    var version = versionDAL.GetVersionByTaskID(conn, task.id);
+                    BSF.Tool.IOHelper.CreateDirectory(path);
+                    if (version != null)
+                    {
+                        string zipFilePath = $"{path}{version.zipfilename}";
+                        ///数据库二进制转压缩文件
+                        CompressHelper.ConvertToFile(version.zipfile, zipFilePath);
+                        CompressHelper.UnCompress(zipFilePath, path);
+                        ///删除压缩文件
+                        File.Delete(zipFilePath);
+                    }
+                    else
+                    {
+                        throw new Exception($"在tb_version表中未查到taskid:{task.id}数据");
+                    }
+                }
+
+                #region//加载外部配置文件
+                tb_task_config_dal task_Config_Dal = new tb_task_config_dal();
+                List<tb_task_config_model> task_Config_Models = task_Config_Dal.GetList(conn, task.id);
+                try
+                {
+                    foreach (var task_config_Model in task_Config_Models)
+                    {
+                        string fullPath = path + task_config_Model.relativePath + task_config_Model.filename;
+                        if (File.Exists(fullPath))
+                        {
+                            File.Delete(fullPath);
+                        }
+                        using (FileStream fs = File.Create(fullPath))
+                        {
+                            byte[] buffer = System.Text.Encoding.UTF8.GetBytes(task_config_Model.filecontent);
+                            fs.Write(buffer);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"任务在加载外部配置文件出错:{ex.Message}");
+                }
+
+                #endregion
+
+                //使用 shell 命令开启 任务程序
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "dotnet",
+                    Arguments = $@"{task.taskmainclassdllfilename}",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true,
+                    WorkingDirectory = $"{path}",
+                };
+                var ProcessStart = Process.Start(psi);
+                if (ProcessStart == null)
+                {
+                    throw new Exception("无法执行进程");
+                }
+                else
+                {
+                    var Output = ProcessStart.StandardOutput;
+                }
+
+                EnumTaskCommandState enumTaskCommandState = EnumTaskCommandState.Error;
+                EnumTaskState enumTaskState = EnumTaskState.Stop;
+                int RetryCount = 10;
+                while (RetryCount-- > 0)
+                {
+                    if (!string.IsNullOrEmpty(ps.GetProcessByName(task.taskmainclassdllfilename)))
+                    {
+                        enumTaskCommandState = EnumTaskCommandState.Success;
+                        enumTaskState = EnumTaskState.Running;
+                        RetryCount = 0;
+                    }
+                    else
+                    {
+                        Thread.Sleep(500);
+                    }
+                }
+
+                ///更新服务状态 服务启动时间
+                //new tb_task_dal().UpdateTaskState(conn, task.id, (int)enumTaskState);
+                task.tasklaststarttime = DateTime.Now;
+                task.taskstate = (byte)enumTaskState;
+                //if(conn.GetConnection().State != System.Data.ConnectionState.Open)
+                //    LogHelper.AddNodeLog($"节点:{task.nodeid}执行任务:{task.id} new tb_task_dal().UpdateTask conn state {conn.GetConnection().State.ToString()}");
+                new tb_task_dal().UpdateTask(conn, task);
+                if (enumTaskCommandState == EnumTaskCommandState.Success)
+                {
+                    LogHelper.AddNodeLog($"节点:{task.nodeid}成功执行任务:{task.id}……");
+                }
+            });
+
+            /*
             SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, async (conn) =>
             {
                 //TBD 修改为 AppDomain.CurrentDomain.BaseDirectory + GlobalConfig.TaskDllDir 
@@ -143,12 +251,135 @@ namespace TaskManager.Node.SystemRuntime
                 //new tb_task_dal().UpdateTaskState(conn, task.id, (int)enumTaskState);
                 task.tasklaststarttime = DateTime.Now;
                 task.taskstate = (byte)enumTaskState;
+                //if(conn.GetConnection().State != System.Data.ConnectionState.Open)
+                //    LogHelper.AddNodeLog($"节点:{task.nodeid}执行任务:{task.id} new tb_task_dal().UpdateTask conn state {conn.GetConnection().State.ToString()}");
                 new tb_task_dal().UpdateTask(conn, task);
                 if (enumTaskCommandState == EnumTaskCommandState.Success)
                 {
                     LogHelper.AddNodeLog($"节点:{task.nodeid}成功执行任务:{task.id}……");
                 }
             });
+            */
+            return true;
+        }
+
+
+        public bool WindowsStart(tb_task_model task)
+        {
+            IProcessService ps = ProcessServiceFactory.CreateProcessService(EnumOSState.Windows.ToString());
+            //判断是否已经运行
+            string pId = ps.GetProcessByName(task.taskmainclassdllfilename);
+            if (!string.IsNullOrEmpty(pId))
+            {
+                throw new Exception("任务已在运行中");
+            }
+            SqlHelper.ExcuteSql(GlobalConfig.TaskDataBaseConnectString, (conn) =>
+            {
+                //TBD 修改为 AppDomain.CurrentDomain.BaseDirectory + GlobalConfig.TaskDllDir 
+                //TBD 后期加入每个任务可定制部署目录
+                // string rootPath = AppDomain.CurrentDomain.BaseDirectory + GlobalConfig.TaskDllDir + "\\";
+                string rootPath = "F:\\" + GlobalConfig.TaskDllDir + "\\";
+                BSF.Tool.IOHelper.CreateDirectory(rootPath);
+
+                string path = $"{rootPath}{task.taskname}\\";
+                //判断程序目录是否已经存在
+                if (!Directory.Exists(path))
+                {
+                    //下载程序集
+                    tb_version_dal versionDAL = new tb_version_dal();
+                    var version = versionDAL.GetVersionByTaskID(conn, task.id);
+                    BSF.Tool.IOHelper.CreateDirectory(path);
+                    if (version != null)
+                    {
+                        string zipFilePath = $"{path}{version.zipfilename}";
+                        ///数据库二进制转压缩文件
+                        CompressHelper.ConvertToFile(version.zipfile, zipFilePath);
+                        CompressHelper.UnCompress(zipFilePath, path);
+                        ///删除压缩文件
+                        File.Delete(zipFilePath);
+                    }
+                    else
+                    {
+                        throw new Exception($"在tb_version表中未查到taskid:{task.id}数据");
+                    }
+                }
+
+                #region//加载外部配置文件
+                tb_task_config_dal task_Config_Dal = new tb_task_config_dal();
+                List<tb_task_config_model> task_Config_Models = task_Config_Dal.GetList(conn, task.id);
+                try
+                {
+                    foreach (var task_config_Model in task_Config_Models)
+                    {
+                        string fullPath = path + task_config_Model.relativePath + task_config_Model.filename;
+                        if (File.Exists(fullPath))
+                        {
+                            File.Delete(fullPath);
+                        }
+                        using (FileStream fs = File.Create(fullPath))
+                        {
+                            byte[] buffer = System.Text.Encoding.UTF8.GetBytes(task_config_Model.filecontent);
+                            fs.Write(buffer);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"任务在加载外部配置文件出错:{ex.Message}");
+                }
+
+                #endregion
+
+                //使用 shell 命令开启 任务程序
+                var psi = new ProcessStartInfo
+                {
+                    FileName = task.taskstartfilename,
+                    Arguments = $@"{task.taskarguments}",
+                    UseShellExecute = true,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = false,
+                    WorkingDirectory = task.taskpath,
+                };
+                var ProcessStart = Process.Start(psi);
+                if (ProcessStart == null)
+                {
+                    throw new Exception("无法执行进程");
+                }
+                else
+                {
+                    var Output = ProcessStart.StandardOutput;
+                }
+
+                EnumTaskCommandState enumTaskCommandState = EnumTaskCommandState.Error;
+                EnumTaskState enumTaskState = EnumTaskState.Stop;
+                int RetryCount = 10;
+                while (RetryCount-- > 0)
+                {
+                    if (!string.IsNullOrEmpty(ps.GetProcessByName(task.taskmainclassdllfilename)))
+                    {
+                        enumTaskCommandState = EnumTaskCommandState.Success;
+                        enumTaskState = EnumTaskState.Running;
+                        RetryCount = 0;
+                    }
+                    else
+                    {
+                        Thread.Sleep(500);
+                    }
+                }
+
+                ///更新服务状态 服务启动时间
+                //new tb_task_dal().UpdateTaskState(conn, task.id, (int)enumTaskState);
+                task.tasklaststarttime = DateTime.Now;
+                task.taskstate = (byte)enumTaskState;
+                //if(conn.GetConnection().State != System.Data.ConnectionState.Open)
+                //    LogHelper.AddNodeLog($"节点:{task.nodeid}执行任务:{task.id} new tb_task_dal().UpdateTask conn state {conn.GetConnection().State.ToString()}");
+                new tb_task_dal().UpdateTask(conn, task);
+                if (enumTaskCommandState == EnumTaskCommandState.Success)
+                {
+                    LogHelper.AddNodeLog($"节点:{task.nodeid}成功执行任务:{task.id}……");
+                }
+            });
+
             return true;
         }
 

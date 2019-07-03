@@ -106,6 +106,26 @@ namespace TaskManager.Domain.Model
         /// 
         /// </summary>
         public string taskremark { get; set; }
-        
+
+        /// <summary>
+        /// 程序跟目录
+        /// </summary>
+        public string taskpath { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string taskstartfilename { get; set; }
+
+        /// <summary>
+        /// 开启服务的命令行脚本中的  参数(比如 java -jar xxx.jar 中  的-jar xxx.jar)
+        /// </summary>
+        public string taskarguments { get; set; }
+
+        /// <summary>
+        /// 查找此任务进程id的批处理脚本，一般运行在powershell或者cmd 目前支持powershell的脚本
+        /// </summary>
+        public string taskfindbatchscript { get; set; }
+
     }
 }
