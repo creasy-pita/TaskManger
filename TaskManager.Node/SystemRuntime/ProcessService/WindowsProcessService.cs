@@ -24,8 +24,16 @@ namespace TaskManager.Node.SystemRuntime.ProcessService
             return string.Empty;
         }
 
+
+        public string RunBatchScriptWithCmd(string batchScript)
+        {
+
+            return null;
+        }
+
         public string GetProcessIdByBatchScript(string batchScript)
         {
+            if (string.IsNullOrEmpty(batchScript)) return null;
             var pro = new Process
             {
                 StartInfo =
@@ -45,7 +53,8 @@ namespace TaskManager.Node.SystemRuntime.ProcessService
             pro.StandardInput.Flush();
             string processId = GetSecondLastLine(pro.StandardOutput);
             //if substring of the string endwiths batchScript means no result,so you should avoid batchScript of ProssesId-like
-            if (processId.EndsWith(batchScript))
+            //TBD 此处需要注意 batchScript 保存的内容， 不能出现纯数字，或者0（如果保存的时此类内容则直接忽略 返回 null）
+            if (processId.EndsWith(batchScript) || processId == "0")
             {
                 processId = string.Empty;
             }

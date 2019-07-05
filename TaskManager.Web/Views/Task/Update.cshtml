@@ -114,6 +114,9 @@
                     <label>查找进程批处理脚本</label><input class="mylongtext" type="text" @Html.Raw(Model.taskstate == (int)TaskManager.Core.EnumTaskState.Running ? "readonly=readonly" : "") id="taskfindbatchscript" name="taskfindbatchscript" value="@Model.taskfindbatchscript" />
                 </li>
                 <li>
+                    <label>卸载任务批处理脚本</label><input class="mylongtext" type="text" @Html.Raw(Model.taskstate == (int)TaskManager.Core.EnumTaskState.Running ? "readonly=readonly" : "") id="taskuninstallbatchscript" name="taskuninstallbatchscript" value="@Model.taskuninstallbatchscript" />
+                </li>
+                <li>
                     <label>任务入口类的命名空间</label><input class="mylongtext" type="text" @Html.Raw(Model.taskstate == (int)TaskManager.Core.EnumTaskState.Running ? "readonly=readonly" : "") id="taskmainclassnamespace" name="taskmainclassnamespace" value="@Model.taskmainclassnamespace" />
                 </li>
                 <li>

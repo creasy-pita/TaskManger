@@ -253,6 +253,11 @@ namespace TaskManager.Domain.Dal
                 o.taskfindbatchscript = dr["taskfindbatchscript"].Tostring();
             }
             //
+            if (dr.Table.Columns.Contains("taskuninstallbatchscript"))
+            {
+                o.taskuninstallbatchscript = dr["taskuninstallbatchscript"].Tostring();
+            }
+            //
             if (dr.Table.Columns.Contains("taskmainclassnamespace"))
             {
                 o.taskmainclassnamespace = dr["taskmainclassnamespace"].Tostring();
@@ -328,15 +333,16 @@ namespace TaskManager.Domain.Dal
                 ps.Add("@taskcron", model.taskcron);
                 ps.Add("@taskpath", model.taskpath);
                 ps.Add("@taskarguments", model.taskarguments);
-                ps.Add("@taskfindbatchscript", model.taskfindbatchscript);
+                ps.Add("@taskfindbatchscript", model.taskfindbatchscript); 
+                ps.Add("@taskuninstallbatchscript", model.taskuninstallbatchscript); 
                 ps.Add("@taskstartfilename", model.taskstartfilename);
                 ps.Add("@taskmainclassnamespace", model.taskmainclassnamespace);
                 ps.Add("@taskremark", model.taskremark);
                 ps.Add("@taskmainclassdllfilename", model.taskmainclassdllfilename);
              //   int rev = Convert.ToInt32(PubConn.ExecuteScalar(@"insert into tb_task(taskname,categoryid,nodeid,taskcreatetime,taskruncount,taskcreateuserid,taskstate,taskversion,taskappconfigjson,taskcron,taskmainclassnamespace,taskremark,taskmainclassdllfilename)
 										   //values(@taskname,@categoryid,@nodeid,@taskcreatetime,@taskruncount,@taskcreateuserid,@taskstate,@taskversion,@taskappconfigjson,@taskcron,@taskmainclassnamespace,@taskremark,@taskmainclassdllfilename) select @@IDENTITY", ps.ToParameters()));
-                PubConn.ExecuteScalar(@"insert into tb_task(taskname,categoryid,nodeid,taskcreatetime,taskupdatetime,taskruncount,taskcreateuserid,taskstate,taskversion,taskappconfigjson,taskcron,taskpath,taskarguments,taskfindbatchscript,taskstartfilename,taskmainclassnamespace,taskremark,taskmainclassdllfilename)
-										   values(@taskname,@categoryid,@nodeid,@taskcreatetime,@taskupdatetime,@taskruncount,@taskcreateuserid,@taskstate,@taskversion,@taskappconfigjson,@taskcron,@taskpath,@taskarguments,@taskfindbatchscript,@taskstartfilename,@taskmainclassnamespace,@taskremark,@taskmainclassdllfilename)", ps.ToParameters());
+                PubConn.ExecuteScalar(@"insert into tb_task(taskname,categoryid,nodeid,taskcreatetime,taskupdatetime,taskruncount,taskcreateuserid,taskstate,taskversion,taskappconfigjson,taskcron,taskpath,taskarguments,taskfindbatchscript,taskuninstallbatchscript,taskstartfilename,taskmainclassnamespace,taskremark,taskmainclassdllfilename)
+										   values(@taskname,@categoryid,@nodeid,@taskcreatetime,@taskupdatetime,@taskruncount,@taskcreateuserid,@taskstate,@taskversion,@taskappconfigjson,@taskcron,@taskpath,@taskarguments,@taskfindbatchscript,@taskuninstallbatchscript,@taskstartfilename,@taskmainclassnamespace,@taskremark,@taskmainclassdllfilename)", ps.ToParameters());
 
                 DataTable dt = PubConn.SqlToDataTable("SELECT LAST_INSERT_ID() AS id_value", null);
                 if (dt != null && dt.Rows.Count > 0)
@@ -351,7 +357,7 @@ namespace TaskManager.Domain.Dal
         {
             return SqlHelper.Visit<int>(ps =>
             {
-            //taskpath taskstartfilename taskarguments taskfindbatchscript
+                //taskpath taskstartfilename taskarguments taskfindbatchscript taskuninstallbatchscript
 
                 ps.Add("@id", model.id);
                 ps.Add("@taskname", model.taskname);
@@ -369,13 +375,14 @@ namespace TaskManager.Domain.Dal
                 ps.Add("@taskstartfilename", model.taskstartfilename);
                 ps.Add("@taskarguments", model.taskarguments);
                 ps.Add("@taskfindbatchscript", model.taskfindbatchscript);
-
+                ps.Add("@taskuninstallbatchscript", model.taskuninstallbatchscript);
+                
                 ps.Add("@taskmainclassdllfilename", model.taskmainclassdllfilename);
                 ps.Add("@taskversion", model.taskversion);
                 ps.Add("@taskstate", model.taskstate);
                 string sql = "Update tb_task Set taskname=@taskname,categoryid=@categoryid,nodeid=@nodeid,taskupdatetime=@taskupdatetime,tasklaststarttime=@tasklaststarttime,";
                 sql += "tasklastendtime=@tasklastendtime,taskappconfigjson=@taskappconfigjson,taskcron=@taskcron,taskcreateuserid=@taskcreateuserid,";
-                sql += "taskmainclassnamespace=@taskmainclassnamespace,taskremark=@taskremark ,taskpath=@taskpath,taskstartfilename=@taskstartfilename,taskarguments=@taskarguments,taskfindbatchscript=@taskfindbatchscript," +
+                sql += "taskmainclassnamespace=@taskmainclassnamespace,taskremark=@taskremark ,taskpath=@taskpath,taskstartfilename=@taskstartfilename,taskarguments=@taskarguments,taskfindbatchscript=@taskfindbatchscript,taskuninstallbatchscript=@taskuninstallbatchscript," +
                 "taskmainclassdllfilename=@taskmainclassdllfilename,taskversion=@taskversion,taskstate=@taskstate";
                 sql += " where id=@id";
                 int i = PubConn.ExecuteSql(sql, ps.ToParameters());

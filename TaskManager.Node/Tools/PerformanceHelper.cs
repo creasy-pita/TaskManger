@@ -23,12 +23,12 @@ namespace TaskManager.Node.Tools
         /// 添加日志
         /// </summary>
         /// <param name="model"></param>
-        public static (double CPU, long memory) GetPerformenceInfo(string serviceName)
+        public static (double CPU, long memory) GetPerformenceInfo(string batchScript)
         {
             try
             {
                 IProcessService ps = ProcessServiceFactory.CreateProcessService(EnumOSState.Windows.ToString());
-                string pIdStr = ps.GetProcessByName(serviceName);
+                string pIdStr = ps.GetProcessIdByBatchScript(batchScript);
                 if (string.IsNullOrEmpty(pIdStr)) return (0,0);
                 Process p = Process.GetProcessById(int.Parse(pIdStr));
                 DateTime lastTime=new DateTime();

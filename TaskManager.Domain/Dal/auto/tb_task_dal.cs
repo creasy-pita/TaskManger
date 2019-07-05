@@ -56,13 +56,14 @@ namespace TaskManager.Domain.Dal
 					new ProcedureParameter("@taskarguments",    model.taskarguments),
 					//
 					new ProcedureParameter("@taskfindbatchscript",    model.taskfindbatchscript),
+					new ProcedureParameter("@taskuninstallbatchscript",    model.taskuninstallbatchscript),
 					//
 					new ProcedureParameter("@taskmainclassnamespace",    model.taskmainclassnamespace),
 					//
 					new ProcedureParameter("@taskremark",    model.taskremark)   
                 };
-            int rev = PubConn.ExecuteSql(@"insert into tb_task(taskname,categoryid,nodeid,taskcreatetime,taskupdatetime,tasklaststarttime,tasklastendtime,tasklasterrortime,taskerrorcount,taskruncount,taskcreateuserid,taskstate,taskversion,taskappconfigjson,taskcron,taskpath,taskstartfilename,taskarguments,taskfindbatchscript,taskmainclassnamespace,taskremark)
-										   values(@taskname,@categoryid,@nodeid,@taskcreatetime,@taskupdatetime,@tasklaststarttime,@tasklastendtime,@tasklasterrortime,@taskerrorcount,@taskruncount,@taskcreateuserid,@taskstate,@taskversion,@taskappconfigjson,@taskcron,@taskpath,@taskstartfilename,@taskarguments,@taskfindbatchscript,@taskmainclassnamespace,@taskremark)", Par);
+            int rev = PubConn.ExecuteSql(@"insert into tb_task(taskname,categoryid,nodeid,taskcreatetime,taskupdatetime,tasklaststarttime,tasklastendtime,tasklasterrortime,taskerrorcount,taskruncount,taskcreateuserid,taskstate,taskversion,taskappconfigjson,taskcron,taskpath,taskstartfilename,taskarguments,taskfindbatchscript,taskuninstallbatchscript,taskmainclassnamespace,taskremark)
+										   values(@taskname,@categoryid,@nodeid,@taskcreatetime,@taskupdatetime,@tasklaststarttime,@tasklastendtime,@tasklasterrortime,@taskerrorcount,@taskruncount,@taskcreateuserid,@taskstate,@taskversion,@taskappconfigjson,@taskcron,@taskpath,@taskstartfilename,@taskarguments,@taskfindbatchscript,@taskuninstallbatchscript,@taskmainclassnamespace,@taskremark)", Par);
             return rev == 1;
 
         }
@@ -110,6 +111,7 @@ namespace TaskManager.Domain.Dal
 					new ProcedureParameter("@taskarguments",    model.taskarguments),
 					//
 					new ProcedureParameter("@taskfindbatchscript",    model.taskfindbatchscript),
+					new ProcedureParameter("@taskuninstallbatchscript",    model.taskuninstallbatchscript),
 					//
 					new ProcedureParameter("@taskmainclassnamespace",    model.taskmainclassnamespace),
 					//
@@ -117,7 +119,7 @@ namespace TaskManager.Domain.Dal
             };
 			Par.Add(new ProcedureParameter("@id",  model.id));
 
-            int rev = PubConn.ExecuteSql("update tb_task set taskname=@taskname,categoryid=@categoryid,nodeid=@nodeid,taskcreatetime=@taskcreatetime,taskupdatetime=@taskupdatetime,tasklaststarttime=@tasklaststarttime,tasklastendtime=@tasklastendtime,tasklasterrortime=@tasklasterrortime,taskerrorcount=@taskerrorcount,taskruncount=@taskruncount,taskcreateuserid=@taskcreateuserid,taskstate=@taskstate,taskversion=@taskversion,taskappconfigjson=@taskappconfigjson,taskcron=@taskcron,taskpath=@taskpath,taskstartfilename=@taskstartfilename,taskarguments=@taskarguments,taskfindbatchscript=@taskfindbatchscript,taskmainclassnamespace=@taskmainclassnamespace,taskremark=@taskremark where id=@id", Par);
+            int rev = PubConn.ExecuteSql("update tb_task set taskname=@taskname,categoryid=@categoryid,nodeid=@nodeid,taskcreatetime=@taskcreatetime,taskupdatetime=@taskupdatetime,tasklaststarttime=@tasklaststarttime,tasklastendtime=@tasklastendtime,tasklasterrortime=@tasklasterrortime,taskerrorcount=@taskerrorcount,taskruncount=@taskruncount,taskcreateuserid=@taskcreateuserid,taskstate=@taskstate,taskversion=@taskversion,taskappconfigjson=@taskappconfigjson,taskcron=@taskcron,taskpath=@taskpath,taskstartfilename=@taskstartfilename,taskarguments=@taskarguments,taskfindbatchscript=@taskfindbatchscript,taskuninstallbatchscript=@taskuninstallbatchscript,taskmainclassnamespace=@taskmainclassnamespace,taskremark=@taskremark where id=@id", Par);
             return rev == 1;
 
         }
@@ -255,6 +257,11 @@ namespace TaskManager.Domain.Dal
             {
                 o.taskfindbatchscript = dr["taskfindbatchscript"].Tostring();
             }
+            if (dr.Table.Columns.Contains("taskuninstallbatchscript"))
+            {
+                o.taskuninstallbatchscript = dr["taskuninstallbatchscript"].Tostring();
+            }
+            
             //
             if (dr.Table.Columns.Contains("taskstartfilename"))
             {

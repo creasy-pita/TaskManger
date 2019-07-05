@@ -43,7 +43,7 @@ namespace TaskManager.Node.SystemMonitor
                         long dirsize = TaskManager.Core.IOHelper.DirSize(new DirectoryInfo(fileinstallpath));
                         dirsizeM = (double)dirsize / 1024 / 1024;
                     }
-                    (double cpu, long memorySize) = PerformanceHelper.GetPerformenceInfo(task.taskmainclassdllfilename);
+                    (double cpu, long memorySize) = PerformanceHelper.GetPerformenceInfo(task.taskfindbatchscript);
                     tb_performance_dal nodedal = new tb_performance_dal();
                     nodedal.AddOrUpdate(c, new Domain.Model.tb_performance_model()
                     {

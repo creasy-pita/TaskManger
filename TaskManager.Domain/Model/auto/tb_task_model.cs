@@ -127,5 +127,10 @@ namespace TaskManager.Domain.Model
         /// </summary>
         public string taskfindbatchscript { get; set; }
 
+        /// <summary>
+        /// 卸载程序包前需要执行的脚本，比如 用于 解除window服务的注册的脚本
+        /// </summary>
+        public string taskuninstallbatchscript { get; set; }
+
     }
 }

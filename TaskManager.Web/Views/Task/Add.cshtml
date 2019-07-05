@@ -324,13 +324,16 @@ function sendPostRequest(url, obj) {
             <label>程序根目录</label><input class="mylongtext" type="text" id="taskpath" name="taskpath" />程序会部署到这个目录下
         </li>
         <li>
-            <label>启动命令</label><input class="mylongtext" type="text" id="taskstartfilename" name="taskstartfilename" />(启动tomcat 命令行脚本中的  exe名称(比如 java -jar xxx.jar 中  的java) 或者 bat脚本名,比如 start.bat run 中的 start.bat；脚本文件需要设置全路径, 如果没有设置环境变量的exe 也需要设置全路径)
+            <label>启动命令123</label><input class="mylongtext" type="text" id="taskstartfilename" name="taskstartfilename" />(启动tomcat 命令行脚本中的  exe名称(比如 java -jar xxx.jar 中  的java) 或者 bat脚本名,比如 start.bat run 中的 start.bat；脚本文件需要设置全路径, 如果没有设置环境变量的exe 也需要设置全路径)
         </li>
         <li>
             <label>启动命令参数</label><input class="mylongtext" type="text" id="taskarguments" name="taskarguments" />(启动服务的命令行脚本中的  参数(比如 java -jar xxx.jar 中  的-jar xxx.jar))
         </li>
         <li>
             <label>查找进程批处理脚本</label><input class="mylongtext" type="text" id="taskfindbatchscript" name="taskfindbatchscript" />(查找此任务进程id的批处理脚本，一般运行在powershell或者cmd 目前支持powershell的脚本)
+        </li>
+        <li>
+            <label>卸载任务批处理脚本</label><input class="mylongtext" type="text" id="taskuninstallbatchscript" name="taskuninstallbatchscript" />(卸载程序包前需要执行的脚本，比如 用于 解除window服务的注册的脚本)
         </li>
         <li>
             <label>任务入口类的命名空间</label><input class="mylongtext" type="text" id="taskmainclassnamespace" name="taskmainclassnamespace" />示范：TaskManager.Demo.DemoTask

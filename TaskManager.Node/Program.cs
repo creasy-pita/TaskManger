@@ -58,7 +58,8 @@ namespace TaskManager.Node
                 CommandQueueProcessor.Run();
                 //注册后台监控
                 //GlobalConfig.Monitors.Add(new SystemMonitor.TaskRecoverMonitor());
-                GlobalConfig.Monitors.Add(new SystemMonitor.TaskPerformanceMonitor());
+
+                //GlobalConfig.Monitors.Add(new SystemMonitor.TaskPerformanceMonitor());//TBD 后续需要开启
                 GlobalConfig.Monitors.Add(new SystemMonitor.NodeHeartBeatMonitor());
                 //GlobalConfig.Monitors.Add(new SystemMonitor.TaskStopMonitor());
             }

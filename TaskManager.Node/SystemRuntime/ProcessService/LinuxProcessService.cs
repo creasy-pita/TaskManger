@@ -39,7 +39,13 @@ namespace TaskManager.Node.SystemRuntime.ProcessService
         {
             return "";
         }
-            public void ProcessKill(int pId)
+
+        public string GetProcessIdByBatchScript(string batchScript)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ProcessKill(int pId)
         {
             var pro = new Process
             {

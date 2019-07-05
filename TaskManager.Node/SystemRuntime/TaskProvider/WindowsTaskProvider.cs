@@ -268,7 +268,7 @@ namespace TaskManager.Node.SystemRuntime
         {
             IProcessService ps = ProcessServiceFactory.CreateProcessService(EnumOSState.Windows.ToString());
             //判断是否已经运行
-            string pId = ps.GetProcessByName(task.taskmainclassdllfilename);
+            string pId = ps.GetProcessIdByBatchScript(task.taskfindbatchscript);
             if (!string.IsNullOrEmpty(pId))
             {
                 throw new Exception("任务已在运行中");
@@ -336,18 +336,15 @@ namespace TaskManager.Node.SystemRuntime
                     FileName = task.taskstartfilename,
                     Arguments = $@"{task.taskarguments}",
                     UseShellExecute = true,
-                    RedirectStandardOutput = true,
                     CreateNoWindow = false,
-                    WorkingDirectory = task.taskpath,
+                    WorkingDirectory = task.taskpath
                 };
-                var ProcessStart = Process.Start(psi);
-                if (ProcessStart == null)
+                var ProcessStart = new Process();
+                ProcessStart.StartInfo = psi;
+                //ProcessStart.EnableRaisingEvents=true;
+                if (!ProcessStart.Start())
                 {
                     throw new Exception("无法执行进程");
-                }
-                else
-                {
-                    var Output = ProcessStart.StandardOutput;
                 }
 
                 EnumTaskCommandState enumTaskCommandState = EnumTaskCommandState.Error;
@@ -355,7 +352,7 @@ namespace TaskManager.Node.SystemRuntime
                 int RetryCount = 10;
                 while (RetryCount-- > 0)
                 {
-                    if (!string.IsNullOrEmpty(ps.GetProcessByName(task.taskmainclassdllfilename)))
+                    if (!string.IsNullOrEmpty(ps.GetProcessIdByBatchScript(task.taskfindbatchscript)))
                     {
                         enumTaskCommandState = EnumTaskCommandState.Success;
                         enumTaskState = EnumTaskState.Running;
@@ -386,7 +383,7 @@ namespace TaskManager.Node.SystemRuntime
         public bool WindowsStop(tb_task_model task)
         {
             IProcessService ps = ProcessServiceFactory.CreateProcessService(EnumOSState.Windows.ToString());
-            string pId = ps.GetProcessByName(task.taskmainclassdllfilename);
+            string pId = ps.GetProcessIdByBatchScript(task.taskfindbatchscript);
             if (string.IsNullOrEmpty(pId))
             {
                 throw new TaskAlreadyNotRunningException("任务不在运行中");
@@ -399,7 +396,7 @@ namespace TaskManager.Node.SystemRuntime
             int RetryCount = 10;
             while (RetryCount-- > 0)
             {
-                if (string.IsNullOrEmpty(ps.GetProcessByName(task.taskmainclassdllfilename)))
+                if (string.IsNullOrEmpty(ps.GetProcessIdByBatchScript(task.taskfindbatchscript)))
                 {
                     enumTaskCommandState = EnumTaskCommandState.Success;
                     enumTaskState = EnumTaskState.Stop;
@@ -463,14 +460,52 @@ namespace TaskManager.Node.SystemRuntime
                         tb_task_dal taskDAL = new tb_task_dal();
                         task = taskDAL.GetOneTask(conn, taskid);
                     });
+                    //TBD 检查任务是否已经停止运行
+
+                    #region //如果有卸载脚本， 则运行 卸载
+                    if (!string.IsNullOrEmpty(task.taskuninstallbatchscript))
+                    {
+                        //使用 shell 命令开启 任务程序
+                        var psi = new ProcessStartInfo
+                        {
+                            FileName = "cmd",
+                            Arguments = $@"{task.taskuninstallbatchscript}",
+                            UseShellExecute = true,
+                            CreateNoWindow = false,
+                            WorkingDirectory = task.taskpath
+                        };
+                        var ProcessStart = new Process();
+                        ProcessStart.StartInfo = psi;
+                        if (!ProcessStart.Start())
+                        {
+                            throw new Exception("无法正确执行卸载任务的脚本");
+                        }
+                    }
+                    #endregion
+
+                    Thread.Sleep(10000);
                     //TBD 修改为 AppDomain.CurrentDomain.BaseDirectory + GlobalConfig.TaskDllDir 
                     //TBD 后期加入每个任务可定制部署目录
                     // string rootPath = AppDomain.CurrentDomain.BaseDirectory + GlobalConfig.TaskDllDir + "\\";
                     string rootPath = "F:\\" + GlobalConfig.TaskDllDir + "\\";
                     string path = $"{rootPath}{task.taskname}\\";
+
+                    //int RetryCount = 10;
+                    //while (RetryCount-- > 0)
+                    //{
+                    //    if (!string.IsNullOrEmpty(ps.GetProcessIdByBatchScript(task.taskfindbatchscript)))
+                    //    {
+                    //        RetryCount = 0;
+                    //    }
+                    //    else
+                    //    {
+                    //        Thread.Sleep(500);
+                    //    }
+                    //}
+
                     if (Directory.Exists(path))
                     {
-                        //TBD 考虑后期 先备份这个文件
+                        //TBD 考虑后期 先备份这个目录中需要备份的文件，或者提前以挂载形式挂载到外部目录
                         Directory.Delete(path,true);
                     }
                     LogHelper.AddTaskLog("节点卸载任务成功", task.id);

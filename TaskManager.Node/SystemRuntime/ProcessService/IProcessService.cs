@@ -8,6 +8,7 @@ namespace TaskManager.Node.SystemRuntime.ProcessService
     {
         string GetProcessByPort(string port);
         string GetProcessByName(string serviceName);
+        string GetProcessIdByBatchScript(string batchScript);
         void ProcessKill(int pId);
     }
 }
