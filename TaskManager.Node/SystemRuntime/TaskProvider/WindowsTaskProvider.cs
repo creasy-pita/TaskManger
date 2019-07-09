@@ -50,10 +50,10 @@ namespace TaskManager.Node.SystemRuntime
                 //TBD 修改为 AppDomain.CurrentDomain.BaseDirectory + GlobalConfig.TaskDllDir 
                 //TBD 后期加入每个任务可定制部署目录
                 // string rootPath = AppDomain.CurrentDomain.BaseDirectory + GlobalConfig.TaskDllDir + "\\";
-                string rootPath = "F:\\" + GlobalConfig.TaskDllDir + "\\";
-                BSF.Tool.IOHelper.CreateDirectory(rootPath);
-
-                string path = $"{rootPath}{task.taskname}\\";
+                //string rootPath = "F:\\" + GlobalConfig.TaskDllDir + "\\";
+                //BSF.Tool.IOHelper.CreateDirectory(rootPath);
+                //string path = $"{rootPath}{task.taskname}\\";
+                string path = task.taskpath;
                 //判断程序目录是否已经存在
                 if (!Directory.Exists(path))
                 {
@@ -263,12 +263,27 @@ namespace TaskManager.Node.SystemRuntime
             return true;
         }
 
+        public string GetProcessId(tb_task_model task, IProcessService ps)
+        {
+            string pId = string.Empty;
+            if (!string.IsNullOrEmpty(task.taskfindbatchscript))
+            {
+                pId = ps.GetProcessIdByBatchScript(task.taskfindbatchscript);
+            }
+            else
+            {
+                pId = ps.GetProcessByCondition(task.taskstartfilename, task.taskarguments);
+            }
+            return pId;
+        }
 
         public bool WindowsStart(tb_task_model task)
         {
             IProcessService ps = ProcessServiceFactory.CreateProcessService(EnumOSState.Windows.ToString());
             //判断是否已经运行
-            string pId = ps.GetProcessIdByBatchScript(task.taskfindbatchscript);
+            //string pId = ps.GetProcessIdByBatchScript(task.taskfindbatchscript);
+            string pId = GetProcessId(task, ps);
+
             if (!string.IsNullOrEmpty(pId))
             {
                 throw new Exception("任务已在运行中");
@@ -278,10 +293,11 @@ namespace TaskManager.Node.SystemRuntime
                 //TBD 修改为 AppDomain.CurrentDomain.BaseDirectory + GlobalConfig.TaskDllDir 
                 //TBD 后期加入每个任务可定制部署目录
                 // string rootPath = AppDomain.CurrentDomain.BaseDirectory + GlobalConfig.TaskDllDir + "\\";
-                string rootPath = "F:\\" + GlobalConfig.TaskDllDir + "\\";
-                BSF.Tool.IOHelper.CreateDirectory(rootPath);
+                //string rootPath = "F:\\" + GlobalConfig.TaskDllDir + "\\";
+                //BSF.Tool.IOHelper.CreateDirectory(rootPath);
 
-                string path = $"{rootPath}{task.taskname}\\";
+                //string path = $"{rootPath}{task.taskname}\\";
+                string path = task.taskpath;
                 //判断程序目录是否已经存在
                 if (!Directory.Exists(path))
                 {
@@ -352,7 +368,8 @@ namespace TaskManager.Node.SystemRuntime
                 int RetryCount = 10;
                 while (RetryCount-- > 0)
                 {
-                    if (!string.IsNullOrEmpty(ps.GetProcessIdByBatchScript(task.taskfindbatchscript)))
+                    //if (!string.IsNullOrEmpty(ps.GetProcessIdByBatchScript(task.taskfindbatchscript)))
+                    if (!string.IsNullOrEmpty(GetProcessId(task, ps)))
                     {
                         enumTaskCommandState = EnumTaskCommandState.Success;
                         enumTaskState = EnumTaskState.Running;
@@ -375,6 +392,9 @@ namespace TaskManager.Node.SystemRuntime
                 {
                     LogHelper.AddNodeLog($"节点:{task.nodeid}成功执行任务:{task.id}……");
                 }
+                else {
+                    LogHelper.AddNodeLog($"节点:{task.nodeid}成功执行失败:{task.id}……");
+                }
             });
 
             return true;
@@ -383,7 +403,8 @@ namespace TaskManager.Node.SystemRuntime
         public bool WindowsStop(tb_task_model task)
         {
             IProcessService ps = ProcessServiceFactory.CreateProcessService(EnumOSState.Windows.ToString());
-            string pId = ps.GetProcessIdByBatchScript(task.taskfindbatchscript);
+            //string pId = ps.GetProcessIdByBatchScript(task.taskfindbatchscript);
+            string pId = GetProcessId(task,ps);
             if (string.IsNullOrEmpty(pId))
             {
                 throw new TaskAlreadyNotRunningException("任务不在运行中");
@@ -396,7 +417,8 @@ namespace TaskManager.Node.SystemRuntime
             int RetryCount = 10;
             while (RetryCount-- > 0)
             {
-                if (string.IsNullOrEmpty(ps.GetProcessIdByBatchScript(task.taskfindbatchscript)))
+                //if (string.IsNullOrEmpty(ps.GetProcessIdByBatchScript(task.taskfindbatchscript)))
+                if (string.IsNullOrEmpty(GetProcessId(task, ps)))
                 {
                     enumTaskCommandState = EnumTaskCommandState.Success;
                     enumTaskState = EnumTaskState.Stop;
@@ -487,21 +509,10 @@ namespace TaskManager.Node.SystemRuntime
                     //TBD 修改为 AppDomain.CurrentDomain.BaseDirectory + GlobalConfig.TaskDllDir 
                     //TBD 后期加入每个任务可定制部署目录
                     // string rootPath = AppDomain.CurrentDomain.BaseDirectory + GlobalConfig.TaskDllDir + "\\";
-                    string rootPath = "F:\\" + GlobalConfig.TaskDllDir + "\\";
-                    string path = $"{rootPath}{task.taskname}\\";
+                    //string rootPath = "F:\\" + GlobalConfig.TaskDllDir + "\\";
+                    //string path = $"{rootPath}{task.taskname}\\";
 
-                    //int RetryCount = 10;
-                    //while (RetryCount-- > 0)
-                    //{
-                    //    if (!string.IsNullOrEmpty(ps.GetProcessIdByBatchScript(task.taskfindbatchscript)))
-                    //    {
-                    //        RetryCount = 0;
-                    //    }
-                    //    else
-                    //    {
-                    //        Thread.Sleep(500);
-                    //    }
-                    //}
+                    string path = task.taskpath;
 
                     if (Directory.Exists(path))
                     {

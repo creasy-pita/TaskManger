@@ -36,7 +36,8 @@ namespace TaskManager.Node
                 {
                     string processId = string.Empty;
                     IProcessService ps = ProcessServiceFactory.CreateProcessService(taskNode.nodeostype);
-                    processId = ps.GetProcessIdByBatchScript(task.taskfindbatchscript);
+                    //processId = ps.GetProcessIdByBatchScript(task.taskfindbatchscript);
+                    processId = GetProcessId(task,ps);
 
                     if (task.taskstate == 1 && string.IsNullOrEmpty( processId))
                     {
@@ -61,7 +62,8 @@ namespace TaskManager.Node
                     }
                     //再次匹配状态 如果当前服务运行状态和数据库服务状态不一致，更新数据库服务状态
                     processId = string.Empty;
-                    processId = ps.GetProcessIdByBatchScript(task.taskfindbatchscript);
+                    //processId = ps.GetProcessIdByBatchScript(task.taskfindbatchscript);
+                    processId = GetProcessId(task,ps);
 
                     int state = string.IsNullOrEmpty(processId)?0:1;
                     if (task.taskstate != state)
@@ -116,5 +118,18 @@ namespace TaskManager.Node
             });
         }
 
+        public static string GetProcessId(tb_task_model task, IProcessService ps)
+        {
+            string pId = string.Empty;
+            if (!string.IsNullOrEmpty(task.taskfindbatchscript))
+            {
+                pId = ps.GetProcessIdByBatchScript(task.taskfindbatchscript);
+            }
+            else
+            {
+                pId = ps.GetProcessByCondition(task.taskstartfilename, task.taskarguments);
+            }
+            return pId;
+        }
     }
 }

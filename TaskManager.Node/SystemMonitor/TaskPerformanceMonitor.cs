@@ -36,14 +36,15 @@ namespace TaskManager.Node.SystemMonitor
                 IEnumerable<tb_task_model> tasks = alltasks.Where((t) => t.taskstate == 1);
                 foreach (var task in tasks)
                 {
-                    string fileinstallpath = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\') + "/" + GlobalConfig.TaskDllDir + "/" +  task.taskname+"/";
+                    //string fileinstallpath = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\') + "/" + GlobalConfig.TaskDllDir + "/" +  task.taskname+"/";
+                    string fileinstallpath = task.taskpath;
                     double dirsizeM = -1;
                     if (System.IO.Directory.Exists(fileinstallpath))
                     {
                         long dirsize = TaskManager.Core.IOHelper.DirSize(new DirectoryInfo(fileinstallpath));
                         dirsizeM = (double)dirsize / 1024 / 1024;
                     }
-                    (double cpu, long memorySize) = PerformanceHelper.GetPerformenceInfo(task.taskfindbatchscript);
+                    (double cpu, long memorySize) = PerformanceHelper.GetPerformenceInfo(task);
                     tb_performance_dal nodedal = new tb_performance_dal();
                     nodedal.AddOrUpdate(c, new Domain.Model.tb_performance_model()
                     {

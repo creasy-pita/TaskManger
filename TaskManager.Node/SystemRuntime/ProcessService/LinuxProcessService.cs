@@ -7,6 +7,11 @@ namespace TaskManager.Node.SystemRuntime.ProcessService
 {
     class LinuxProcessService : IProcessService
     {
+        public string GetProcessByCondition(string processName, string commandLineFilterStr)
+        {
+            throw new NotImplementedException();
+        }
+
         public string GetProcessByName(string serviceName)
         {
             var pro = new Process

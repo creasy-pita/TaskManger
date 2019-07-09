@@ -23,6 +23,25 @@ namespace TaskManager.Node.SystemRuntime.ProcessService
             }
             return string.Empty;
         }
+        /// <summary>
+        /// 按进程名称 和 命令行参数查找 进程id
+        /// </summary>
+        /// <param name="processName">进程名称</param>
+        /// <param name="commandLineFilterStr">进程的命令行参数</param>
+        /// <returns></returns>
+        public string GetProcessByCondition(string processName, string commandLineFilterStr)
+        {
+            Process[] proclist = Process.GetProcessesByName(processName);
+            foreach (var p in proclist)
+            {
+                string cmdName = ProcessCommonLine.GetCommandLineOfProcess(p);
+                if (cmdName.IndexOf(commandLineFilterStr) > -1)
+                {
+                    return p.Id.ToString();
+                }
+            }
+            return string.Empty;
+        }
 
 
         public string RunBatchScriptWithCmd(string batchScript)

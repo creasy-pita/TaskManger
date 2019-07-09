@@ -23,12 +23,14 @@ namespace TaskManager.Node.Tools
         /// 添加日志
         /// </summary>
         /// <param name="model"></param>
-        public static (double CPU, long memory) GetPerformenceInfo(string batchScript)
+        //public static (double CPU, long memory) GetPerformenceInfo(string batchScript)
+        public static (double CPU, long memory) GetPerformenceInfo(tb_task_model task)
         {
             try
             {
                 IProcessService ps = ProcessServiceFactory.CreateProcessService(EnumOSState.Windows.ToString());
-                string pIdStr = ps.GetProcessIdByBatchScript(batchScript);
+                //string pIdStr = ps.GetProcessIdByBatchScript( batchScript);
+                string pIdStr = GetProcessId(task, ps);
                 if (string.IsNullOrEmpty(pIdStr)) return (0,0);
                 Process p = Process.GetProcessById(int.Parse(pIdStr));
                 DateTime lastTime=new DateTime();
@@ -117,6 +119,20 @@ namespace TaskManager.Node.Tools
             {
                 return (0, 0);
             }
+        }
+
+        public static string GetProcessId(tb_task_model task, IProcessService ps)
+        {
+            string pId = string.Empty;
+            if (!string.IsNullOrEmpty(task.taskfindbatchscript))
+            {
+                pId = ps.GetProcessIdByBatchScript(task.taskfindbatchscript);
+            }
+            else
+            {
+                pId = ps.GetProcessByCondition(task.taskstartfilename, task.taskarguments);
+            }
+            return pId;
         }
 
     }
