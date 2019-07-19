@@ -1,0 +1,37 @@
+﻿@{
+    ViewBag.Title = "Add";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+   
+</style>
+<script>
+    function sub() {
+        if ($("#packagename").val() == "") {
+            alert("请填写程序包名称！");
+            return false;
+        }
+    }
+</script>
+<div class="head">
+    <div class="title">
+        新增程序包 @Html.Raw(TaskManager.Web.Models.Common.HelpHtml(""))
+    </div>
+</div>
+<div>
+    @using (Html.BeginForm("Add", "Package", FormMethod.Post, new { @onsubmit = "return sub()" }))
+    {
+    <ul class="mydetail">
+        <li>
+            <label>程序包名称</label><input type="text" id="packagename" name="packagename" />
+        </li>
+        <li>
+            <label>备注</label>
+            <textarea id="remark" name="remark" style="height:200px"></textarea>
+        </li>
+        <li>
+            <input type="submit" class="btn1" value="提交" />
+        </li>
+    </ul>
+    }
+</div>

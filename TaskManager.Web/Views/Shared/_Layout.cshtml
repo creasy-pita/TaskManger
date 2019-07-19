@@ -32,45 +32,51 @@
                 
                 @if(role==(int)TaskManager.Core.EnumUserRole.Admin)
                 {
-                    <ul class="level1">
-                        <li>
-                            <p>任务管理<i></i></p>
-                            <ul class="level2">
-                                <li><a href="@Url.Action("index", "task")">任务列表</a></li>
-                                <li><a href="@Url.Action("index", "webtask")">web任务列表</a></li>
-                                <li><a href="@Url.Action("index", "Node")">节点列表</a></li>
-                                <li><a href="@Url.Action("index", "category")">分类列表</a></li>
-                                <li><a href="@Url.Action("index", "command")">命令列表</a></li>
-                            </ul>
-                        </li>
-                        <li>
-                            <p>日志查看<i></i></p>
-                            <ul class="level2">
-                                <li><a href="@Url.Action("errorlog", "log")">错误日志</a></li>
-                                <li><a href="@Url.Action("log", "log")">日志</a></li>
-                            </ul>
-                        </li>
-                        <li>
-                            <p>性能查看<i></i></p>
-                            <ul class="level2">
-                                <li><a href="@Url.Action("index", "performance")">任务性能分析</a></li>
-                                <li><a href="@Url.Action("nodeindex", "performance")">节点性能分析</a></li>
-                            </ul>
-                        </li>
-                        <li>
-                            <p>配置管理<i></i></p>
-                            <ul class="level2">
-                                <li><a href="@Url.Action("index", "config")">配置</a></li>
-                            </ul>
-                        </li>
-                        <li>
-                            <p>用户管理<i></i></p>
-                            <ul class="level2">
-                                <li><a href="@Url.Action("index", "user")">用户</a></li>
-                            </ul>
-                        </li>
-                     
+            <ul class="level1">
+                <li>
+                    <p>程序服务包管理<i></i></p>
+                    <ul class="level2">
+                        <li><a href="@Url.Action("index", "Package")">程序包列表</a></li>
                     </ul>
+                </li>
+                <li>
+                    <p>任务管理<i></i></p>
+                    <ul class="level2">
+                        <li><a href="@Url.Action("index", "task")">任务列表</a></li>
+                        <li><a href="@Url.Action("index", "webtask")">web任务列表</a></li>
+                        <li><a href="@Url.Action("index", "Node")">节点列表</a></li>
+                        <li><a href="@Url.Action("index", "category")">分类列表</a></li>
+                        <li><a href="@Url.Action("index", "command")">命令列表</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <p>日志查看<i></i></p>
+                    <ul class="level2">
+                        <li><a href="@Url.Action("errorlog", "log")">错误日志</a></li>
+                        <li><a href="@Url.Action("log", "log")">日志</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <p>性能查看<i></i></p>
+                    <ul class="level2">
+                        <li><a href="@Url.Action("index", "performance")">任务性能分析</a></li>
+                        <li><a href="@Url.Action("nodeindex", "performance")">节点性能分析</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <p>配置管理<i></i></p>
+                    <ul class="level2">
+                        <li><a href="@Url.Action("index", "config")">配置</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <p>用户管理<i></i></p>
+                    <ul class="level2">
+                        <li><a href="@Url.Action("index", "user")">用户</a></li>
+                    </ul>
+                </li>
+
+            </ul>
                 }
                 else
                 {

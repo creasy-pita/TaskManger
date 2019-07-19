@@ -90,14 +90,6 @@
                     </select>
                 </li>
                 <li>
-                    <label>任务配置json</label>
-                    <textarea id="taskappconfigjson" name="taskappconfigjson" @Html.Raw(Model.taskstate == (int)TaskManager.Core.EnumTaskState.Running ? "readonly=readonly" : "") style="height:200px">@Model.taskappconfigjson</textarea>
-                </li>
-                <li>
-                    <label>数据库临时数据json</label>
-                    <textarea id="tempdatajson" name="tempdatajson" @Html.Raw(Model.taskstate == (int)TaskManager.Core.EnumTaskState.Running ? "readonly=readonly" : "") style="height:200px">@TempData.tempdatajson</textarea>示范:{"key1":"value1","key2":"value2"}
-                </li>
-                <li>
                     <label>Cron表达式</label>
                     <input type="text" id="taskcron" name="taskcron" @Html.Raw(Model.taskstate == (int)TaskManager.Core.EnumTaskState.Running ? "readonly=readonly" : "") value="@Model.taskcron"> <a target="_blank" href="@Url.Action("cron", "Task", new {  })">Cron表达式生成器</a> <a target="_blank" href="@Url.Action("CustomCorn", "Task", new {  })">自定义cron表达式</a>
                 </li>
@@ -115,12 +107,6 @@
                 </li>
                 <li>
                     <label>卸载任务批处理脚本</label><input class="mylongtext" type="text" @Html.Raw(Model.taskstate == (int)TaskManager.Core.EnumTaskState.Running ? "readonly=readonly" : "") id="taskuninstallbatchscript" name="taskuninstallbatchscript" value="@Model.taskuninstallbatchscript" />
-                </li>
-                <li>
-                    <label>任务入口类的命名空间</label><input class="mylongtext" type="text" @Html.Raw(Model.taskstate == (int)TaskManager.Core.EnumTaskState.Running ? "readonly=readonly" : "") id="taskmainclassnamespace" name="taskmainclassnamespace" value="@Model.taskmainclassnamespace" />
-                </li>
-                <li>
-                    <label>任务入口dll文件名</label><input class="mylongtext" type="text" @Html.Raw(Model.taskstate == (int)TaskManager.Core.EnumTaskState.Running ? "readonly=readonly" : "") id="taskmainclassdllfilename" name="taskmainclassdllfilename" value="@Model.taskmainclassdllfilename" />
                 </li>
                 <li>
                     <label>版本</label>

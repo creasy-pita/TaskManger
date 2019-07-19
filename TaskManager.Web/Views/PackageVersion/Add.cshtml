@@ -1,0 +1,41 @@
+﻿@{
+    ViewBag.Title = "Add";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+   
+</style>
+<script>
+    function sub() {
+        if ($("#packagename").val() == "") {
+            alert("请填写程序包版本号！");
+            return false;
+        }
+    }
+</script>
+<div class="head">
+    <div class="title">
+        新增程序包版本 @Html.Raw(TaskManager.Web.Models.Common.HelpHtml(""))
+    </div>
+</div>
+<div>
+    @using (Html.BeginForm("Add", "PackageVersion", FormMethod.Post, new { enctype = "multipart/form-data", @onsubmit = "return sub()" }))
+    {
+    <ul class="mydetail">
+        <input type="hidden" id="packageid" name="packageid" value="@(ViewBag.packageid)" />
+        <li>
+            <label>版本号</label><input type="text" id="versionno" name="versionno" />
+        </li>
+        <li>
+            <label>上传文件</label><input type="file" id="TaskDll" name="TaskDll" />
+        </li>
+        <li>
+            <label>备注</label>
+            <textarea id="remark" name="remark" style="height:200px"></textarea>
+        </li>
+        <li>
+            <input type="submit" class="btn1" value="提交" />
+        </li>
+    </ul>
+    }
+</div>

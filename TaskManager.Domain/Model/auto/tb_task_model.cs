@@ -91,14 +91,14 @@ namespace TaskManager.Domain.Model
         /// 
         /// </summary>
         public string taskcron { get; set; }
-        
+
         /// <summary>
-        /// 
+        /// 废弃不使用 obsolete discard
         /// </summary>
         public string taskmainclassnamespace { get; set; }
 
         /// <summary>
-        /// 
+        /// 废弃不使用 obsolete discard
         /// </summary>
         public string taskmainclassdllfilename { get; set; }
 
@@ -108,7 +108,7 @@ namespace TaskManager.Domain.Model
         public string taskremark { get; set; }
 
         /// <summary>
-        /// 程序跟目录
+        /// 程序根目录 rootpath
         /// </summary>
         public string taskpath { get; set; }
 

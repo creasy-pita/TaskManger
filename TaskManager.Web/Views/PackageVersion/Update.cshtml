@@ -1,0 +1,40 @@
+﻿@model TaskManager.Domain.Model.tb_packageversion_model
+@{
+    ViewBag.Title = "Update";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script>
+    function sub() {
+        if ($("#packagename").val() == "") {
+            alert("请填写程序包名称！");
+            return false;
+        }
+    }
+</script>
+<div class="head">
+    <div class="title">
+        修改程序包 @Html.Raw(TaskManager.Web.Models.Common.HelpHtml(""))
+    </div>
+</div>
+<div>
+    <input type="hidden" value="@Model.id" id="id" />
+    @using (Html.BeginForm("Update", "PackageVersion", FormMethod.Post, new { enctype = "multipart/form-data",@onsubmit = "return sub()" }))
+    {
+    <ul class="mydetail">
+        <li>
+            <label>版本号</label><span><input type="text" id="versionno" name="versionno" value="@Model.versionno" /></span>
+        </li>
+        <li>
+            <label>文件 @Model.zipfilename</label>
+        </li>
+        <li>
+            <label>上传新文件</label>
+            <input type="file" name="TaskDll" value="TaskDll" />
+        </li>
+        <li>
+            <input type="submit" class="btn1" value="提交" />
+        </li>
+    </ul>
+    }
+</div>
