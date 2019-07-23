@@ -103,9 +103,11 @@ namespace TaskManager.Web.Controllers
                     List<tb_category_model> Category = new tb_category_dal().GetList(PubConn, "");
                     List<tb_node_model> Node = new tb_node_dal().GetListAll(PubConn);
                     List<tb_user_model> User = new tb_user_dal().GetAllUsers(PubConn);
+                    List<tb_package_model> package = new tb_package_dal().GetListAll(PubConn);
                     ViewBag.Node = Node;
                     ViewBag.Category = Category;
                     ViewBag.User = User;
+                    ViewBag.package = package;
                     return View();
                 }
             });
@@ -248,11 +250,15 @@ namespace TaskManager.Web.Controllers
                     List<tb_category_model> Category = new tb_category_dal().GetList(PubConn, "");
                     List<tb_node_model> Node = new tb_node_dal().GetListAll(PubConn);
                     List<tb_user_model> User = new tb_user_dal().GetAllUsers(PubConn);
+                    List<tb_package_model> package = new tb_package_dal().GetListAll(PubConn);
+                    List<tb_packageversion_model> packageversion = new tb_packageversion_dal().GetListByPackageId(PubConn,model.taskpackageid);
                     ViewBag.Node = Node;
                     ViewBag.Category = Category;
                     ViewBag.Version = Version;
                     ViewBag.User = User;
                     ViewBag.TempData = tempdatamodel;
+                    ViewBag.package = package;
+                    ViewBag.packageversion = packageversion;
                     return View(model);
                 }
             });

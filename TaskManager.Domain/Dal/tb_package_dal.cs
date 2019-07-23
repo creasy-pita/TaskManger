@@ -70,5 +70,22 @@ namespace TaskManager.Domain.Dal
             count = _count;
             return Model;
         }
+
+        public List<tb_package_model> GetListAll(DbConn PubConn)
+        {
+            return SqlHelper.Visit<List<tb_package_model>>(ps =>
+            {
+                List<tb_package_model> Model = new List<tb_package_model>();
+                string sql = "select * from tb_package";
+                DataSet ds = new DataSet();
+                PubConn.SqlToDataSet(ds, sql, ps.ToParameters());
+                foreach (DataRow dr in ds.Tables[0].Rows)
+                {
+                    tb_package_model n = CreateModel(dr);
+                    Model.Add(n);
+                }
+                return Model;
+            });
+        }
     }
 }

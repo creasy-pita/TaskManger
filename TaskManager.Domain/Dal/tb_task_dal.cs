@@ -223,6 +223,16 @@ namespace TaskManager.Domain.Dal
                 o.taskversion = dr["taskversion"].Toint();
             }
             //
+            if (dr.Table.Columns.Contains("taskpackageid"))
+            {
+                o.taskpackageid = dr["taskpackageid"].Toint();
+            }
+            //
+            if (dr.Table.Columns.Contains("taskpackageversionid"))
+            {
+                o.taskpackageversionid = dr["taskpackageversionid"].Toint();
+            }
+            //
             if (dr.Table.Columns.Contains("taskappconfigjson"))
             {
                 o.taskappconfigjson = dr["taskappconfigjson"].Tostring();
@@ -329,6 +339,8 @@ namespace TaskManager.Domain.Dal
                 ps.Add("@taskcreateuserid", model.taskcreateuserid);
                 ps.Add("@taskstate",0);
                 ps.Add("@taskversion", 1);
+                ps.Add("@taskpackageid", model.taskpackageid);
+                ps.Add("@taskpackageversionid", model.taskpackageversionid);
                 ps.Add("@taskappconfigjson", model.taskappconfigjson.NullToEmpty());
                 ps.Add("@taskcron", model.taskcron);
                 ps.Add("@taskpath", model.taskpath);
@@ -341,8 +353,8 @@ namespace TaskManager.Domain.Dal
                 ps.Add("@taskmainclassdllfilename", model.taskmainclassdllfilename);
              //   int rev = Convert.ToInt32(PubConn.ExecuteScalar(@"insert into tb_task(taskname,categoryid,nodeid,taskcreatetime,taskruncount,taskcreateuserid,taskstate,taskversion,taskappconfigjson,taskcron,taskmainclassnamespace,taskremark,taskmainclassdllfilename)
 										   //values(@taskname,@categoryid,@nodeid,@taskcreatetime,@taskruncount,@taskcreateuserid,@taskstate,@taskversion,@taskappconfigjson,@taskcron,@taskmainclassnamespace,@taskremark,@taskmainclassdllfilename) select @@IDENTITY", ps.ToParameters()));
-                PubConn.ExecuteScalar(@"insert into tb_task(taskname,categoryid,nodeid,taskcreatetime,taskupdatetime,taskruncount,taskcreateuserid,taskstate,taskversion,taskappconfigjson,taskcron,taskpath,taskarguments,taskfindbatchscript,taskuninstallbatchscript,taskstartfilename,taskmainclassnamespace,taskremark,taskmainclassdllfilename)
-										   values(@taskname,@categoryid,@nodeid,@taskcreatetime,@taskupdatetime,@taskruncount,@taskcreateuserid,@taskstate,@taskversion,@taskappconfigjson,@taskcron,@taskpath,@taskarguments,@taskfindbatchscript,@taskuninstallbatchscript,@taskstartfilename,@taskmainclassnamespace,@taskremark,@taskmainclassdllfilename)", ps.ToParameters());
+                PubConn.ExecuteScalar(@"insert into tb_task(taskname,categoryid,nodeid,taskcreatetime,taskupdatetime,taskruncount,taskcreateuserid,taskstate,taskversion,taskpackageid,taskpackageversionid,taskappconfigjson,taskcron,taskpath,taskarguments,taskfindbatchscript,taskuninstallbatchscript,taskstartfilename,taskmainclassnamespace,taskremark,taskmainclassdllfilename)
+										   values(@taskname,@categoryid,@nodeid,@taskcreatetime,@taskupdatetime,@taskruncount,@taskcreateuserid,@taskstate,@taskversion,@taskpackageid,@taskpackageversionid,@taskappconfigjson,@taskcron,@taskpath,@taskarguments,@taskfindbatchscript,@taskuninstallbatchscript,@taskstartfilename,@taskmainclassnamespace,@taskremark,@taskmainclassdllfilename)", ps.ToParameters());
 
                 DataTable dt = PubConn.SqlToDataTable("SELECT LAST_INSERT_ID() AS id_value", null);
                 if (dt != null && dt.Rows.Count > 0)
@@ -379,11 +391,13 @@ namespace TaskManager.Domain.Dal
                 
                 ps.Add("@taskmainclassdllfilename", model.taskmainclassdllfilename);
                 ps.Add("@taskversion", model.taskversion);
+                ps.Add("@taskpackageid", model.taskpackageid);
+                ps.Add("@taskpackageversionid", model.taskpackageversionid);
                 ps.Add("@taskstate", model.taskstate);
                 string sql = "Update tb_task Set taskname=@taskname,categoryid=@categoryid,nodeid=@nodeid,taskupdatetime=@taskupdatetime,tasklaststarttime=@tasklaststarttime,";
                 sql += "tasklastendtime=@tasklastendtime,taskappconfigjson=@taskappconfigjson,taskcron=@taskcron,taskcreateuserid=@taskcreateuserid,";
                 sql += "taskmainclassnamespace=@taskmainclassnamespace,taskremark=@taskremark ,taskpath=@taskpath,taskstartfilename=@taskstartfilename,taskarguments=@taskarguments,taskfindbatchscript=@taskfindbatchscript,taskuninstallbatchscript=@taskuninstallbatchscript," +
-                "taskmainclassdllfilename=@taskmainclassdllfilename,taskversion=@taskversion,taskstate=@taskstate";
+                "taskmainclassdllfilename=@taskmainclassdllfilename,taskversion=@taskversion,taskpackageid=@taskpackageid,taskpackageversionid=@taskpackageversionid,taskstate=@taskstate";
                 sql += " where id=@id";
                 int i = PubConn.ExecuteSql(sql, ps.ToParameters());
                 return i;

@@ -7,6 +7,8 @@
     List<tb_node_model> Node = ViewBag.Node as List<tb_node_model>;
     List<tb_user_model> User = ViewBag.User as List<tb_user_model>;
     List<tb_version_model> Version = ViewBag.Version as List<tb_version_model>;
+    List<tb_package_model> package = ViewBag.package as List<tb_package_model>;
+    List<tb_packageversion_model> packageversion = ViewBag.packageversion as List<tb_packageversion_model>;
     tb_tempdata_model TempData = ViewBag.TempData as tb_tempdata_model;
     int role = Convert.ToInt32(ViewBag.Role);
     if (role != (int)TaskManager.Core.EnumUserRole.Admin)
@@ -16,30 +18,42 @@
 }
 
 <script>
+    function GetVersionList(packageid) {
+        var url = "/api/PackageVersion/view/" + packageid;
+        //alert(url);
+        $.ajax({
+            url: url,
+            type: "GET",
+            processData: false,
+            contentType: false,
+            success: function (data) {
+                if (data != undefined) {
+                    var selectbox = $("#taskpackageversionid").get(0);
+                    removeOptions(selectbox);
+                    for (var i = 0; i < data.length; i++) {
+                        var pv = data[i];
+                        var option = document.createElement("option");
+                        option.text = pv.versionno + '_' + pv.zipfilename;
+                        option.value = pv.id;
+                        selectbox.add(option);
+                    }
+                }
+            }
+        });
+    }
+    function removeOptions(selectbox) {
+        var i;
+        for (i = selectbox.options.length - 1; i >= 0; i--) {
+            selectbox.remove(i);
+        }
+    }
+
     function sub() {
         //TBD 需要修改为 与Add 相同 能够保存 完整的任务 对象信息
-        if ($("#nodename").val() == "") {
-            alert("请填写节点名称！");
-            return false;
-        }
         var sel = $("#taskversion").find("option:selected").val();
         if (sel == -1) {
             if ($("#TaskDll").val() == "") {
                 alert("请选择新版本文件！")
-                return false;
-            }
-        }
-        var nodeip = $("#nodeip").val();
-        if (nodeip == "") {
-            alert("请填写节点IP！");
-            return false;
-        }
-        else {
-            //ip地址
-            var exp = /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/;
-            var reg = nodeip.match(exp);
-            if (reg == null) {
-                alert("IP地址不合法！");
                 return false;
             }
         }
@@ -107,6 +121,26 @@
                 </li>
                 <li>
                     <label>卸载任务批处理脚本</label><input class="mylongtext" type="text" @Html.Raw(Model.taskstate == (int)TaskManager.Core.EnumTaskState.Running ? "readonly=readonly" : "") id="taskuninstallbatchscript" name="taskuninstallbatchscript" value="@Model.taskuninstallbatchscript" />
+                </li>
+                <li>
+                    <label>程序仓库列表</label>
+                    <select id="taskpackageid" name="taskpackageid" @Html.Raw(Model.taskstate == (int)TaskManager.Core.EnumTaskState.Running ? "readonly=readonly" : "") onchange="GetVersionList(this.value)">
+                        <option value="-1"></option>
+                        @foreach (var p in package)
+                        {
+                            <option value="@p.id" @Html.Raw(p.id == @Model.taskpackageid ? "selected=selected" : "")>@(p.packagename)</option>
+                        }
+                    </select>
+                </li>
+                <li>
+                    <label>程序仓库列表</label>
+                    <select id="taskpackageversionid" name="taskpackageversionid" @Html.Raw(Model.taskstate == (int)TaskManager.Core.EnumTaskState.Running ? "readonly=readonly" : "") >
+                        <option value="-1"></option>
+                        @foreach (var pv in packageversion)
+                        {
+                            <option value="@pv.id" @Html.Raw(pv.id == @Model.taskpackageversionid ? "selected=selected" : "")>@(pv.versionno+"_"+pv.zipfilename)</option>
+                        }
+                    </select>
                 </li>
                 <li>
                     <label>版本</label>

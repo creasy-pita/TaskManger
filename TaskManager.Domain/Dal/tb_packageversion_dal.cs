@@ -32,6 +32,25 @@ namespace TaskManager.Domain.Dal
             });
         }
 
+        public List<tb_packageversion_model> GetListByPackageId(DbConn PubConn, int packageId)
+        {
+            List<tb_packageversion_model> modelList = new List<tb_packageversion_model>();
+            DataSet dsList = SqlHelper.Visit<DataSet>(ps =>
+            {
+                string sql = "select id,versionno,zipfilename from tb_packageversion where packageid=@packageid";
+                DataSet ds = new DataSet();
+                ps.Add("packageid", packageId);
+                PubConn.SqlToDataSet(ds, sql, ps.ToParameters());
+                return ds;
+            });
+            foreach (DataRow dr in dsList.Tables[0].Rows)
+            {
+                tb_packageversion_model m = CreateModel(dr);
+                modelList.Add(m);
+            }
+            return modelList;
+        }
+
         public List<tb_packageversion_model> GetListByPackageId(DbConn PubConn, int packageId, string cstime, string cetime, int pagesize, int pageindex, out int count)
         {
             int _count = 0;

@@ -45,6 +45,10 @@ namespace TaskManager.Domain.Dal
 					//
 					new ProcedureParameter("@taskversion",    model.taskversion),
 					//
+					new ProcedureParameter("@taskpackageid",    model.taskpackageid),
+					//
+					new ProcedureParameter("@taskpackageversionid",    model.taskpackageversionid),
+					//
 					new ProcedureParameter("@taskappconfigjson",    model.taskappconfigjson),
 					//
 					new ProcedureParameter("@taskcron",    model.taskcron),
@@ -62,8 +66,8 @@ namespace TaskManager.Domain.Dal
 					//
 					new ProcedureParameter("@taskremark",    model.taskremark)   
                 };
-            int rev = PubConn.ExecuteSql(@"insert into tb_task(taskname,categoryid,nodeid,taskcreatetime,taskupdatetime,tasklaststarttime,tasklastendtime,tasklasterrortime,taskerrorcount,taskruncount,taskcreateuserid,taskstate,taskversion,taskappconfigjson,taskcron,taskpath,taskstartfilename,taskarguments,taskfindbatchscript,taskuninstallbatchscript,taskmainclassnamespace,taskremark)
-										   values(@taskname,@categoryid,@nodeid,@taskcreatetime,@taskupdatetime,@tasklaststarttime,@tasklastendtime,@tasklasterrortime,@taskerrorcount,@taskruncount,@taskcreateuserid,@taskstate,@taskversion,@taskappconfigjson,@taskcron,@taskpath,@taskstartfilename,@taskarguments,@taskfindbatchscript,@taskuninstallbatchscript,@taskmainclassnamespace,@taskremark)", Par);
+            int rev = PubConn.ExecuteSql(@"insert into tb_task(taskname,categoryid,nodeid,taskcreatetime,taskupdatetime,tasklaststarttime,tasklastendtime,tasklasterrortime,taskerrorcount,taskruncount,taskcreateuserid,taskstate,taskversion,taskpackageid,taskpackageversionid,taskappconfigjson,taskcron,taskpath,taskstartfilename,taskarguments,taskfindbatchscript,taskuninstallbatchscript,taskmainclassnamespace,taskremark)
+										   values(@taskname,@categoryid,@nodeid,@taskcreatetime,@taskupdatetime,@tasklaststarttime,@tasklastendtime,@tasklasterrortime,@taskerrorcount,@taskruncount,@taskcreateuserid,@taskstate,@taskversion,@taskpackageid,@taskpackageversionid,@taskappconfigjson,@taskcron,@taskpath,@taskstartfilename,@taskarguments,@taskfindbatchscript,@taskuninstallbatchscript,@taskmainclassnamespace,@taskremark)", Par);
             return rev == 1;
 
         }
@@ -100,6 +104,10 @@ namespace TaskManager.Domain.Dal
 					//
 					new ProcedureParameter("@taskversion",    model.taskversion),
 					//
+					new ProcedureParameter("@taskpackageid",    model.taskpackageid),
+					//
+					new ProcedureParameter("@taskpackageversionid",    model.taskpackageversionid),
+					//
 					new ProcedureParameter("@taskappconfigjson",    model.taskappconfigjson),
 					//
 					new ProcedureParameter("@taskcron",    model.taskcron),
@@ -119,7 +127,7 @@ namespace TaskManager.Domain.Dal
             };
 			Par.Add(new ProcedureParameter("@id",  model.id));
 
-            int rev = PubConn.ExecuteSql("update tb_task set taskname=@taskname,categoryid=@categoryid,nodeid=@nodeid,taskcreatetime=@taskcreatetime,taskupdatetime=@taskupdatetime,tasklaststarttime=@tasklaststarttime,tasklastendtime=@tasklastendtime,tasklasterrortime=@tasklasterrortime,taskerrorcount=@taskerrorcount,taskruncount=@taskruncount,taskcreateuserid=@taskcreateuserid,taskstate=@taskstate,taskversion=@taskversion,taskappconfigjson=@taskappconfigjson,taskcron=@taskcron,taskpath=@taskpath,taskstartfilename=@taskstartfilename,taskarguments=@taskarguments,taskfindbatchscript=@taskfindbatchscript,taskuninstallbatchscript=@taskuninstallbatchscript,taskmainclassnamespace=@taskmainclassnamespace,taskremark=@taskremark where id=@id", Par);
+            int rev = PubConn.ExecuteSql("update tb_task set taskname=@taskname,categoryid=@categoryid,nodeid=@nodeid,taskcreatetime=@taskcreatetime,taskupdatetime=@taskupdatetime,tasklaststarttime=@tasklaststarttime,tasklastendtime=@tasklastendtime,tasklasterrortime=@tasklasterrortime,taskerrorcount=@taskerrorcount,taskruncount=@taskruncount,taskcreateuserid=@taskcreateuserid,taskstate=@taskstate,taskversion=@taskversion,taskpackageid=@taskpackageid,taskpackageversionid=@taskpackageversionid,taskappconfigjson=@taskappconfigjson,taskcron=@taskcron,taskpath=@taskpath,taskstartfilename=@taskstartfilename,taskarguments=@taskarguments,taskfindbatchscript=@taskfindbatchscript,taskuninstallbatchscript=@taskuninstallbatchscript,taskmainclassnamespace=@taskmainclassnamespace,taskremark=@taskremark where id=@id", Par);
             return rev == 1;
 
         }
@@ -232,8 +240,18 @@ namespace TaskManager.Domain.Dal
 			{
 				o.taskversion = dr["taskversion"].Toint();
 			}
-			//
-			if(dr.Table.Columns.Contains("taskappconfigjson"))
+            //
+            if (dr.Table.Columns.Contains("taskpackageid"))
+            {
+                o.taskpackageid = dr["taskpackageid"].Toint();
+            }
+            //
+            if (dr.Table.Columns.Contains("taskpackageversionid"))
+            {
+                o.taskpackageversionid = dr["taskpackageversionid"].Toint();
+            }
+            //
+            if (dr.Table.Columns.Contains("taskappconfigjson"))
 			{
 				o.taskappconfigjson = dr["taskappconfigjson"].Tostring();
 			}

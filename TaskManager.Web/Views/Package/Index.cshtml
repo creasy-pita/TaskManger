@@ -59,7 +59,7 @@
                     <td>
                         <a href="@Url.Action("Update", "Package", new { id = @item.id })">修改</a>
                         <input type="button" value="删除" onclick="Delete('@item.id    ')" />
-                        <a href="@Url.Action("Index","PackageVersion",  new { id = @item.id })">版本维护</a>
+                        <a href="@Url.Action("Index","PackageVersion",  new { id = @item.id,CStime="" })">版本维护1</a>
                     </td>
                 </tr>
                 }

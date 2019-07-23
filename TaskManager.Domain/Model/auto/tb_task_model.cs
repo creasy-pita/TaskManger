@@ -132,5 +132,15 @@ namespace TaskManager.Domain.Model
         /// </summary>
         public string taskuninstallbatchscript { get; set; }
 
+        /// <summary>
+        /// 任务使用的程序服务仓库服务版本id
+        /// </summary>
+        public int taskpackageversionid { get; set; }
+
+        /// <summary>
+        /// 任务使用的程序服务仓库服务id
+        /// </summary>
+        public int taskpackageid { get; set; }
+
     }
 }

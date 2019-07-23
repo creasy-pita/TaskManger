@@ -41,6 +41,19 @@ namespace TaskManager.Web.Controllers
             });
         }
 
+        [HttpGet]
+        [Route("api/[controller]/[action]/{packageid}")]
+        public JsonResult view(int packageid)
+        {
+            tb_packageversion_dal dal = new tb_packageversion_dal();
+            List<tb_packageversion_model> List = new List<tb_packageversion_model>();
+            using (DbConn PubConn = DbConn.CreateConn(Config.TaskConnectString))
+            {
+                PubConn.Open();
+                List = dal.GetListByPackageId(PubConn,packageid);
+            }
+            return Json(List);
+        }
         public ActionResult Add(int packageId)
         {
             ViewBag.packageid = packageId;

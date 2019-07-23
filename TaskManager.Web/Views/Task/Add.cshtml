@@ -5,12 +5,43 @@
     List<tb_category_model> Category = ViewBag.Category as List<tb_category_model>;
     List<tb_node_model> Node = ViewBag.Node as List<tb_node_model>;
     List<tb_user_model> User = ViewBag.User as List<tb_user_model>;
+    List<tb_package_model> package = ViewBag.package as List<tb_package_model>;
 }
 <style>
      
 </style>
 
 <script>
+    function GetVersionList(packageid) {
+        //var url = "/PackageVersion/Index?packageid=" + packageid;
+        var url = "/api/PackageVersion/view/" + packageid;
+        //alert(url);
+        $.ajax({
+            url: url,
+            type: "GET",
+            processData: false,
+            contentType: false,
+            success: function (data) {
+                if (data != undefined) {
+                    var selectbox = $("#taskpackageversionid").get(0);
+                    removeOptions(selectbox);
+                    for (var i = 0; i < data.length; i++) {
+                        var pv = data[i];
+                        var option = document.createElement("option");
+                        option.text = pv.versionno + '_' + pv.zipfilename;
+                        option.value = pv.id;
+                        selectbox.add(option);
+                    }
+                }
+            }
+        });
+    }
+    function removeOptions(selectbox) {
+        var i;
+        for (i = selectbox.options.length - 1; i >= 0; i--) {
+            selectbox.remove(i);
+        }
+    }
     function sub() {
         if ($("#nodename").val() == "") {
             alert("请填写节点名称！");
@@ -79,13 +110,13 @@
         model["taskcreateuserid"] = $("#taskcreateuserid").val();;
         model["taskstate"] = 0;
         model["taskversion"] = 1;
+        model["taskpackageid"] = $("#taskpackageid").val();
+        model["taskpackageversionid"] = $("#taskpackageversionid").val();
         model["taskpath"] = $("#taskpath").val();
         model["taskstartfilename"] = $("#taskstartfilename").val();
         model["taskarguments"] = $("#taskarguments").val();
-
-
-        model["taskmainclassnamespace"] = $("#taskmainclassnamespace").val();
-        model["taskmainclassdllfilename"] = $("#taskmainclassdllfilename").val();
+        model["taskfindbatchscript"] = $("#taskfindbatchscript").val();
+        model["taskuninstallbatchscript"] = $("#taskuninstallbatchscript").val();
         model["taskremark"] = $("#taskremark").val();
 
 
@@ -115,7 +146,6 @@
             contentType: false,
             data: formData,
             success: function (data) {
-                alert(data.code);
                 if (data.code == 1)
                     window.location.href = window.location.href.replace("/Add", "/Index").replace("/add", "/Index");
                 else
@@ -124,149 +154,6 @@
         });
     }
 
-    function MySubmit3() {
-        var data = {};
-        var model = {};
-        var config_models = [];
-        //组装 model 
-        model["id"] = 0;
-        model["taskname"] = $("#taskname").val();
-        model["categoryid"] = $("#categoryid").val();
-        model["nodeid"] = $("#nodeid").val();
-        model["taskcreatetime"] = "2019-04-19";
-        model["taskupdatetime"] = "2019-05-23";
-        model["tasklaststarttime"] = "2019-05-31";
-        model["tasklastendtime"] = "2019-05-31";
-        model["tasklasterrortime"] = "1900-01-01";
-        model["taskerrorcount"] = 0;
-        model["taskruncount"] = 0;
-        model["taskcreateuserid"] = $("#taskcreateuserid").val();;
-        model["taskstate"] = 0;
-        model["taskversion"] = 1;
-        model["taskappconfigjson"] = "";
-        model["taskcron"] = "0/5 * * * * ?";
-        model["taskmainclassnamespace"] = $("#taskmainclassnamespace").val();
-        model["taskmainclassdllfilename"] = $("#taskmainclassdllfilename").val();
-        model["taskremark"] = $("#taskremark").val();
-
-
-        //组装config_models
-        var config_model1 = {};
-        config_model1["id"] = 0;
-        config_model1["taskid"] = 0;
-        config_model1["relativePath"] = "/a/b/c/";
-        config_model1["filecontent"] = "<root>aa</root>";
-        config_model1["filename"] = "appconfig.xml";
-        config_model1["lastupdatetime"] = "0001-01-01";
-
-        var config_model2 = {};
-        config_model2["id"] = 0;
-        config_model2["taskid"] = 0;
-        config_model2["relativePath"] = "/a/b/c/";
-        config_model2["filecontent"] = "{\"Logging\": {\"LogLevel\":{\"Default\":\"Warning\"}},\"AllowedHosts\": \"*\"}";
-        config_model2["filename"] = "appconfig.json";
-        config_model2["lastupdatetime"] = "0001-01-01";
-        config_models.push(config_model1);
-        config_models.push(config_model2);
-
-        data["model"] = model;
-        data["config_models"] = config_models;
-
-
-        var url = window.location.href + "FullInfo";
-        alert(url);
-        sendPostRequest(url, data);
-
-    }
-
-
-    function MySubmit1() {
-        var data = {};
-        //组装 model 
-        data["age"] = 0;
-        data["name"] = "111";
-        var url = window.location.href + "FullInfo2";
-        alert(url);
-        sendPostRequest(url, data);
-    }
-    function MySubmit2() {
-        var data = {};
-        var model = {};
-        var config_models = [];
-        //组装 model 
-        model["id"] = 0;
-        model["taskname"] = "TasksTest";
-        model["categoryid"] = 1;
-        model["nodeid"] = 3;
-        model["taskcreatetime"] = "2019-04-19";
-        model["taskupdatetime"] = "2019-05-23";
-        model["tasklaststarttime"] = "2019-05-31";
-        model["tasklastendtime"] = "2019-05-31";
-        model["tasklasterrortime"] = "1900-01-01";
-        model["taskerrorcount"] = 0;
-        model["taskruncount"] = 0;
-        model["taskcreateuserid"] = 5;
-        model["taskstate"] = 0;
-        model["taskversion"] = 1;
-        model["taskappconfigjson"] = "";
-        model["taskcron"] = "0/5 * * * * ?";
-        model["taskmainclassnamespace"] = "BackgroundTasksSample";
-        model["taskmainclassdllfilename"] = "BackgroundTasksSample.dll aaa";
-        model["taskremark"] = "BackgroundTasksSampleWindowsVersion";
-
-
-        //组装config_models
-        var config_model1 = {};
-        config_model1["id"] = 0;
-        config_model1["taskid"] = 0;
-        config_model1["relativePath"] = "/a/b/c/";
-        config_model1["filecontent"] = "<root>aa</root>";
-        config_model1["filename"] = "appconfig.xml";
-        config_model1["lastupdatetime"] = "0001-01-01";
-
-        var config_model2 = {};
-        config_model2["id"] = 0;
-        config_model2["taskid"] = 0;
-        config_model2["relativePath"] = "/a/b/c/";
-        config_model2["filecontent"] = "{\"Logging\": {\"LogLevel\":{\"Default\":\"Warning\"}},\"AllowedHosts\": \"*\"}";
-        config_model2["filename"] = "appconfig.json";
-        config_model2["lastupdatetime"] = "0001-01-01";
-        config_models.push(config_model1);
-        config_models.push(config_model2);
-
-        data["model"] = model;
-        data["config_models"] = config_models;
-        
-
-        var url = window.location.href+"FullInfo";
-        alert(url);
-        sendPostRequest(url, data);
-
-    }
-//**
-// * 发送post请求
- //*  {Object} url
- //* {Object} obj 
- //*/
-function sendPostRequest(url, obj) {
-	var xmlhttp;
-	if (window.XMLHttpRequest) {
-		xmlhttp = new XMLHttpRequest();
-	} else {
-		xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-	}
-	xmlhttp.onreadystatechange = function() {
-		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-			alert(xmlhttp.responseText);
-		} else if (xmlhttp.readyState == 4 && xmlhttp.status == 0) {
-			alert("服务器未响应");
-		}
-	}
-	xmlhttp.open("POST", url, true);
-	xmlhttp.setRequestHeader('Content-Type', 'application/json');
-    //xmlhttp.send(obj);
-    xmlhttp.send(JSON.stringify(obj));
-}
 
 </script>
 <div class="head">
@@ -336,10 +223,20 @@ function sendPostRequest(url, obj) {
             <label>卸载任务批处理脚本</label><input class="mylongtext" type="text" id="taskuninstallbatchscript" name="taskuninstallbatchscript" />(卸载程序包前需要执行的脚本，比如 用于 解除window服务的注册的脚本)
         </li>
         <li>
-            <label>任务入口类的命名空间</label><input class="mylongtext" type="text" id="taskmainclassnamespace" name="taskmainclassnamespace" />示范：TaskManager.Demo.DemoTask
+            <label>程序仓库列表</label>
+            <select id="taskpackageid" name="taskpackageid" onchange="GetVersionList(this.value)">
+                <option value="-1"></option>
+                @foreach (var p in package)
+                {
+                    <option value="@p.id">@(p.packagename)</option>
+                }
+            </select>
         </li>
         <li>
-            <label>任务入口dll文件名</label><input class="mylongtext" type="text" id="taskmainclassdllfilename" name="taskmainclassdllfilename" />示范: TaskManager.Demo.exe
+            <label>程序仓库列表</label>
+            <select id="taskpackageversionid" name="taskpackageversionid">
+
+            </select>
         </li>
         <li>
             <label>上传文件</label><input type="file" id="TaskDll" name="TaskDll" />

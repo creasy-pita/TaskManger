@@ -299,25 +299,43 @@ namespace TaskManager.Node.SystemRuntime
                 //string path = $"{rootPath}{task.taskname}\\";
                 string path = task.taskpath;
                 //判断程序目录是否已经存在
+                //TBD 对于路径的处理  要注意 每一段路径是否需要加 【\】
                 if (!Directory.Exists(path))
                 {
-                    //下载程序集
-                    tb_version_dal versionDAL = new tb_version_dal();
-                    var version = versionDAL.GetVersionByTaskID(conn, task.id);
+                    tb_packageversion_dal packageversion_Dal = new tb_packageversion_dal();
+                    tb_packageversion_model packageversion_Model = packageversion_Dal.Get(conn, task.taskpackageversionid);
                     BSF.Tool.IOHelper.CreateDirectory(path);
-                    if (version != null)
+                    if (packageversion_Model != null)
                     {
-                        string zipFilePath = $"{path}{version.zipfilename}";
+                        string zipFilePath = $"{path}{packageversion_Model.zipfilename}";
                         ///数据库二进制转压缩文件
-                        CompressHelper.ConvertToFile(version.zipfile, zipFilePath);
+                        CompressHelper.ConvertToFile(packageversion_Model.zipfile, zipFilePath);
                         CompressHelper.UnCompress(zipFilePath, path);
                         ///删除压缩文件
                         File.Delete(zipFilePath);
                     }
                     else
                     {
-                        throw new Exception($"在tb_version表中未查到taskid:{task.id}数据");
+                        throw new Exception($"在tb_packageversion表中未查到taskid:{task.id}数据");
                     }
+
+                    ////下载程序集
+                    tb_version_dal versionDAL = new tb_version_dal();
+                    //var version = versionDAL.GetVersionByTaskID(conn, task.id);
+                    //BSF.Tool.IOHelper.CreateDirectory(path);
+                    //if (version != null)
+                    //{
+                    //    string zipFilePath = $"{path}{version.zipfilename}";
+                    //    ///数据库二进制转压缩文件
+                    //    CompressHelper.ConvertToFile(version.zipfile, zipFilePath);
+                    //    CompressHelper.UnCompress(zipFilePath, path);
+                    //    ///删除压缩文件
+                    //    File.Delete(zipFilePath);
+                    //}
+                    //else
+                    //{
+                    //    throw new Exception($"在tb_version表中未查到taskid:{task.id}数据");
+                    //}
                 }
 
                 #region//加载外部配置文件
