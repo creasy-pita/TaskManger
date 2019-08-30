@@ -27,7 +27,8 @@ namespace TaskManager.Web.Controllers
             var userlogininfo = UserLoginInfo.CurrentUserLoginInfo;
             if (userlogininfo != null)
             {
-                return RedirectToAction("index", "Task");
+                return Redirect(returnurl);
+                //return RedirectToAction("index", "Task");
             }
             return View();
         }

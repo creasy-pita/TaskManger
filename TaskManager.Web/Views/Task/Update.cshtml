@@ -104,10 +104,6 @@
                     </select>
                 </li>
                 <li>
-                    <label>Cron表达式</label>
-                    <input type="text" id="taskcron" name="taskcron" @Html.Raw(Model.taskstate == (int)TaskManager.Core.EnumTaskState.Running ? "readonly=readonly" : "") value="@Model.taskcron"> <a target="_blank" href="@Url.Action("cron", "Task", new {  })">Cron表达式生成器</a> <a target="_blank" href="@Url.Action("CustomCorn", "Task", new {  })">自定义cron表达式</a>
-                </li>
-                <li>
                     <label>web程序根目录</label><input class="mylongtext" type="text" @Html.Raw(Model.taskstate == (int)TaskManager.Core.EnumTaskState.Running ? "readonly=readonly" : "") id="taskpath" name="taskpath" value="@Model.taskpath" />
                 </li>
                 <li>
@@ -133,7 +129,7 @@
                     </select>
                 </li>
                 <li>
-                    <label>程序仓库列表</label>
+                    <label>程序版本列表</label>
                     <select id="taskpackageversionid" name="taskpackageversionid" @Html.Raw(Model.taskstate == (int)TaskManager.Core.EnumTaskState.Running ? "readonly=readonly" : "") >
                         <option value="-1"></option>
                         @foreach (var pv in packageversion)
@@ -141,19 +137,6 @@
                             <option value="@pv.id" @Html.Raw(pv.id == @Model.taskpackageversionid ? "selected=selected" : "")>@(pv.versionno+"_"+pv.zipfilename)</option>
                         }
                     </select>
-                </li>
-                <li>
-                    <label>版本</label>
-                    <select id="taskversion" name="taskversion" @Html.Raw(Model.taskstate == (int)TaskManager.Core.EnumTaskState.Running ? "readonly=readonly" : "")>
-                        <option value="-1">新版本</option>
-                        @foreach (var v in Version)
-                        {
-                            <option value="@v.version" @Html.Raw(v.version == @Model.taskversion ? "selected=selected" : "")>@(v.version)_@(v.zipfilename)</option>
-                        }
-                    </select>
-                </li>
-                <li>
-                    <label>上传文件</label><input type="file" @Html.Raw(Model.taskstate == (int)TaskManager.Core.EnumTaskState.Running ? "readonly=readonly" : "") id="TaskDll" name="TaskDll" />
                 </li>
                 <li>
                     <label>备注</label>

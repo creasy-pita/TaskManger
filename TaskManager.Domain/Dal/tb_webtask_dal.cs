@@ -318,7 +318,7 @@ namespace TaskManager.Domain.Dal
                 ps.Add("@taskruncount", 0);
                 ps.Add("@taskcreateuserid", model.taskcreateuserid);
                 ps.Add("@taskstate",0);
-                ps.Add("@taskport", 1);
+                ps.Add("@taskport", model.taskport);
                 ps.Add("@taskhealthcheckurl", model.taskhealthcheckurl.NullToEmpty());
                 ps.Add("@taskpath", model.taskpath);
                 ps.Add("@taskarguments", model.taskarguments);

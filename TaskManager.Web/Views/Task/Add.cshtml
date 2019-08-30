@@ -88,8 +88,8 @@
     function MySubmit() {
         if (!check()) return;
         var formData = new FormData();
-        var taskDll = $('input[name="TaskDll"]').get(0).files[0];
-        formData.append("TaskDll", taskDll);
+        //var taskDll = $('input[name="TaskDll"]').get(0).files[0];
+        //formData.append("TaskDll", taskDll);
 
         var data = {};
         var model = {};
@@ -237,9 +237,6 @@
             <select id="taskpackageversionid" name="taskpackageversionid">
 
             </select>
-        </li>
-        <li>
-            <label>上传文件</label><input type="file" id="TaskDll" name="TaskDll" />
         </li>
         <li>
             <label>备注</label>

@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using TaskManager.Node.Tools;
 
 namespace TaskManager.Node.SystemRuntime.ProcessService
 {
@@ -52,32 +53,41 @@ namespace TaskManager.Node.SystemRuntime.ProcessService
 
         public string GetProcessIdByBatchScript(string batchScript)
         {
-            if (string.IsNullOrEmpty(batchScript)) return null;
-            var pro = new Process
+            string processId = string.Empty;
+            try
             {
-                StartInfo =
+                if (string.IsNullOrEmpty(batchScript)) return null;
+                var pro = new Process
                 {
-                    FileName = "powershell.exe",
-                    UseShellExecute = false,
-                    RedirectStandardInput = true,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true
+                    StartInfo =
+                    {
+                        FileName = "powershell.exe",
+                        UseShellExecute = false,
+                        RedirectStandardInput = true,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        CreateNoWindow = true
+                    }
+                };
+                pro.Start();
+                // pro.StandardInput.WriteLine("Get-WmiObject win32_service -filter \"name = 'GtCxService_LSSJ'\"| Select-Object -ExpandProperty ProcessId ");
+                pro.StandardInput.WriteLine(batchScript);
+                pro.StandardInput.WriteLine("exit");
+                pro.StandardInput.Flush();
+                processId = GetSecondLastLine(pro.StandardOutput);
+                //if substring of the string endwiths batchScript means no result,so you should avoid batchScript of ProssesId-like
+                //TBD 此处需要注意 batchScript 保存的内容， 不能出现纯数字，或者0（如果保存的时此类内容则直接忽略 返回 null）
+                if (processId.EndsWith(batchScript) || processId == "0")
+                {
+                    processId = string.Empty;
                 }
-            };
-            pro.Start();
-            // pro.StandardInput.WriteLine("Get-WmiObject win32_service -filter \"name = 'GtCxService_LSSJ'\"| Select-Object -ExpandProperty ProcessId ");
-            pro.StandardInput.WriteLine(batchScript);
-            pro.StandardInput.WriteLine("exit");
-            pro.StandardInput.Flush();
-            string processId = GetSecondLastLine(pro.StandardOutput);
-            //if substring of the string endwiths batchScript means no result,so you should avoid batchScript of ProssesId-like
-            //TBD 此处需要注意 batchScript 保存的内容， 不能出现纯数字，或者0（如果保存的时此类内容则直接忽略 返回 null）
-            if (processId.EndsWith(batchScript) || processId == "0")
-            {
-                processId = string.Empty;
+                return processId;
             }
-            return processId; 
+            catch (Exception ex)
+            {
+                LogHelper.AddNodeLog($"GetProcessIdByBatchScript出错 {ex.Message + ex.StackTrace}");
+                throw ex;
+            }
         }
 
         public static string GetSecondLastLine(StreamReader streamReader)

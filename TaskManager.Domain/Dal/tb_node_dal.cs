@@ -117,8 +117,13 @@ namespace TaskManager.Domain.Dal
                 string sql = "select id,nodename,nodecreatetime,nodeip,nodeostype,nodelastupdatetime,ifcheckstate from tb_node where id=@id";
                 DataSet ds=new DataSet();
                 PubConn.SqlToDataSet(ds, sql, ps.ToParameters());
-                DataRow dr = ds.Tables[0].Rows[0];
-                return CreateModel(dr);
+                if (ds.Tables[0].Rows.Count > 0)
+                {
+
+                    DataRow dr = ds.Tables[0].Rows[0];
+                    return CreateModel(dr);
+                }
+                return null;
             });
         }
 

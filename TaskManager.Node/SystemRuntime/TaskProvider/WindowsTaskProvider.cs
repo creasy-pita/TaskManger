@@ -282,7 +282,10 @@ namespace TaskManager.Node.SystemRuntime
             IProcessService ps = ProcessServiceFactory.CreateProcessService(EnumOSState.Windows.ToString());
             //判断是否已经运行
             //string pId = ps.GetProcessIdByBatchScript(task.taskfindbatchscript);
+            LogHelper.AddNodeLog($"节点:{task.nodeid}开启任务{task.id}时检查之前是否在运行开始");
+
             string pId = GetProcessId(task, ps);
+            LogHelper.AddNodeLog($"节点:{task.nodeid}开启任务{task.id}时检查之前是否在运行结束");
 
             if (!string.IsNullOrEmpty(pId))
             {
@@ -302,6 +305,7 @@ namespace TaskManager.Node.SystemRuntime
                 //TBD 对于路径的处理  要注意 每一段路径是否需要加 【\】
                 if (!Directory.Exists(path))
                 {
+                    LogHelper.AddNodeLog($"节点:{task.nodeid}开启任务{task.id}时开始程序集下载");
                     tb_packageversion_dal packageversion_Dal = new tb_packageversion_dal();
                     tb_packageversion_model packageversion_Model = packageversion_Dal.Get(conn, task.taskpackageversionid);
                     BSF.Tool.IOHelper.CreateDirectory(path);
@@ -318,24 +322,8 @@ namespace TaskManager.Node.SystemRuntime
                     {
                         throw new Exception($"在tb_packageversion表中未查到taskid:{task.id}数据");
                     }
+                    LogHelper.AddNodeLog($"节点:{task.nodeid}开启任务{task.id}时完成程序集下载");
 
-                    ////下载程序集
-                    tb_version_dal versionDAL = new tb_version_dal();
-                    //var version = versionDAL.GetVersionByTaskID(conn, task.id);
-                    //BSF.Tool.IOHelper.CreateDirectory(path);
-                    //if (version != null)
-                    //{
-                    //    string zipFilePath = $"{path}{version.zipfilename}";
-                    //    ///数据库二进制转压缩文件
-                    //    CompressHelper.ConvertToFile(version.zipfile, zipFilePath);
-                    //    CompressHelper.UnCompress(zipFilePath, path);
-                    //    ///删除压缩文件
-                    //    File.Delete(zipFilePath);
-                    //}
-                    //else
-                    //{
-                    //    throw new Exception($"在tb_version表中未查到taskid:{task.id}数据");
-                    //}
                 }
 
                 #region//加载外部配置文件
@@ -343,6 +331,7 @@ namespace TaskManager.Node.SystemRuntime
                 List<tb_task_config_model> task_Config_Models = task_Config_Dal.GetList(conn, task.id);
                 try
                 {
+                    LogHelper.AddNodeLog($"节点:{task.nodeid}开启任务{task.id}时开始外部配置文件加载");
                     foreach (var task_config_Model in task_Config_Models)
                     {
                         string fullPath = path + task_config_Model.relativePath + task_config_Model.filename;
@@ -356,6 +345,7 @@ namespace TaskManager.Node.SystemRuntime
                             fs.Write(buffer);
                         }
                     }
+                    LogHelper.AddNodeLog($"节点:{task.nodeid}开启任务{task.id}时完成外部配置文件加载");
                 }
                 catch (Exception ex)
                 {
@@ -364,6 +354,7 @@ namespace TaskManager.Node.SystemRuntime
 
                 #endregion
 
+                LogHelper.AddNodeLog($"节点:{task.nodeid}开启任务{task.id}时打开程序进程...");
                 //使用 shell 命令开启 任务程序
                 var psi = new ProcessStartInfo
                 {

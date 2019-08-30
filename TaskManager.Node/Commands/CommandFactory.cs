@@ -16,6 +16,7 @@ namespace TaskManager.Node.Commands
         public static void Execute(tb_command_model commandInfo)
         {
             string namespacestr = typeof(BaseCommand).Namespace;
+            LogHelper.AddNodeLog(namespacestr + "." + commandInfo.commandname.ToString() + "Command");
             var obj = Assembly.GetAssembly(typeof(BaseCommand)).CreateInstance(namespacestr + "." + commandInfo.commandname.ToString() + "Command", true);
             if (obj != null && obj is BaseCommand)
             {

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using TaskManager.Core;
 using TaskManager.Node.SystemRuntime.ProcessService;
+using TaskManager.Node.Tools;
 
 namespace TaskManager.Node.SystemRuntime.Services
 {
@@ -26,19 +27,16 @@ namespace TaskManager.Node.SystemRuntime.Services
                 //    Message = $"正在启动1 服务名：{t.TableName} ;服务端口{t.Port}"
                 //};
                 //BeginStartEvent?.Invoke(args);
+                LogHelper.AddNodeLog($"webtask port:{t.Port}");
                 StartTomcat(t.Path, t.StartFileName, t.StartArguments);
-                if (DoCheck(t))
-                {
-                    //TomcatEventArgs args1 = new TomcatEventArgs
-                    //{
-                    //    Message = $"启动完成 服务名：{t.TableName} ;服务端口{t.Port}"
-                    //};
-                    //StartCompeleteEvent?.Invoke(args1);
-                }
+                LogHelper.AddNodeLog($"DoHealthCheck begin:{t.HealthCheckUrl}");
+                DoCheck(t);
+                LogHelper.AddNodeLog($"DoHealthCheck end");
                 return true;
             }
             catch (Exception ex)
             {
+                LogHelper.AddNodeLog($"Start error:{ex.Message + ex.StackTrace}");
                 return false;
             }
         }
@@ -50,7 +48,7 @@ namespace TaskManager.Node.SystemRuntime.Services
             Stopwatch tw = new Stopwatch();
             while (!flag && currTimes <= maxCheckTimes)
             {
-                System.Threading.Thread.Sleep(3000);
+                Thread.Sleep(3000);
                 currTimes++;
                 HttpWebRequest request;
                 HttpWebResponse response = null;
@@ -65,39 +63,16 @@ namespace TaskManager.Node.SystemRuntime.Services
                 }
                 catch (Exception ex)
                 {
+                    //LogHelper.AddNodeLog($"DoCheck :{currTimes} time has exception :{ex.Message+ex.StackTrace}" );
                     tw.Stop();
-                    //TomcatEventArgs args = new TomcatEventArgs
-                    //{
-                    //    //Message = $"Server Port:{t.Port} the {currTimes}  check finds tomcat server not ready, wait for another check! info:{ex.Message}"
-                    //    Message = $"{t.TableName} server refused, wait for another check in 3 seconds later! info:{ex.Message}"
-                    //};
-                    //OnStartingEvent?.Invoke(args);
-                    //Console.WriteLine($"Server Port:{t.Port} the {currTimes}  check finds tomcat server not ready, wait for another check! info:{ex.Message}");
                     continue;
                 }
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    //TomcatEventArgs args = new TomcatEventArgs
-                    //{
-                    //    // Message = $"Server Port:{t.TableName} the {currTimes}  check findstomcat server is ok ! time elapse:{tw.ElapsedMilliseconds}ms"
-                    //    Message = $"{t.TableName} server is ok !"
-                    //};
-                    //StartCompeleteEvent?.Invoke(args);
-                    //Console.WriteLine($"Server Port:{t.Port} the {currTimes}  check findstomcat server is ok ! time elapse:{tw.ElapsedMilliseconds}ms");
                     flag = true;
                 }
-                else
-                {
-                    //TomcatEventArgs args = new TomcatEventArgs
-                    //{
-                    //    //Message = $"Server Port:{t.Port} the {currTimes}  check finds tomcat server not ready, wait for another checktime elapse:{tw.ElapsedMilliseconds}ms"
-                    //    Message = $"{t.TableName}  server not ready, wait for another check in 3 seconds later"
-                    //};
-                    //OnStartingEvent?.Invoke(args);
-                    //Console.WriteLine($"Server Port:{t.Port} the {currTimes}  check finds tomcat server not ready, wait for another checktime elapse:{tw.ElapsedMilliseconds}ms");
-                }
             }
-            return true;
+            return flag;
         }
         public static void StartTomcat(string WorkingDirectory, string StartFileName, string StartFileArg)
         {
@@ -126,16 +101,20 @@ namespace TaskManager.Node.SystemRuntime.Services
 
         public bool Stop(TomcatEntity t)
         {
-
+            LogHelper.AddNodeLog("port"+t.Port);
             IProcessService ps = ProcessServiceFactory.CreateProcessService(EnumOSState.Windows.ToString());
             string processId = ps.GetProcessByPort(t.Port);
+            LogHelper.AddNodeLog("processId" + processId);
             if(!string.IsNullOrEmpty( processId))
             {
                 //如果能通过命令形式关闭， 则命令关闭
                 //if (!string.IsNullOrEmpty(t.StopFileName) && !string.IsNullOrEmpty(t.StopArguments))
+                LogHelper.AddNodeLog("Path: StopFileName:StopArguments"+ t.Path + t.StopFileName + t.StopArguments);
                 if (!string.IsNullOrEmpty(t.StopFileName))
                 {
+                    LogHelper.AddNodeLog("stop begin ");
                     StartTomcat(t.Path, t.StopFileName, t.StopArguments);
+                    LogHelper.AddNodeLog("stop end ");
                     return true;
                 }
                 //否则使用 监听端口查找进程关闭

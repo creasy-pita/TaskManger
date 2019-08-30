@@ -29,6 +29,7 @@
                 },
                 success: function (data) {
                     if (data.code == 1) {
+                        alert(taskname + ' ' + data.msg);
                         var task=new CreateTask(id,state,taskname,window.document);
                         task.Init();
                     }

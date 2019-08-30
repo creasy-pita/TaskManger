@@ -176,13 +176,13 @@ namespace TaskManager.Web.Controllers
             tb_task_config_model[] config_models = info.config_models;
             string tempdatajson = info.tempdatajson;
 
-            string filename = TaskDll.FileName;
-            byte[] dllbyte;
-            using (var dll = TaskDll.OpenReadStream())
-            {
-                dllbyte = new byte[dll.Length];
-                dll.Read(dllbyte, 0, Convert.ToInt32(dll.Length));
-            }
+            //string filename = TaskDll.FileName;
+            //byte[] dllbyte;
+            //using (var dll = TaskDll.OpenReadStream())
+            //{
+            //    dllbyte = new byte[dll.Length];
+            //    dll.Read(dllbyte, 0, Convert.ToInt32(dll.Length));
+            //}
 
             tb_task_dal dal = new tb_task_dal();
             tb_task_config_dal config_dal = new tb_task_config_dal();
@@ -196,16 +196,16 @@ namespace TaskManager.Web.Controllers
                 try
                 {
                     model.taskcreatetime = DateTime.Now;
-                    model.taskversion = 1;
+                    //model.taskversion = 1;
                     int taskid = dal.AddTask(PubConn, model);
-                    dalversion.Add(PubConn, new tb_version_model()
-                    {
-                        taskid = taskid,
-                        version = 1,
-                        versioncreatetime = DateTime.Now,
-                        zipfile = dllbyte,
-                        zipfilename = System.IO.Path.GetFileName(filename)
-                    });
+                    //dalversion.Add(PubConn, new tb_version_model()
+                    //{
+                    //    taskid = taskid,
+                    //    version = 1,
+                    //    versioncreatetime = DateTime.Now,
+                    //    zipfile = dllbyte,
+                    //    zipfilename = System.IO.Path.GetFileName(filename)
+                    //});
                     foreach (var config_Model in config_models)
                     {
                         config_dal.Add(PubConn, new tb_task_config_model()
