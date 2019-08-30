@@ -65,7 +65,6 @@ select p.*, n.nodename,'' as taskname
 	where p.nodeid=n.id order by  p.nodeid desc
 ----------------------------------------------------------------		
 
-
 2019年4月12日
 	TBD lastTimeDic 的数据是按照pid的方式维护的，可能随着进程关闭而过期引起 混乱使用的问题，需要
 

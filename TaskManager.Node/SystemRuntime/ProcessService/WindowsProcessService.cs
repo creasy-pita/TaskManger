@@ -5,11 +5,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using TaskManager.Core.Util;
 using TaskManager.Node.Tools;
 
 namespace TaskManager.Node.SystemRuntime.ProcessService
 {
-    class WindowsProcessService : IProcessService
+    public class WindowsProcessService : IProcessService
     {
         public string GetProcessByName(string serviceName)
         {
@@ -61,7 +62,7 @@ namespace TaskManager.Node.SystemRuntime.ProcessService
                 {
                     StartInfo =
                     {
-                        FileName = "powershell.exe",
+                        FileName = "cmd.exe",// "powershell.exe",
                         UseShellExecute = false,
                         RedirectStandardInput = true,
                         RedirectStandardOutput = true,
@@ -72,12 +73,16 @@ namespace TaskManager.Node.SystemRuntime.ProcessService
                 pro.Start();
                 // pro.StandardInput.WriteLine("Get-WmiObject win32_service -filter \"name = 'GtCxService_LSSJ'\"| Select-Object -ExpandProperty ProcessId ");
                 pro.StandardInput.WriteLine(batchScript);
-                pro.StandardInput.WriteLine("exit");
                 pro.StandardInput.Flush();
-                processId = GetSecondLastLine(pro.StandardOutput);
+                pro.StandardInput.WriteLine("exit");
+                processId = GetThirdLastLine(pro.StandardOutput);
                 //if substring of the string endwiths batchScript means no result,so you should avoid batchScript of ProssesId-like
                 //TBD 此处需要注意 batchScript 保存的内容， 不能出现纯数字，或者0（如果保存的时此类内容则直接忽略 返回 null）
                 if (processId.EndsWith(batchScript) || processId == "0")
+                {
+                    processId = string.Empty;
+                }
+                if(!CastUtil.CanCastInt(processId) )
                 {
                     processId = string.Empty;
                 }
@@ -90,7 +95,7 @@ namespace TaskManager.Node.SystemRuntime.ProcessService
             }
         }
 
-        public static string GetSecondLastLine(StreamReader streamReader)
+        public static string GetThirdLastLine(StreamReader streamReader)
         {
             var line = "";
             Stack lineStack = new Stack();
@@ -98,7 +103,7 @@ namespace TaskManager.Node.SystemRuntime.ProcessService
             {
                 lineStack.Push(line);
             }
-            if (lineStack.Pop() != null)
+            if (lineStack.Pop() != null && lineStack.Pop() !=null)
             {
                 if ((line = lineStack.Pop().ToString()) != null)
                 {
